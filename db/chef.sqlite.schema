@@ -1,0 +1,29 @@
+pragma foreign_keys = on;
+
+drop table if exists `sightings`;
+drop table if exists `servers`;
+drop table if exists `ips`;
+drop table if exists `names`;
+
+create table `names` (
+	`name` text not null primary key
+);
+
+create table `ips` (
+	`ip` integer not null primary key
+);
+
+create table `servers` (
+	`ip` integer not null,
+	`port` integer not null,
+	`description` text not null,
+	unique (`ip`, `port`)
+);
+
+create table `sightings` (
+	`name` integer not null references `names`(`rowid`),
+	`ip` integer references `ips`(`rowid`),
+	`server` integer not null references `servers`(`rowid`),
+	`timestamp` integer not null default (strftime('%s', 'now')),
+	unique (`ip`, `name`, `timestamp`)
+);

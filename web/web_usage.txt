@@ -1,0 +1,17 @@
+USAGE
+
+/names     – sorts by name frequency, which means the most oftenly used name will be first
+/lastseen  – sorts by timeliness, which means the most recent sighting will be first
+/status    – displays database status (i.e. counts of recorded data)
+
+/names and /lastseen commands take a name, an IP, or an IP range as argument and return the same results, only the sorting will be different.
+IPs (also in ranges) can be given partially, e.g. 177.159/8 will be parsed as 177.159.0.0/8 which in turn will return results in the subnet 177.0.0.0.
+
+examples:
+  /names/unnamed
+  /names/93.194
+  /names/177.159/8
+  /lastseen/novi
+  /lastseen/141.3.23
+
+use '_' instead of '/' in names, e.g. '/names/_dev_zero' to look up the name '/dev/zero' and '%3F' instead of '?'

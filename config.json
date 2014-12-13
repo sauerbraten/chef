@@ -1,0 +1,64 @@
+{
+	// SQlite database file name
+	"db_file_path": "/home/axle/.chef/chef.sqlite",
+
+	// collector
+
+	// master server address
+	"master_server_address": "sauerbraten.org",
+
+	// master server port
+	"master_server_port": "28787",
+
+	// servers that should be scanned even when they are not on the master list
+	"hidden_servers": [
+		"sauerleague.org:20000",
+		"sauerleague.org:30000",
+		"sauerleague.org:40000",
+		"noviteam.de:28785",
+		"sauerleague.org:10000",
+		"crowd.gg:28785",
+		"sauer.woop.us:28785",
+		"vaq-clan.de:28785"
+	],
+
+	// servers that should never be scanned (overrides the list of hidden servers to scan)
+	// if no port is specfied, all servers on that host are blacklisted
+	"blacklisted_servers": [
+		"pisto.horse"
+	],
+
+	// scan interval in seconds
+	"scan_interval_seconds": 60,
+
+	// IRC bot
+
+	// IRC nick
+	"irc_nick": "chef",
+
+	// IRC account name
+	"irc_account_name": "chef",
+
+	// IRC account password
+	"irc_account_password": "QA5ZRkKnEOGx9Xjuvu0a",
+
+	// IRC channels to join on connect
+	"irc_channels": ["#novi-intern"],
+
+	// IRC trusted user accounts (can use the bot in PM)
+	"irc_trusted_users": [
+		"dss.asdf.gamesurge",
+		"pix.user.gamesurge",
+		"Luffy.hacks-on.gamesurge",
+		"pure_ascii.is-always-idle-on.gamesurge",
+		"Tagger.idle-whore.gamesurge",
+		"Whoohoo.Gimme.Them.Coooki.es", // tagger's bouncer
+		"ySoSrs.user.gamesurge",
+		"pisto.princess.gamesurge"
+	],
+
+	// web interface
+
+	// web interface address
+	"web_interface_address": "31.220.27.98:6060"
+}

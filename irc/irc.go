@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/sauerbraten/chef/db"
+	"github.com/sauerbraten/chef/ips"
 	irc "github.com/thoj/go-ircevent"
 )
 
@@ -139,5 +140,10 @@ func reply(e *irc.Event, msg string) {
 }
 
 func sanitize(s string) string {
-	return strings.NewReplacer("/", "_", "?", "%3F").Replace(s)
+	// don't replace '/' in IP ranges
+	if !ips.IsIP(s) {
+		return strings.NewReplacer("/", "_", "?", "%3F").Replace(s)
+	} else {
+		return s
+	}
 }

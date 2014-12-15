@@ -15,7 +15,3 @@ func New() (*DB, error) {
 
 	return &DB{db}, err
 }
-
-func (db *DB) Close() {
-	db.DB.Close()
-}

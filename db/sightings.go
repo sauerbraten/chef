@@ -4,16 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"net"
-	"regexp"
-)
 
-// checks for IP by requiring one to 4 octets. matches when there is at least the first octet. octets one to three need to end with a dot. also matches CIDR notations of ranges.
-// examples:
-// 123.
-// 109.103.
-// 11.233.109.201
-// 154.93.0.0/16
-var ipRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])?(\/(3[0-1]|[12]?[0-9]))?$`)
+	"github.com/sauerbraten/chef/ips"
+)
 
 type Sighting struct {
 	Name              string
@@ -33,8 +26,8 @@ const (
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
 func (db *DB) LookUp(nameOrIP string, sorting Sorting) []Sighting {
-	if ipRegex.MatchString(nameOrIP) {
-		lower, upper := getIPRange(getSubnet(nameOrIP))
+	if ips.IsIP(nameOrIP) {
+		lower, upper := ips.GetIPRange(ips.GetSubnet(nameOrIP))
 		return db.lookUpByIpRange(lower, upper, sorting)
 	} else {
 		return db.lookUpByName(nameOrIP, sorting)
@@ -68,7 +61,7 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 		name, intIp, timestamp, serverIP, serverPort, serverDescription := "", int64(0), int64(0), "", 0, ""
 		rows.Scan(&name, &intIp, &timestamp, &serverIP, &serverPort, &serverDescription)
 
-		ip := intToIP(intIp).String()
+		ip := ips.Int2IP(intIp).String()
 		if ip == "255.255.255.255" {
 			ip = ""
 		}
@@ -86,8 +79,11 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 	return sightings
 }
 
+// Returns the SQLite rowid of the server specified by IP and port. In case no such server exists, it is inserted and the rowid of the new entry is returned.
+// If a server with that IP and port already exists but the descriptions differ, it is updated in the database.
 func (db *DB) GetServerId(ip string, port int, description string) (serverId int64) {
-	err := db.QueryRow("select `rowid` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverId)
+	var descriptionInDB string
+	err := db.QueryRow("select `rowid`, `description` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverId, &descriptionInDB)
 
 	if err == sql.ErrNoRows {
 		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`) values (?, ?, ?)", ip, port, description)
@@ -101,7 +97,7 @@ func (db *DB) GetServerId(ip string, port int, description string) (serverId int
 		}
 	} else if err != nil {
 		log.Fatal("error getting ID of server:", err)
-	} else {
+	} else if description != descriptionInDB {
 		_, err = db.Exec("update `servers` set `description` = ? where `rowid` = ?", description, serverId)
 		if err != nil {
 			log.Fatal("error updating server description:", err)
@@ -111,6 +107,7 @@ func (db *DB) GetServerId(ip string, port int, description string) (serverId int
 	return
 }
 
+// Returns the SQLite rowid of the name specified. In case no such entry exists, it is inserted and the rowid of the new entry is returned.
 func (db *DB) getPlayerNameId(name string) (nameId int64) {
 	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameId)
 
@@ -131,6 +128,7 @@ func (db *DB) getPlayerNameId(name string) (nameId int64) {
 	return
 }
 
+// Returns the SQLite rowid of the IP specified. In case no such entry exists, it is inserted and the rowid of the new entry is returned.
 func (db *DB) getPlayerIpId(ip int64) (ipId int64) {
 	err := db.QueryRow("select `rowid` from `ips` where `ip` = ?", ip).Scan(&ipId)
 
@@ -151,8 +149,9 @@ func (db *DB) getPlayerIpId(ip int64) (ipId int64) {
 	return
 }
 
+// Adds an entry in the sightings table.
 func (db *DB) AddOrIgnoreSighting(name string, ip net.IP, serverId int64) {
-	_, err := db.Exec("insert or ignore into `sightings` (`name`, `ip`, `server`) values (?, ?, ?)", db.getPlayerNameId(name), db.getPlayerIpId(ipToInt(ip)), serverId)
+	_, err := db.Exec("insert or ignore into `sightings` (`name`, `ip`, `server`) values (?, ?, ?)", db.getPlayerNameId(name), db.getPlayerIpId(ips.IP2Int(ip)), serverId)
 	if err != nil {
 		log.Fatal("error inserting new sighting:", err)
 	}

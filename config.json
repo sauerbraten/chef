@@ -1,6 +1,7 @@
 {
 	// SQlite database file name
-	"db_file_path": "/home/axle/.chef/chef.sqlite",
+	"db_file_path": "~/.chef/chef.sqlite",
+
 
 	// collector
 
@@ -12,24 +13,37 @@
 
 	// servers that should be scanned even when they are not on the master list
 	"hidden_servers": [
+
+		// hidden
 		"sauerleague.org:20000",
 		"sauerleague.org:30000",
 		"sauerleague.org:40000",
+
+		// main public servers (mentioned here in case the master server goes down)
 		"noviteam.de:28785",
 		"sauerleague.org:10000",
 		"crowd.gg:28785",
 		"sauer.woop.us:28785",
-		"vaq-clan.de:28785"
+		"vaq-clan.de:28785",
+		"sparc.nicotinelounge.com:28785",
+		"darkkeepers.dk:28785",
+		"effic.me:10000",
+		"effic.me:20000",
+		"effic.me:30000",
+		"effic.me:40000",
+		"effic.me:50000",
+		"effic.me:60000"
 	],
 
 	// servers that should never be scanned (overrides the list of hidden servers to scan)
 	// if no port is specfied, all servers on that host are blacklisted
 	"blacklisted_servers": [
-		"pisto.horse"
+		"pisto.horse" // sends fake IPs matching the player's country, can't be filtered
 	],
 
 	// scan interval in seconds
 	"scan_interval_seconds": 60,
+
 
 	// IRC bot
 
@@ -56,6 +70,7 @@
 		"ySoSrs.user.gamesurge",
 		"pisto.princess.gamesurge"
 	],
+
 
 	// web interface
 

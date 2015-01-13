@@ -25,17 +25,17 @@ const (
 )
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
-func (db *DB) LookUp(nameOrIP string, sorting Sorting) []Sighting {
+func (db *DB) LookUpNames(nameOrIP string, sorting Sorting) []Sighting {
 	if ips.IsIP(nameOrIP) {
-		lower, upper := ips.GetIPRange(ips.GetSubnet(nameOrIP))
-		return db.lookUpByIpRange(lower, upper, sorting)
+		lowest, highest := ips.GetIPRange(ips.GetSubnet(nameOrIP))
+		return db.lookUpByIpRange(lowest, highest, sorting)
 	} else {
 		return db.lookUpByName(nameOrIP, sorting)
 	}
 }
 
-func (db *DB) lookUpByIpRange(lowerIpRangeBoundary, upperIpRangeBoundary int64, sorting Sorting) []Sighting {
-	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where `sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?) group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", lowerIpRangeBoundary, upperIpRangeBoundary)
+func (db *DB) lookUpByIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting) []Sighting {
+	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where `sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?) group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", lowestIpInRange, highestIpInRange)
 	if err != nil {
 		log.Fatal("error looking up sightings by IP:", err)
 	}

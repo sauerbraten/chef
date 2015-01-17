@@ -51,7 +51,8 @@ func main() {
 func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err error) {
 	list, err = ms.getServerList()
 	if err != nil {
-		return
+		// still search hidden servers
+		list = map[string]*net.UDPAddr{}
 	}
 
 	for _, hiddenServerAddress := range conf.HiddenServers {
@@ -100,7 +101,6 @@ func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err 
 	return
 }
 
-// errors suppressed so logs are not spammed
 func scanServer(serverAddress *net.UDPAddr) {
 	s, err := extinfo.NewServer(serverAddress.IP.String(), serverAddress.Port, 1*time.Second)
 	if err != nil {

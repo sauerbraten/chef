@@ -4,7 +4,7 @@ A configurable Sauerbraten spy bot written in Go.
 
 Chef collects all name-IP combinations it finds on servers and stores them in an SQLite database. You can access this data via a web interface or an IRC bot.
 
-> *With great power comes great responsibility*
+> *With great power comes great responsibility.*
 
 
 ## Collector
@@ -50,7 +50,7 @@ It uses a *direct lookup* when you give an IP and a *2-step lookup* when you giv
 
 ## „Name, IP or IP range“
 
-Chef does some smart regex matching and IP padding to improve the user experience. If the argument to the lookup commands is at least the first octet of an IP and the first dot, it is interpreted as an IP range. The prefix can be ommitted, in which case it will be deduced from the IP. The IP is padded with zeroes if neccessary, i.e. `123.` becomes `123.0.0.0`, `92.1` becomes `92.1.0.0`. The prefix size will be guessed from how many octets were given if it is omitted.
+Chef does some smart regex matching and IP padding to improve the user experience. If the argument to the lookup commands is at least the first octet of an IP and the first dot, it is interpreted as an IP range. The prefix can be ommitted, in which case it will be deduced from the IP. The IP is padded with zeroes if neccessary, i.e. `123.` becomes `123.0.0.0`, `92.1` becomes `92.1.0.0`. The prefix size, if not specified, will be guessed from how many octets were given.
 
 ### Examples
 

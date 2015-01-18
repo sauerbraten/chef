@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -23,10 +23,11 @@ func main() {
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
-	r.HandleFunc("/{sorting:names|lastseen}/{nameOrIp:.*}", lookUp)
+
+	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
+	r.HandleFunc("/lookup", lookupSightings)
 	r.HandleFunc("/status", status)
-	r.HandleFunc("/{*}", usage)
-	r.HandleFunc("/", usage)
+	r.HandleFunc("/", front)
 
 	// start listening
 	log.Println("server listening on", conf.WebInterfaceAddress)
@@ -36,36 +37,47 @@ func main() {
 	}
 }
 
-func usage(resp http.ResponseWriter, req *http.Request) {
-	http.ServeFile(resp, req, "./web_usage.txt")
-	return
+func front(resp http.ResponseWriter, req *http.Request) {
+	http.ServeFile(resp, req, "html/front.html")
 }
 
-func lookUp(resp http.ResponseWriter, req *http.Request) {
+type Results struct {
+	Query     string
+	Sightings []db.Sighting
+}
+
+func TimestampToString(timestamp int64) string {
+	return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST")
+}
+
+func lookupSightings(resp http.ResponseWriter, req *http.Request) {
 	logRequest(req)
 
-	vars := mux.Vars(req)
-	nameOrIp := vars["nameOrIp"]
+	nameOrIP := req.FormValue("q")
 
-	var sorting db.Sorting
-	switch vars["sorting"] {
-	case "names":
-		sorting = db.ByNameFrequency
-	case "lastseen":
+	sorting := db.ByNameFrequency
+	if req.FormValue("sorting") == "last_seen" {
 		sorting = db.ByLastSeen
 	}
 
-	sightings := storage.LookUp(nameOrIp, sorting)
-
-	if len(sightings) == 0 {
-		fmt.Fprintln(resp, "nothing found!")
-		return
+	directLookupForced := false
+	if req.FormValue("direct") == "true" {
+		directLookupForced = true
 	}
 
-	fmt.Fprintf(resp, "%15s   %-15s   %-23s   %15s   %5s   %s\n\n", "PLAYER IP", "PLAYER NAME", "LAST SEEN", "SERVER IP", "PORT", "SERVER DESCRIPTION")
+	sightings := storage.Lookup(nameOrIP, sorting, directLookupForced)
 
-	for _, sighting := range sightings {
-		fmt.Fprintf(resp, "%15s   %-15s   %-23s   %15s   %5d   %s\n", sighting.IP, sighting.Name, time.Unix(sighting.Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), sighting.ServerIP, sighting.ServerPort, sighting.ServerDescription)
+	results := Results{
+		Query:     nameOrIP,
+		Sightings: sightings,
+	}
+
+	resultsTempl := template.New("results.html")
+	resultsTempl = resultsTempl.Funcs(template.FuncMap{"timestring": TimestampToString})
+	resultsTempl = template.Must(resultsTempl.ParseFiles("html/results.html"))
+	err := resultsTempl.Execute(resp, results)
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -74,15 +86,8 @@ func status(resp http.ResponseWriter, req *http.Request) {
 
 	status := storage.Status()
 
-	fmt.Fprintln(resp, "DATABASE STATUS")
-	fmt.Fprintln(resp)
-	fmt.Fprintf(resp, "%7d names\n", status.NamesCount)
-	fmt.Fprintf(resp, "%7d IPs\n", status.IPsCount)
-	fmt.Fprintf(resp, "%7d combinations of name and IP\n", status.CombinationsCount)
-	fmt.Fprintf(resp, "%7d sightings\n", status.SightingsCount)
-	fmt.Fprintf(resp, "%7d servers\n", status.ServersCount)
-	fmt.Fprintln(resp)
-	fmt.Fprintln(resp, "all numbers are distinct (unique) counts")
+	statusTempl := template.Must(template.ParseFiles("html/status.html"))
+	statusTempl.Execute(resp, status)
 }
 
 func logRequest(req *http.Request) {

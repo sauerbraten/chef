@@ -13,16 +13,16 @@ type config struct {
 var conf config
 
 func init() {
-	filePath := ""
+	configFilePath := ""
 	if len(os.Args) < 2 {
-		filePath = "config.json"
+		configFilePath = "config.json"
 	} else {
-		filePath = os.Args[1]
+		configFilePath = os.Args[1]
 	}
 
 	conf = config{}
 
-	err := jsonconf.ParseFile(filePath, &conf)
+	err := jsonconf.ParseFile(configFilePath, &conf)
 	if err != nil {
 		panic(err)
 	}

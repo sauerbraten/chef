@@ -1,4 +1,4 @@
-package ips
+package ips // import "github.com/sauerbraten/chef/ips"
 
 import (
 	"net"
@@ -45,7 +45,7 @@ func Int2IP(intIp int64) net.IP {
 // 	184.29.39.193/16
 // 	12.304/8
 // 	29.43.223./13
-// A CIDR notation prefix size is optional, a fitting prefix size will be chosen in the case it's omitted.
+// A CIDR notation prefix size is optional, a fitting prefix size will be chosen in the case it's omitted or the specified prefix size is > 24.
 func GetSubnet(cidr string) (ipNet *net.IPNet) {
 	parts := strings.Split(cidr, "/")
 
@@ -102,7 +102,7 @@ func GetSubnet(cidr string) (ipNet *net.IPNet) {
 }
 
 // Returns lowest and highest IP inside the IPNet as integers (for easy range checking).
-func GetIPRange(ipNet *net.IPNet) (lowest, highest int64) {
+func GetIpRange(ipNet *net.IPNet) (lowest, highest int64) {
 	var notMask int64
 
 	for index, ipOctet := range ipNet.IP.To4() {

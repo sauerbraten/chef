@@ -1,0 +1,59 @@
+body {
+	max-width: 58em;
+	margin: 1em auto;
+	color: #333;
+}
+
+body, input, select {
+	font-family: monospace;
+	color: #333;
+}
+
+h1, form {
+	margin: 1.5em 0;
+}
+
+input, select, label {
+	margin: .25em auto;
+	vertical-align: middle;
+}
+
+input[type="search"] {
+	font-size: 1.25em;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+thead {
+	font-weight: bold;
+	border-bottom: 1px solid #999;
+}
+
+td {
+	padding: .25em .5em;
+	border-right: 1px solid #999;
+	border-left: 1px solid #999;
+}
+
+td:last-child {
+	border-right: none;
+}
+
+td:first-child {
+	border-left: none;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.footer {
+	display: block;
+	margin: 2em 0;
+}

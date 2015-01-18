@@ -6,6 +6,7 @@ Chef collects all name-IP-combinations it finds on servers and stores them in a 
 
 > *With great power comes great responsibility*
 
+
 ## Collector
 
 Chef retrieves the server list from the master server, adds manually specified servers, removes blacklisted servers, and then queries every server for client data via Sauerbraten's extinfo functionality (q.v. [my extinfo package for Go](http://github.com/sauerbraten/extinfo)). This happens periodically at a configurable interval. Chef stores the following data:

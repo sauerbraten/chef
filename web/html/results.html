@@ -1,0 +1,56 @@
+<!doctype html>
+
+<html>
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta charset="utf-8">
+
+	<title>{{.Query}} – Chef</title>
+
+	<link href="/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+	<h1 class="text-center">
+		<a href="/">CHEF</a>
+	</h1>
+
+	<h2>Results for „{{.Query}}“</h2>
+
+	{{if len .Sightings}}
+	<table>
+		<thead>
+			<tr>
+				<td class="text-center">Player IP</td>
+				<td class="text-center">Player Name</td>
+				<td class="text-center">Last Seen</td>
+				<td class="text-center">Server IP</td>
+				<td class="text-center">Port</td>
+				<td>Server Description</td>
+			</tr>
+		</thead>
+		<tbody>
+			{{range .Sightings}}
+			<tr>
+				<td class="text-right">{{.IP}}</td>
+				<td>{{.Name}}</td>
+				<td>{{timestring .Timestamp}}</td>
+				<td class="text-right">{{.ServerIP}}</td>
+				<td class="text-right">{{.ServerPort}}</td>
+				<td>{{.ServerDescription}}</td>
+			</tr>
+			{{end}}
+		</tbody>
+	</table>
+	{{else}}
+	<p>
+		Nothing found!
+	</p>
+	{{end}}
+
+</body>
+
+</html>

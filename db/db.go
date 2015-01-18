@@ -1,4 +1,4 @@
-package db
+package db // import "github.com/sauerbraten/chef/db"
 
 import (
 	"database/sql"

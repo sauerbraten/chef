@@ -9,8 +9,8 @@ import (
 	"github.com/sauerbraten/chef/db"
 )
 
-func nameLookUp(nameOrIP string) string {
-	sightings := storage.LookUp(nameOrIP, db.ByNameFrequency)
+func nameLookup(nameOrIP string) string {
+	sightings := storage.Lookup(nameOrIP, db.ByNameFrequency, false)
 
 	if len(sightings) == 0 {
 		return "nothing found!"
@@ -38,8 +38,8 @@ func nameLookUp(nameOrIP string) string {
 	return fmt.Sprintf("%s – more at http://"+conf.WebInterfaceAddress+"/names/%s", strings.Join(topFiveNames, ", "), sanitize(nameOrIP))
 }
 
-func lastSeenLookUp(nameOrIP string) string {
-	sightings := storage.LookUp(nameOrIP, db.ByLastSeen)
+func lastSeenLookup(nameOrIP string) string {
+	sightings := storage.Lookup(nameOrIP, db.ByLastSeen, false)
 
 	if len(sightings) == 0 {
 		return "nothing found!"

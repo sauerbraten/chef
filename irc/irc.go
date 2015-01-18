@@ -80,12 +80,12 @@ func main() {
 		if isHelpCommandAlias(firstMessageToken) {
 			reply(e, ".names <name|IP>    – returns the five most oftenly used names by IPs that used <name> / names used by <IP>")
 			reply(e, ".lastseen <name|IP> – returns date and time a player with that <name/IP> was last seen")
-		} else if isNameLookUpCommandAlias(firstMessageToken) {
+		} else if isNameLookupCommandAlias(firstMessageToken) {
 			nameOrIP := e.Message()[len(firstMessageToken)+1:]
-			reply(e, nameLookUp(nameOrIP))
-		} else if isLastSeenLookUpCommandAlias(firstMessageToken) {
+			reply(e, nameLookup(nameOrIP))
+		} else if isLastSeenLookupCommandAlias(firstMessageToken) {
 			nameOrIP := e.Message()[len(firstMessageToken)+1:]
-			reply(e, lastSeenLookUp(nameOrIP))
+			reply(e, lastSeenLookup(nameOrIP))
 		}
 
 		// log query
@@ -115,13 +115,13 @@ func isHelpCommandAlias(s string) bool {
 	return isIncluded(s, helpAliases)
 }
 
-func isNameLookUpCommandAlias(s string) bool {
+func isNameLookupCommandAlias(s string) bool {
 	nameLookupAliases := []string{".names", ".name", ".nicks", ".n"}
 
 	return isIncluded(s, nameLookupAliases)
 }
 
-func isLastSeenLookUpCommandAlias(s string) bool {
+func isLastSeenLookupCommandAlias(s string) bool {
 	lastSeenLookupAliases := []string{".lastseen", ".seen", ".ls", ".s"}
 
 	return isIncluded(s, lastSeenLookupAliases)

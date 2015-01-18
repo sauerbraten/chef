@@ -21,20 +21,20 @@ type Sorting string
 
 const (
 	ByLastSeen      Sorting = "`timestamp`"               // sort most recent sighting first
-	ByNameFrequency         = "count(`sightings`.`name`)" // put most oftenly used name first
+	ByNameFrequency Sorting = "count(`sightings`.`name`)" // put most oftenly used name first
 )
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
-func (db *DB) LookUpNames(nameOrIP string, sorting Sorting) []Sighting {
+func (db *DB) Lookup(nameOrIP string, sorting Sorting, directLookupForced bool) []Sighting {
 	if ips.IsIP(nameOrIP) {
-		lowest, highest := ips.GetIPRange(ips.GetSubnet(nameOrIP))
-		return db.lookUpByIpRange(lowest, highest, sorting)
+		lowest, highest := ips.GetIpRange(ips.GetSubnet(nameOrIP))
+		return db.lookupIpRange(lowest, highest, sorting)
 	} else {
-		return db.lookUpByName(nameOrIP, sorting)
+		return db.lookupName(nameOrIP, sorting, directLookupForced)
 	}
 }
 
-func (db *DB) lookUpByIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting) []Sighting {
+func (db *DB) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting) []Sighting {
 	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where `sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?) group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", lowestIpInRange, highestIpInRange)
 	if err != nil {
 		log.Fatal("error looking up sightings by IP:", err)
@@ -44,8 +44,14 @@ func (db *DB) lookUpByIpRange(lowestIpInRange, highestIpInRange int64, sorting S
 	return rowsToSightings(rows)
 }
 
-func (db *DB) lookUpByName(name string, sorting Sorting) []Sighting {
-	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where (`sightings`.`ip` in (select `ip` from `sightings` where `name` in (select `rowid` from `names` where `name` like ?)) and `ips`.`ip` != '') group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", "%"+name+"%")
+func (db *DB) lookupName(name string, sorting Sorting, directLookupForced bool) []Sighting {
+	condition := "`sightings`.`ip` in (select `ip` from `sightings` where `name` in (select `rowid` from `names` where `name` like ?)) and `ips`.`ip` != ''"
+
+	if directLookupForced {
+		condition = "`sightings`.`name` in (select `rowid` from `names` where `name` like ?) and `ips`.`ip` != ''"
+	}
+
+	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where ("+condition+") group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", "%"+name+"%")
 	if err != nil {
 		log.Fatal("error looking up sightings by name:", err)
 	}
@@ -58,10 +64,10 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 	sightings := []Sighting{}
 
 	for rows.Next() {
-		name, intIp, timestamp, serverIP, serverPort, serverDescription := "", int64(0), int64(0), "", 0, ""
-		rows.Scan(&name, &intIp, &timestamp, &serverIP, &serverPort, &serverDescription)
+		name, intIP, timestamp, serverIP, serverPort, serverDescription := "", int64(0), int64(0), "", 0, ""
+		rows.Scan(&name, &intIP, &timestamp, &serverIP, &serverPort, &serverDescription)
 
-		ip := ips.Int2IP(intIp).String()
+		ip := ips.Int2IP(intIP).String()
 		if ip == "255.255.255.255" {
 			ip = ""
 		}

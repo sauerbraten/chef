@@ -2,17 +2,14 @@
 	// SQlite database file name
 	"db_file_path": "/home/axle/.chef/chef.sqlite",
 
-
-	// collector
-
 	// master server address
 	"master_server_address": "sauerbraten.org",
 
 	// master server port
 	"master_server_port": "28787",
 
-	// servers that should be scanned even when they are not on the master list
-	"hidden_servers": [
+	// servers that should be scanned even when they are not on the master list (hidden) or when the master server is down etc.
+	"extra_servers": [
 
 		// hidden
 		"sauerleague.org:20000",
@@ -45,39 +42,5 @@
 	"scan_interval_seconds": 60,
 
 	// verbosity of collector
-	"collector_verbose": true,
-
-
-	// IRC bot
-
-	// IRC nick
-	"irc_nick": "chef",
-
-	// IRC account name
-	"irc_account_name": "chef",
-
-	// IRC account password
-	"irc_account_password": "QA5ZRkKnEOGx9Xjuvu0a",
-
-	// IRC channels to join on connect
-	"irc_channels": ["#novi-intern"],
-
-	// IRC trusted user accounts (can use the bot in PM)
-	"irc_trusted_users": [
-		"dss.asdf.gamesurge",
-		"pix.user.gamesurge",
-		"Luffy.hacks-on.gamesurge",
-		"pure_ascii.is-always-idle-on.gamesurge",
-		"Tagger.idle-whore.gamesurge",
-		"Whoohoo.Gimme.Them.Coooki.es", // tagger's bouncer
-		"ySoSrs.user.gamesurge",
-		"pisto.princess.gamesurge"
-	],
-
-
-	// web interface
-
-	// web interface address
-	// must be a publicly reachable address, since the IRC bot includes links to it in its replies
-	"web_interface_address": "localhost:6060"
+	"verbose": true
 }

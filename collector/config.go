@@ -10,10 +10,10 @@ import (
 type config struct {
 	MasterServerAddress string        `json:"master_server_address"`
 	MasterServerPort    string        `json:"master_server_port"`
-	HiddenServers       []string      `json:"hidden_servers"`
+	ExtraServers        []string      `json:"extra_servers"`
 	BlacklistedServers  []string      `json:"blacklisted_servers"`
 	ScanIntervalSeconds time.Duration `json:"scan_interval_seconds"`
-	Verbose bool `json:"collector_verbose"`
+	Verbose             bool          `json:"collector_verbose"`
 }
 
 var conf config

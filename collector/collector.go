@@ -55,9 +55,9 @@ func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err 
 		list = map[string]*net.UDPAddr{}
 	}
 
-	for _, hiddenServerAddress := range conf.HiddenServers {
+	for _, serverAddress := range conf.ExtraServers {
 		var addr *net.UDPAddr
-		addr, err = net.ResolveUDPAddr("udp", hiddenServerAddress)
+		addr, err = net.ResolveUDPAddr("udp", serverAddress)
 		if err != nil {
 			return
 		}
@@ -70,12 +70,12 @@ func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err 
 		}
 	}
 
-	for _, blacklistedServerAddress := range conf.BlacklistedServers {
+	for _, serverAddress := range conf.BlacklistedServers {
 		var deletePrefix string
 
-		if strings.Count(blacklistedServerAddress, ":") == 0 {
+		if strings.Count(serverAddress, ":") == 0 {
 			var addr *net.IPAddr
-			addr, err = net.ResolveIPAddr("ip", blacklistedServerAddress)
+			addr, err = net.ResolveIPAddr("ip", serverAddress)
 			if err != nil {
 				return
 			}
@@ -83,7 +83,7 @@ func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err 
 			deletePrefix = addr.IP.String()
 		} else {
 			var addr *net.UDPAddr
-			addr, err = net.ResolveUDPAddr("udp", blacklistedServerAddress)
+			addr, err = net.ResolveUDPAddr("udp", serverAddress)
 			if err != nil {
 				return
 			}

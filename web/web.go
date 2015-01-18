@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -67,17 +68,30 @@ func lookupSightings(resp http.ResponseWriter, req *http.Request) {
 
 	sightings := storage.Lookup(nameOrIP, sorting, directLookupForced)
 
-	results := Results{
-		Query:     nameOrIP,
-		Sightings: sightings,
-	}
+	if req.FormValue("plain") == "true" {
+		if len(sightings) == 0 {
+			fmt.Fprintln(resp, "nothing found!")
+			return
+		}
 
-	resultsTempl := template.New("results.html")
-	resultsTempl = resultsTempl.Funcs(template.FuncMap{"timestring": TimestampToString})
-	resultsTempl = template.Must(resultsTempl.ParseFiles("html/results.html"))
-	err := resultsTempl.Execute(resp, results)
-	if err != nil {
-		log.Println(err)
+		fmt.Fprintf(resp, "%15s   %-15s   %-23s   %15s   %5s   %s\n\n", "PLAYER IP", "PLAYER NAME", "LAST SEEN", "SERVER IP", "PORT", "SERVER DESCRIPTION")
+
+		for _, sighting := range sightings {
+			fmt.Fprintf(resp, "%15s   %-15s   %-23s   %15s   %5d   %s\n", sighting.IP, sighting.Name, time.Unix(sighting.Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), sighting.ServerIP, sighting.ServerPort, sighting.ServerDescription)
+		}
+	} else {
+		results := Results{
+			Query:     nameOrIP,
+			Sightings: sightings,
+		}
+
+		resultsTempl := template.New("results.html")
+		resultsTempl = resultsTempl.Funcs(template.FuncMap{"timestring": TimestampToString})
+		resultsTempl = template.Must(resultsTempl.ParseFiles("html/results.html"))
+		err := resultsTempl.Execute(resp, results)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 

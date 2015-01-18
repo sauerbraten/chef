@@ -2,7 +2,7 @@
 
 A configurable Sauerbraten spy bot written in Go.
 
-Chef collects all name-IP-combinations it finds on servers and stores them in a SQLite database. You can access this data via web interface or IRC bot.
+Chef collects all name-IP combinations it finds on servers and stores them in an SQLite database. You can access this data via a web interface or an IRC bot.
 
 > *With great power comes great responsibility*
 
@@ -13,36 +13,40 @@ Chef retrieves the server list from the master server, adds manually specified s
 
 - information on the server
 - name
-- IP
+- IP (only the first three octets since Sauerbraten doesn't give the full IP)
 - sighting (i.e. IP bla was seen on server foo using name bar at this specific time)
 
 To store these things, the database has four tables:
 
-- `names` table: stores the name as string
-- `ips` table: stores the IP as integer (to enable IP range checks)
-- `servers` table: stores server IP as string, server port as int, server description as string. IP and port uniquely identify a server. If the description changes it is simply updated in this table.
-- `sightings` table: stores entries consisting of the current time and SQLite rowids referencing a name, an IP and a server.
+- `names`: stores the name as string
+- `ips`: stores the IP as integer (to facilitate IP range checks)
+- `servers`: stores server IP as string, server port as int, server description as string. An IP and a port together uniquely identify a server. If the description of a known server changes, the description is simply updated in this table.
+- `sightings`: stores entries consisting of the current time and SQLite rowids referencing a name, an IP and a server.
 
 For more information, see [`db/chef.sqlite.schema`](https://github.com/sauerbraten/chef/blob/master/db/chef.sqlite.schema).
 
 
 ## Web Interface
 
-Chef offers a web interface to access the collected data. The interface uses API-like URLs, but is intended to be used by humans (formatted text replies etc.). It has two endpoints, both of which perform the same DB query, but with different sorting for the results:
+Chef offers a web interface to access the collected data. The interface lets you perform two types of lookups, a *direct lookup* and a *2-step lookup*. It has a simple frontpage with a query field, a drop-down to select the sorting (defaults to name frequency) and a checkbox to force a direct lookup when searching with a name. Additionally, there is a status page displaying the number of DB entries per table.
 
-- `/names/<name, IP, or IP range>`: sorts by name frequency
-- `/lastseen/<name, IP, or IP range>`: sorts by date and time, most recent sighting first
+### Direct Lookup
 
-Additionally, there is a `/status` page displaying the number of DB entries per table.
+A direct lookup is a simple lookup with only one step. If you give a name, it returns all IPs that have used this name; if you give an IP or IP range, it returns all names that have been used by the given IP (range). Results are displayed as distinct name-IP combinations with the timestamp and server information of their last sighting attached.
+
+### 2-Step Lookup
+
+A 2-step lookup only works on names: It first performs a direct lookup of the name to get all IPs that used the name, and then looks up all sightings by all those IPs. Like direct lookups, it returns distinct name-IP combinations with timestamp and server information of their last sighting.
 
 
 ## IRC Bot
 
-Lastly, there is an IRC bot. It performs the same two lookups as the web interface:
+Lastly, there is an IRC bot. It has the following two commands:
 
 - `.names <name, IP, or IP range>`: aliases: `.name`, `.nicks`, `.n`
 - `.lastseen <name, IP, or IP range>`: aliases: `.seen`, `.ls`, `.s`
 
+It uses a *direct lookup* when you give an IP and a *2-step lookup* when you give a name as argument.
 
 ## „Name, IP or IP range“
 
@@ -50,6 +54,6 @@ Chef does some smart regex matching and IP padding to improve the user experienc
 
 ### Examples
 
-- `177.40/16` → `177.40.0.0/16` → results in 177.40.0.0 - 177.40.255.255
-- `243.80.97` → `243.80.97.0/24` → results in 243.80.97.0 - 243.80.97.255
-- `183.29.64.0/9` → results in 183.0.0.0 - 183.127.255.255
+- `177.40/16` → `177.40.0.0/16` → results in `177.40.0.0` – `177.40.255.255`
+- `243.80.97` → `243.80.97.0/24` → results in `243.80.97.0` – `243.80.97.255`
+- `183.29.64.0/9` → results in `183.0.0.0` – `183.127.255.255`

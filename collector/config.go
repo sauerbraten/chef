@@ -18,11 +18,9 @@ type config struct {
 var conf config
 
 func init() {
-	filePath := ""
-	if len(os.Args) < 2 {
-		filePath = "config.json"
-	} else {
-		filePath = os.Args[1]
+	configFilePath := "~/.chef/config.json"
+	if len(os.Args) >= 2 {
+		configFilePath = os.Args[1]
 	}
 
 	conf = config{}

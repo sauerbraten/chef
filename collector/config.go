@@ -13,6 +13,7 @@ type config struct {
 	HiddenServers       []string      `json:"hidden_servers"`
 	BlacklistedServers  []string      `json:"blacklisted_servers"`
 	ScanIntervalSeconds time.Duration `json:"scan_interval_seconds"`
+	Verbose bool `json:"collector_verbose"`
 }
 
 var conf config

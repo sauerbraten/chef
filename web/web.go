@@ -24,10 +24,10 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 
-	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
+	r.HandleFunc("/", front)
 	r.HandleFunc("/lookup", lookupSightings)
 	r.HandleFunc("/status", status)
-	r.HandleFunc("/", front)
+	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
 	// start listening
 	log.Println("server listening on", conf.WebInterfaceAddress)

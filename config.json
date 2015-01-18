@@ -44,6 +44,9 @@
 	// scan interval in seconds
 	"scan_interval_seconds": 60,
 
+	// verbosity of collector
+	"collector_verbose": true,
+
 
 	// IRC bot
 
@@ -76,5 +79,5 @@
 
 	// web interface address
 	// must be a publicly reachable address, since the IRC bot includes links to it in its replies
-	"web_interface_address": "31.220.27.98:6060"
+	"web_interface_address": "localhost:6060"
 }

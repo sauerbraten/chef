@@ -104,13 +104,13 @@ func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err 
 func scanServer(serverAddress *net.UDPAddr) {
 	s, err := extinfo.NewServer(serverAddress.IP.String(), serverAddress.Port, 1*time.Second)
 	if err != nil {
-		log.Println(err)
+		verbose(err)
 		return
 	}
 
 	basicInfo, err := s.GetBasicInfo()
 	if err != nil {
-		log.Println("error getting basic info from", serverAddress, ":", err)
+		verbose("error getting basic info from", serverAddress, ":", err)
 		return
 	}
 
@@ -118,7 +118,7 @@ func scanServer(serverAddress *net.UDPAddr) {
 
 	playerInfos, err := s.GetAllClientInfo()
 	if err != nil {
-		log.Println("error getting client info from", serverAddress, ":", err)
+		verbose("error getting client info from", serverAddress, ":", err)
 		return
 	}
 
@@ -137,5 +137,11 @@ func scanServer(serverAddress *net.UDPAddr) {
 		}
 
 		storage.AddOrIgnoreSighting(playerInfo.Name, ip, serverID)
+	}
+}
+
+func verbose(args ...interface{}) {
+	if conf.Verbose {
+		log.Println(args...)
 	}
 }

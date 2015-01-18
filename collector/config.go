@@ -18,14 +18,14 @@ type config struct {
 var conf config
 
 func init() {
-	configFilePath := "~/.chef/config.json"
+	configFilePath := "config.json"
 	if len(os.Args) >= 2 {
 		configFilePath = os.Args[1]
 	}
 
 	conf = config{}
 
-	err := jsonconf.ParseFile(filePath, &conf)
+	err := jsonconf.ParseFile(configFilePath, &conf)
 	if err != nil {
 		panic(err)
 	}

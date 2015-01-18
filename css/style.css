@@ -1,5 +1,5 @@
 body {
-	max-width: 58em;
+	max-width: 69em;
 	margin: 1em auto;
 	color: #333;
 }
@@ -43,6 +43,11 @@ td:last-child {
 
 td:first-child {
 	border-left: none;
+}
+
+.text {
+	max-width: 48em;
+	margin: 0 auto;
 }
 
 .text-right {

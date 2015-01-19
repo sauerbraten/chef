@@ -1,0 +1,45 @@
+<!doctype html>
+
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta charset="utf-8">
+
+	<title>More Information – CHEF</title>
+
+	<link href="/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+	<header>
+		<h1 class="align-center">
+			<a href="/">CHEF</a>
+		</h1>
+	</header>
+
+	<main>
+		<article class="text">
+			<h2>What is collected?</h2>
+
+			<p>
+				This service stores information about what IP (using what name) was seen on which server. It stores IP, port, and description of every server on the master list plus PSL2-4. It stores all IPs it sees (first three octets), and all names it sees. It then stores an entry equivalent to "IP x.x.x.x was seen on server ABC at this date and time using name XYZ".
+			</p>
+
+			<h3>Exceptions</h3>
+
+			<p>
+				Some servers do not give the correct IP but instead send an IP like 0.0.0.0 or other, harder to recognize fake IPs. These servers are put on a 'greylist', which means that they will be scanned, but all IPs they send will be changed to 0.0.0.0 before saving them, and sightings from those servers will not be shown in 2-step name lookups.
+			</p>
+		</article>
+	</main>
+
+	<footer>
+		<small>
+			Sauerbraten spy by pix – <a href="/status">Status</a> – <a href="/info">More Information</a>
+		</small>
+	</footer>
+
+</body>
+</html>

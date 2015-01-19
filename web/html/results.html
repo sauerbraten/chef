@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta charset="utf-8">
 
-	<title>{{.Lookup.Query}} – CHEF</title>
+	<title>{{.Query}} – CHEF</title>
 
 	<link href="/style.css" rel="stylesheet">
 </head>
@@ -21,11 +21,11 @@
 
 	<main>
 		<header>
-			<h2>Results for {{.Lookup.Query}}</h2>
-			<small>{{if .Lookup.DirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .Lookup.SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
+			<h2>Results for {{.Query}}</h2>
+			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP (range){{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
 		</header>
 
-		{{if len .Sightings}}
+		{{if len .Results}}
 		<table>
 			<thead>
 				<tr>
@@ -38,7 +38,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{{range .Sightings}}
+				{{range .Results}}
 				<tr>
 					<td class="align-right">{{.IP}}</td>
 					<td>{{.Name}}</td>
@@ -59,7 +59,7 @@
 
 	<footer>
 		<small>
-			Sauerbraten spy by pix – <a href="/status">Status</a>
+			Sauerbraten spy by pix – <a href="/status">Status</a> – <a href="/info">More Information</a>
 		</small>
 	</footer>
 

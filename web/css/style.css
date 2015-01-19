@@ -60,6 +60,10 @@ td {
 	padding: .25em .75em;
 	border-right: 1px solid #999;
 	border-left: 1px solid #999;
+	max-width: 20em;
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 td:last-child {

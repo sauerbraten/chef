@@ -2,24 +2,24 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
-	"net/url"
 	"time"
 
 	"github.com/sauerbraten/chef/db"
 )
 
 func nameLookup(nameOrIP string) string {
-	sightings := storage.Lookup(nameOrIP, db.ByNameFrequency, false)
+	finishedLookup := storage.Lookup(nameOrIP, db.ByNameFrequency, false)
 
-	if len(sightings) == 0 {
+	if len(finishedLookup.Results) == 0 {
 		return "nothing found!"
 	}
 
 	topFiveNames := []string{}
 
-	for i, sighting := range sightings {
+	for i, sighting := range finishedLookup.Results {
 		if i < 5 {
 			alreadyIncluded := false
 			for _, includedName := range topFiveNames {
@@ -40,20 +40,21 @@ func nameLookup(nameOrIP string) string {
 }
 
 func lastSeenLookup(nameOrIP string) string {
-	sightings := storage.Lookup(nameOrIP, db.ByLastSeen, false)
+	finishedLookup := storage.Lookup(nameOrIP, db.ByLastSeen, false)
 
-	if len(sightings) == 0 {
+	if len(finishedLookup.Results) == 0 {
 		return "nothing found!"
 	}
 
-	serverString := sightings[0].ServerDescription
-	if sightings[0].ServerDescription != "" {
+	lastSighting := finishedLookup.Results[0]
+	serverString := lastSighting.ServerDescription
+	if lastSighting.ServerDescription != "" {
 		serverString += " ("
 	}
-	serverString += sightings[0].ServerIP + ":" + strconv.Itoa(sightings[0].ServerPort)
-	if sightings[0].ServerDescription != "" {
+	serverString += lastSighting.ServerIP + ":" + strconv.Itoa(lastSighting.ServerPort)
+	if lastSighting.ServerDescription != "" {
 		serverString += ")"
 	}
 
-	return fmt.Sprintf("%s (%s) was last seen %s on %s – more at http://"+conf.WebInterfaceAddress+"/lookup?q=%s&sorting=last_seen", sightings[0].Name, sightings[0].IP, time.Unix(sightings[0].Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), serverString, url.QueryEscape(nameOrIP))
+	return fmt.Sprintf("%s (%s) was last seen %s on %s – more at http://"+conf.WebInterfaceAddress+"/lookup?q=%s&sorting=last_seen", lastSighting.Name, lastSighting.IP, time.Unix(lastSighting.Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), serverString, url.QueryEscape(nameOrIP))
 }

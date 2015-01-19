@@ -1,10 +1,10 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
-	"text/template"
 
 	"github.com/gorilla/mux"
 	"github.com/sauerbraten/chef/db"
@@ -26,6 +26,7 @@ func main() {
 	r.HandleFunc("/", front)
 	r.HandleFunc("/lookup", lookup)
 	r.HandleFunc("/status", status)
+	r.HandleFunc("/info", info)
 	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
 	// start listening
@@ -48,6 +49,11 @@ func status(resp http.ResponseWriter, req *http.Request) {
 
 	statusTempl := template.Must(template.ParseFiles("html/status.html"))
 	statusTempl.Execute(resp, status)
+}
+
+func info(resp http.ResponseWriter, req *http.Request) {
+	logRequest(req)
+	http.ServeFile(resp, req, "html/info.html")
 }
 
 func logRequest(req *http.Request) {

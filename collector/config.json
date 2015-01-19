@@ -2,13 +2,13 @@
 	// SQlite database file name
 	"db_file_path": "/home/axle/.chef/chef.sqlite",
 
-	// master server address
+	// Master server address
 	"master_server_address": "sauerbraten.org",
 
-	// master server port
+	// Master server port
 	"master_server_port": "28787",
 
-	// servers that should be scanned even when they are not on the master list (hidden) or when the master server is down etc.
+	// Servers that should be scanned even when they are not on the master list (hidden) or when the master server is unreachable.
 	"extra_servers": [
 
 		// hidden
@@ -32,15 +32,18 @@
 		"effic.me:60000"
 	],
 
-	// servers that should never be scanned (overrides the list of hidden servers to scan)
-	// if no port is specfied, all servers on that host are blacklisted
-	"blacklisted_servers": [
-		"pisto.horse" // sends fake IPs matching the player's country, can't be filtered
+	// Servers from which not to save client IP addresses since they are fake.
+	// Obviously fake IPs like 0.0.0.0 and IPs from the server's local network (192.168.0.0/16)
+	// are never stored, even if the server where they are found is not in this list.
+	// If no port is specfied, all servers on that host are greylisted.
+	"greylisted_servers": [
+		"pisto.horse", // sends fake IPs matching the player's country, can't be filtered
+		"92.222.216.113" // DM servers, send fake IP (2.21.0.0)
 	],
 
-	// scan interval in seconds
+	// Scan interval in seconds
 	"scan_interval_seconds": 60,
 
-	// verbosity of collector
+	// Verbosity of collector
 	"verbose": true
 }

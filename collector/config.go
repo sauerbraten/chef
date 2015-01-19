@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"os"
 	"time"
 
@@ -8,12 +9,14 @@ import (
 )
 
 type config struct {
-	MasterServerAddress string        `json:"master_server_address"`
-	MasterServerPort    string        `json:"master_server_port"`
-	ExtraServers        []string      `json:"extra_servers"`
-	BlacklistedServers  []string      `json:"blacklisted_servers"`
-	ScanIntervalSeconds time.Duration `json:"scan_interval_seconds"`
-	Verbose             bool          `json:"collector_verbose"`
+	MasterServerAddress string          `json:"master_server_address"`
+	MasterServerPort    string          `json:"master_server_port"`
+	ExtraServers        []string        `json:"extra_servers"`
+	extraServers        []*net.UDPAddr  // to hold addresses after resolving them at initialization
+	GreylistedServers   []string        `json:"greylisted_servers"`
+	greylistedServers   map[string]bool // map (basically a set) for easier lookups
+	ScanIntervalSeconds time.Duration   `json:"scan_interval_seconds"`
+	Verbose             bool            `json:"verbose"`
 }
 
 var conf config
@@ -24,7 +27,9 @@ func init() {
 		configFilePath = os.Args[1]
 	}
 
-	conf = config{}
+	conf = config{
+		greylistedServers: map[string]bool{},
+	}
 
 	err := jsonconf.ParseFile(configFilePath, &conf)
 	if err != nil {

@@ -4,20 +4,14 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/sauerbraten/chef/db"
+	"github.com/sauerbraten/chef/ips"
 	"github.com/sauerbraten/extinfo"
 )
 
 var storage *db.DB
-
-var privateNet *net.IPNet
-
-func init() {
-	_, privateNet, _ = net.ParseCIDR("192.168.0.0/16")
-}
 
 func main() {
 	var err error
@@ -27,15 +21,18 @@ func main() {
 	}
 	defer storage.Close()
 
+	// resolve addresses given in config
+	err = finishConfiguration()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ms := newMasterServer(conf.MasterServerAddress, conf.MasterServerPort)
 
 	for start := range time.Tick(conf.ScanIntervalSeconds * time.Second) {
 		log.Println("refreshing server list after tick at", start.String())
 
-		list, err := getCompleteServerList(ms)
-		if err != nil {
-			log.Println(err)
-		}
+		list := getServerList(ms)
 
 		log.Println("running scan...")
 
@@ -47,62 +44,54 @@ func main() {
 	}
 }
 
-// get master server list, add hidden servers, remove blacklisted servers
-func getCompleteServerList(ms *masterServer) (list map[string]*net.UDPAddr, err error) {
-	list, err = ms.getServerList()
-	if err != nil {
-		// still search hidden servers
-		list = map[string]*net.UDPAddr{}
-	}
-
+func finishConfiguration() (err error) {
+	// resolve extra servers
 	for _, serverAddress := range conf.ExtraServers {
 		var addr *net.UDPAddr
+
 		addr, err = net.ResolveUDPAddr("udp", serverAddress)
 		if err != nil {
 			return
 		}
 
-		// don't add servers that are already contained in master server list
-		if _, ok := list[addr.IP.String()+":"+strconv.Itoa(addr.Port)]; ok {
-			continue
-		} else {
-			list[addr.IP.String()+":"+strconv.Itoa(addr.Port)] = addr
-		}
+		conf.extraServers = append(conf.extraServers, addr)
 	}
 
-	for _, serverAddress := range conf.BlacklistedServers {
-		var deletePrefix string
+	// resolve greylisted servers
+	for _, serverAddress := range conf.GreylistedServers {
+		var addr *net.IPAddr
 
-		if strings.Count(serverAddress, ":") == 0 {
-			var addr *net.IPAddr
-			addr, err = net.ResolveIPAddr("ip", serverAddress)
-			if err != nil {
-				return
-			}
-
-			deletePrefix = addr.IP.String()
-		} else {
-			var addr *net.UDPAddr
-			addr, err = net.ResolveUDPAddr("udp", serverAddress)
-			if err != nil {
-				return
-			}
-
-			deletePrefix = addr.IP.String() + ":" + strconv.Itoa(addr.Port)
+		addr, err = net.ResolveIPAddr("ip", serverAddress)
+		if err != nil {
+			return
 		}
 
-		for serverAddress, _ := range list {
-			if strings.HasPrefix(serverAddress, deletePrefix) {
-				delete(list, serverAddress)
-			}
-		}
+		conf.greylistedServers[addr.IP.String()] = true
+	}
+
+	return
+}
+
+// get master server list and add manually specified extra servers
+func getServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
+	var err error
+
+	list, err = ms.getServerList()
+	if err != nil {
+		log.Println("error getting master server list:", err)
+		// still search extra servers
+		list = map[string]*net.UDPAddr{}
+	}
+
+	for _, addr := range conf.extraServers {
+		list[addr.IP.String()+":"+strconv.Itoa(addr.Port)] = addr
 	}
 
 	return
 }
 
 func scanServer(serverAddress *net.UDPAddr) {
-	s, err := extinfo.NewServer(serverAddress.IP.String(), serverAddress.Port, 1*time.Second)
+	s, err := extinfo.NewServer(serverAddress.IP.String(), serverAddress.Port, 2*time.Second)
 	if err != nil {
 		verbose(err)
 		return
@@ -129,14 +118,17 @@ func scanServer(serverAddress *net.UDPAddr) {
 	log.Println("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
 	for _, playerInfo := range playerInfos {
-		ip := playerInfo.IP
-
-		if ip.Equal(net.ParseIP("0.0.0.0")) || privateNet.Contains(ip) {
-			// no useable IP → useless, don't save
+		// don't save bot sightings
+		if playerInfo.ClientNum > 127 {
 			continue
 		}
 
-		storage.AddOrIgnoreSighting(playerInfo.Name, ip, serverID)
+		// check IP
+		if ips.IsInPrivateNetwork(playerInfo.IP) || conf.greylistedServers[serverAddress.IP.String()] {
+			playerInfo.IP = net.ParseIP("0.0.0.0")
+		}
+
+		storage.AddOrIgnoreSighting(playerInfo.Name, playerInfo.IP, serverID)
 	}
 }
 

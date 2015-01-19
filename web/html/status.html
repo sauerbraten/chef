@@ -1,7 +1,6 @@
 <!doctype html>
 
 <html>
-
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,39 +13,50 @@
 
 <body>
 
-	<h1 class="text-center">
-		<a href="/">CHEF</a>
-	</h1>
+	<header>
+		<h1 class="align-center">
+			<a href="/">CHEF</a>
+		</h1>
+	</header>
 
-	<h2>Status Information</h2>
+	<main>
+		<div class="text">
+			<h2>Status Information</h2>
 
-	<table>
-		<tr>
-			<td class="text-right">{{.NamesCount}}</td>
-			<td>names</td>
-		</tr>
-		<tr>
-			<td class="text-right">{{.IPsCount}}</td>
-			<td>IPs</td>
-		</tr>
-		<tr>
-			<td class="text-right">{{.CombinationsCount}}</td>
-			<td>combinations of name and IP</td>
-		</tr>
-		<tr>
-			<td class="text-right">{{.SightingsCount}}</td>
-			<td>sightings</td>
-		</tr>
-		<tr>
-			<td class="text-right">{{.ServersCount}}</td>
-			<td>servers</td>
-		</tr>
-	</table>
+			<table>
+				<tr>
+					<td class="align-right">{{.NamesCount}}</td>
+					<td>names</td>
+				</tr>
+				<tr>
+					<td class="align-right">{{.IPsCount}}</td>
+					<td>IPs</td>
+				</tr>
+				<tr>
+					<td class="align-right">{{.CombinationsCount}}</td>
+					<td>combinations of name and IP</td>
+				</tr>
+				<tr>
+					<td class="align-right">{{.SightingsCount}}</td>
+					<td>sightings</td>
+				</tr>
+				<tr>
+					<td class="align-right">{{.ServersCount}}</td>
+					<td>servers</td>
+				</tr>
+			</table>
 
-	<p>
-		All numbers are distinct (unique) counts.
-	</p>
+			<p>
+				All numbers are distinct (unique) counts.
+			</p>
+		</div>
+	</main>
+
+	<footer>
+		<small>
+			Sauerbraten spy by pix – <a href="/status">Status</a>
+		</small>
+	</footer>
 
 </body>
-
 </html>

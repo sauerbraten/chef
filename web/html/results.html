@@ -1,56 +1,67 @@
 <!doctype html>
 
 <html>
-
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta charset="utf-8">
 
-	<title>{{.Query}} – Chef</title>
+	<title>{{.Lookup.Query}} – Chef</title>
 
 	<link href="/style.css" rel="stylesheet">
 </head>
 
 <body>
 
-	<h1 class="text-center">
-		<a href="/">CHEF</a>
-	</h1>
+	<header>
+		<h1 class="align-center">
+			<a href="/">CHEF</a>
+		</h1>
+	</header>
 
-	<h2>Results for {{.Query}}</h2>
+	<main>
+		<header>
+			<h2>Results for {{.Lookup.Query}}</h2>
+			<small>{{if .Lookup.DirectLookup}}direct lookup{{else}}2-step lookup{{end}} – sorted by {{if .Lookup.SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
+		</header>
 
-	{{if len .Sightings}}
-	<table>
-		<thead>
-			<tr>
-				<td class="text-center">Player IP</td>
-				<td class="text-center">Player Name</td>
-				<td class="text-center">Last Seen</td>
-				<td class="text-center">Server IP</td>
-				<td class="text-center">Port</td>
-				<td>Server Description</td>
-			</tr>
-		</thead>
-		<tbody>
-			{{range .Sightings}}
-			<tr>
-				<td class="text-right">{{.IP}}</td>
-				<td>{{.Name}}</td>
-				<td>{{timestring .Timestamp}}</td>
-				<td class="text-right">{{.ServerIP}}</td>
-				<td class="text-right">{{.ServerPort}}</td>
-				<td>{{.ServerDescription}}</td>
-			</tr>
-			{{end}}
-		</tbody>
-	</table>
-	{{else}}
-	<p>
-		Nothing found!
-	</p>
-	{{end}}
+		{{if len .Sightings}}
+		<table>
+			<thead>
+				<tr>
+					<td class="align-center">Player IP</td>
+					<td class="align-center">Player Name</td>
+					<td class="align-center">Last Seen</td>
+					<td class="align-center">Server IP</td>
+					<td class="align-center">Port</td>
+					<td>Server Description</td>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .Sightings}}
+				<tr>
+					<td class="align-right">{{.IP}}</td>
+					<td>{{.Name}}</td>
+					<td>{{timestring .Timestamp}}</td>
+					<td class="align-right">{{.ServerIP}}</td>
+					<td class="align-right">{{.ServerPort}}</td>
+					<td>{{.ServerDescription}}</td>
+				</tr>
+				{{end}}
+			</tbody>
+		</table>
+		{{else}}
+		<p>
+			Nothing found!
+		</p>
+		{{end}}
+	</main>
+
+	<footer>
+		<small>
+			Sauerbraten spy by pix – <a href="/status">Status</a>
+		</small>
+	</footer>
 
 </body>
-
 </html>

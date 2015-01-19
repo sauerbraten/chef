@@ -1,8 +1,11 @@
 body {
-	width: 70em;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	width: 72em;
+	min-height: 100vh;
 	margin: 0 auto;
-	padding: .5em;
-	color: #333;
+	padding: 0 .5em;
 }
 
 body, input, select {
@@ -10,8 +13,28 @@ body, input, select {
 	color: #333;
 }
 
+header, main, footer {
+	flex-basis: 100%;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	align-items: baseline;
+	align-content: flex-start;
+}
+
+main {
+	flex-grow: 1;
+}
+
+footer {
+	margin: 2em 0;
+	justify-content: center;
+}
+
 h1, form {
 	margin: 1.5em 0;
+	min-width: 100%;
+	text-align: center;
 }
 
 input, select, label {
@@ -24,6 +47,7 @@ input[type="search"] {
 }
 
 table {
+	min-width: 100%;
 	border-collapse: collapse;
 }
 
@@ -33,7 +57,7 @@ thead {
 }
 
 td {
-	padding: .25em .5em;
+	padding: .25em .75em;
 	border-right: 1px solid #999;
 	border-left: 1px solid #999;
 }
@@ -51,15 +75,10 @@ td:first-child {
 	margin: 0 auto;
 }
 
-.text-right {
+.align-right {
 	text-align: right;
 }
 
-.text-center {
+.align-center {
 	text-align: center;
-}
-
-.footer {
-	display: block;
-	margin: 2em 0;
 }

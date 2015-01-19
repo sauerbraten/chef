@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta charset="utf-8">
 
-	<title>{{.Lookup.Query}} – Chef</title>
+	<title>{{.Lookup.Query}} – CHEF</title>
 
 	<link href="/style.css" rel="stylesheet">
 </head>
@@ -22,7 +22,7 @@
 	<main>
 		<header>
 			<h2>Results for {{.Lookup.Query}}</h2>
-			<small>{{if .Lookup.DirectLookup}}direct lookup{{else}}2-step lookup{{end}} – sorted by {{if .Lookup.SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
+			<small>{{if .Lookup.DirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .Lookup.SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
 		</header>
 
 		{{if len .Sightings}}
@@ -42,7 +42,7 @@
 				<tr>
 					<td class="align-right">{{.IP}}</td>
 					<td>{{.Name}}</td>
-					<td>{{timestring .Timestamp}}</td>
+					<td class="align-center">{{timestring .Timestamp}}</td>
 					<td class="align-right">{{.ServerIP}}</td>
 					<td class="align-right">{{.ServerPort}}</td>
 					<td>{{.ServerDescription}}</td>

@@ -14,7 +14,7 @@ body, input, select {
 }
 
 header, main, footer {
-	flex-basis: 100%;
+	width: 100%;
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: space-between;

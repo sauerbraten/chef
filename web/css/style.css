@@ -86,3 +86,7 @@ td:first-child {
 .align-center {
 	text-align: center;
 }
+
+.orange {
+	color: #c40;
+}

@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"time"
 
 	"github.com/sauerbraten/chef/db"
+	"github.com/sauerbraten/chef/kidban"
 )
 
 func TimestampToString(timestamp int64) string {
 	return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST")
+}
+
+func IsInKidbannedNetwork(ipString string) bool {
+	return kidban.IsInKidbannedNetwork(net.ParseIP(ipString))
 }
 
 func lookup(resp http.ResponseWriter, req *http.Request) {
@@ -44,7 +50,7 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 		}
 	} else {
 		resultsTempl := template.New("results.html")
-		resultsTempl = resultsTempl.Funcs(template.FuncMap{"timestring": TimestampToString})
+		resultsTempl = resultsTempl.Funcs(template.FuncMap{"timestring": TimestampToString, "ipIsInKidbannedNetwork": IsInKidbannedNetwork})
 		resultsTempl = template.Must(resultsTempl.ParseFiles("html/results.html"))
 		err := resultsTempl.Execute(resp, finishedLookup)
 		if err != nil {

@@ -40,7 +40,7 @@
 			<tbody>
 				{{range .Results}}
 				<tr>
-					<td class="align-right">{{.IP}}</td>
+					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">{{.IP}}</td>
 					<td>{{.Name}}</td>
 					<td class="align-center">{{timestring .Timestamp}}</td>
 					<td class="align-right">{{.ServerIP}}</td>

@@ -4,5 +4,8 @@
 
 	// web interface address
 	// must be a publicly reachable address, since the IRC bot includes links to it in its replies
-	"web_interface_address": "localhost:6060"
+	"web_interface_address": "localhost:6060",
+
+	// kidban ranges URL
+	"kidban_ranges_url": "https://raw.githubusercontent.com/pisto/ASkidban/master/compiled/ipv4"
 }

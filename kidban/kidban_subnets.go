@@ -41,10 +41,6 @@ func PeriodicallyUpdateKidbanRanges(url string) {
 		kidbannedNetworks = networks
 		lock.Unlock()
 
-		for _, net := range kidbannedNetworks {
-			log.Println(net)
-		}
-
 		<-ticker
 	}
 }

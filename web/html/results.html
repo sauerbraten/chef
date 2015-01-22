@@ -20,6 +20,21 @@
 	</header>
 
 	<main>
+		<form class="searchform text-center" action="/lookup" method="get">
+			<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" autofocus />
+			<br />
+			<label for="sorting">sort by</label>
+			<select name="sorting">
+				<option value="name_frequency" selected>name frequency</option>
+				<option value="last_seen">last seen</option>
+			</select>
+			<br />
+			<input type="checkbox" name="direct" value="true" />
+			<label for="direct">force direct lookup</label>
+			<br />
+			<input type="submit" value="Search" />
+		</form>
+
 		<header>
 			<h2>Results for {{.Query}}</h2>
 			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP (range){{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
@@ -52,7 +67,7 @@
 		</table>
 
 		<p>
-			IPs that lie in a range which is most likely not used for private DSL connections (but for things like businesses, VPNs, server hosting, proxies, etc.) are colored orange-red.
+			IPs that lie in a range which is most likely used for things like businesses, VPNs, server hosting, proxies, etc. are colored orange-red.
 		</p>
 		{{else}}
 		<p>

@@ -22,6 +22,15 @@ header, main, footer {
 	align-content: flex-start;
 }
 
+header a, header a:visited {
+	color: inherit;
+	text-decoration: none;
+}
+
+header a:hover {
+	text-decoration: underline;
+}
+
 main {
 	flex-grow: 1;
 }
@@ -53,13 +62,13 @@ table {
 
 thead {
 	font-weight: bold;
-	border-bottom: 1px solid #999;
+	border-bottom: 1px solid #bbb;
 }
 
 td {
 	padding: .25em .75em;
-	border-right: 1px solid #999;
-	border-left: 1px solid #999;
+	border-right: 1px solid #bbb;
+	border-left: 1px solid #bbb;
 	max-width: 20em;
 	overflow-x: hidden;
 	white-space: nowrap;

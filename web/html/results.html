@@ -25,11 +25,11 @@
 			<br />
 			<label for="sorting">sort by</label>
 			<select name="sorting">
-				<option value="name_frequency" selected>name frequency</option>
-				<option value="last_seen">last seen</option>
+				<option value="name_frequency" {{if .SortedByNameFrequency}}selected{{end}}>name frequency</option>
+				<option value="last_seen" {{if not .SortedByNameFrequency}}selected{{end}}>last seen</option>
 			</select>
 			<br />
-			<input type="checkbox" name="direct" value="true" />
+			<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}}checked{{end}} />
 			<label for="direct">force direct lookup</label>
 			<br />
 			<input type="submit" value="Search" />

@@ -11,7 +11,10 @@ import (
 )
 
 func nameLookup(nameOrIP string) string {
+	println("running name lookup")
+	println(nameOrIP)
 	finishedLookup := storage.Lookup(nameOrIP, db.ByNameFrequency, false)
+	println("finished")
 
 	if len(finishedLookup.Results) == 0 {
 		return "nothing found!"

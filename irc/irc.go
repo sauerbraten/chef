@@ -1,17 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	irc "github.com/fluffle/goirc/client"
 	"github.com/sauerbraten/chef/db"
-	irc "github.com/thoj/go-ircevent"
 )
 
 var (
 	storage *db.DB
-	conn    *irc.Connection
+	conn    *irc.Conn
 )
 
 const (
@@ -26,16 +27,19 @@ func main() {
 	}
 	defer storage.Close()
 
-	conn = irc.IRC(conf.Nick, conf.Nick)
+	ircConfig := irc.NewConfig(conf.Nick)
+	ircConfig.Me.Ident = "chef"
+	ircConfig.Me.Name = "pix' spy bot"
+	ircConfig.Server = "195.8.250.180:6667" // 195.8.250.180 = irc.gamesurge.net
+	ircConfig.NewNick = func(n string) string { return n + "_" }
 
-	err = conn.Connect("irc.gamesurge.net:6667")
-	if err != nil {
-		log.Fatal(err)
-	}
+	disconnected := make(chan bool)
 
-	conn.AddCallback("001", func(e *irc.Event) {
+	conn = irc.Client(ircConfig)
+
+	conn.HandleFunc(irc.CONNECTED, func(conn *irc.Conn, line *irc.Line) {
 		if conf.AccountName != "" && conf.AccountPassword != "" {
-			conn.Privmsgf("AuthServ@Services.GameSurge.net", "auth %s %s", conf.AccountName, conf.AccountPassword)
+			conn.Privmsg("AuthServ@Services.GameSurge.net", fmt.Sprintf("auth %s %s", conf.AccountName, conf.AccountPassword))
 			time.Sleep(500 * time.Millisecond)
 		}
 
@@ -44,58 +48,60 @@ func main() {
 		}
 	})
 
-	/* verbose output for debugging
-	conn.AddCallback("NOTICE", func(e *irc.Event) {
-		log.Println(e.Message())
+	conn.HandleFunc(irc.DISCONNECTED, func(conn *irc.Conn, line *irc.Line) {
+		disconnected <- true
 	})
 
-	conn.AddCallback("PRIVMSG", func(e *irc.Event) {
-		log.Println(e.Message())
-	})
-	*/
+	conn.HandleFunc(irc.PRIVMSG, handlePrivMsg)
 
-	conn.AddCallback("PRIVMSG", func(e *irc.Event) {
-		if !strings.HasPrefix(e.Message(), ".") {
-			return
+	for {
+		// Tell client to connect.
+		if err := conn.Connect(); err != nil {
+			log.Fatal(err)
 		}
 
-		if isPM(e) {
-			allowed := false
+		<-disconnected
 
-			for _, user := range conf.TrustedUsers {
-				if e.Host == user {
-					allowed = true
-				}
-			}
-
-			if !allowed {
-				conn.Privmsg(e.Nick, "you lack access to this bot. contact "+MAINTAINER+" if you think you are eligible.")
-				return
-			}
-		}
-
-		firstMessageToken := strings.Split(e.Message(), " ")[0]
-
-		if isHelpCommandAlias(firstMessageToken) {
-			reply(e, ".names <name|IP>    – returns the five most oftenly used names by IPs that used <name> / names used by <IP>")
-			reply(e, ".lastseen <name|IP> – returns date and time a player with that <name/IP> was last seen")
-		} else if isNameLookupCommandAlias(firstMessageToken) {
-			nameOrIP := e.Message()[len(firstMessageToken)+1:]
-			reply(e, nameLookup(nameOrIP))
-		} else if isLastSeenLookupCommandAlias(firstMessageToken) {
-			nameOrIP := e.Message()[len(firstMessageToken)+1:]
-			reply(e, lastSeenLookup(nameOrIP))
-		}
-
-		// log query
-		log.Println(e.Source+":", e.Message())
-	})
-
-	conn.Loop()
+		// when disconnected, wait 1 minute before trying to re-connect
+		time.Sleep(1 * time.Minute)
+	}
 }
 
-func isPM(e *irc.Event) bool {
-	return e.Arguments[0] == conf.Nick
+func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
+	if !strings.HasPrefix(line.Text(), ".") {
+		return
+	}
+
+	if !line.Public() {
+		allowed := false
+
+		for _, user := range conf.TrustedUsers {
+			if line.Host == user {
+				allowed = true
+			}
+		}
+
+		if !allowed {
+			conn.Privmsg(line.Nick, "you lack access to this bot. contact "+MAINTAINER+" if you think you are eligible.")
+			return
+		}
+	}
+
+	firstMessageToken := strings.Split(line.Text(), " ")[0]
+
+	if isHelpCommandAlias(firstMessageToken) {
+		reply(line, ".names <name|IP>    – returns the five most oftenly used names by IPs that used <name> / names used by <IP>")
+		reply(line, ".lastseen <name|IP> – returns date and time a player with that <name/IP> was last seen")
+	} else if isNameLookupCommandAlias(firstMessageToken) {
+		nameOrIP := line.Text()[len(firstMessageToken)+1:]
+		reply(line, nameLookup(nameOrIP))
+	} else if isLastSeenLookupCommandAlias(firstMessageToken) {
+		nameOrIP := line.Text()[len(firstMessageToken)+1:]
+		reply(line, lastSeenLookup(nameOrIP))
+	}
+
+	// log query
+	log.Println(line.Src+":", line.Text())
 }
 
 func isIncluded(s string, slice []string) bool {
@@ -126,14 +132,10 @@ func isLastSeenLookupCommandAlias(s string) bool {
 	return isIncluded(s, lastSeenLookupAliases)
 }
 
-func reply(e *irc.Event, msg string) {
-	target := e.Arguments[0]
-
-	if isPM(e) {
-		target = e.Nick
-	} else {
-		msg = e.Nick + ": " + msg
+func reply(line *irc.Line, msg string) {
+	if line.Public() {
+		msg = line.Nick + ": " + msg
 	}
 
-	conn.Privmsg(target, msg)
+	conn.Privmsg(line.Target(), msg)
 }

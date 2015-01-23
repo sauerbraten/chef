@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sauerbraten/chef/db"
+	"github.com/sauerbraten/chef/kidban"
 )
 
 var storage *db.DB
@@ -23,10 +24,10 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 
-	r.HandleFunc("/", front)
+	r.HandleFunc("/", frontPage)
 	r.HandleFunc("/lookup", lookup)
-	r.HandleFunc("/status", status)
-	r.HandleFunc("/info", info)
+	r.HandleFunc("/status", statusPage)
+	r.HandleFunc("/info", infoPage)
 	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
 	// start listening
@@ -37,21 +38,33 @@ func main() {
 	}
 }
 
-func front(resp http.ResponseWriter, req *http.Request) {
+func frontPage(resp http.ResponseWriter, req *http.Request) {
 	logRequest(req)
 	http.ServeFile(resp, req, "html/front.html")
 }
 
-func status(resp http.ResponseWriter, req *http.Request) {
-	logRequest(req)
-
-	status := storage.Status()
-
-	statusTempl := template.Must(template.ParseFiles("html/status.html"))
-	statusTempl.Execute(resp, status)
+type status struct {
+	db.Status
+	TimeOfLastKidbanUpdate string
 }
 
-func info(resp http.ResponseWriter, req *http.Request) {
+func statusPage(resp http.ResponseWriter, req *http.Request) {
+	logRequest(req)
+
+	status := &status{
+		Status:                 storage.Status(),
+		TimeOfLastKidbanUpdate: kidban.GetTimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
+	}
+
+	statusTempl := template.Must(template.ParseFiles("html/status.html"))
+	err := statusTempl.Execute(resp, status)
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func infoPage(resp http.ResponseWriter, req *http.Request) {
 	logRequest(req)
 	http.ServeFile(resp, req, "html/info.html")
 }

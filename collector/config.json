@@ -38,7 +38,7 @@
 	// If no port is specfied, all servers on that host are greylisted.
 	"greylisted_servers": [
 		"pisto.horse", // sends fake IPs matching the player's country, can't be filtered
-		"92.222.216.113" // DM servers, send fake IP (2.21.0.0)
+		"92.222.216.113" // DM servers, send fake IP (e.g. 2.21.0.0)
 	],
 
 	// Scan interval in seconds

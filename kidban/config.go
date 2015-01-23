@@ -9,7 +9,7 @@ import (
 
 type config struct {
 	KidbanRangesURL string        `json:"kidban_ranges_url"`
-	UpdateInterval  time.Duration `json:"update_interval"`
+	UpdateInterval  time.Duration `json:"kidban_update_interval"`
 }
 
 var conf config

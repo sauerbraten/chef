@@ -46,6 +46,10 @@ h1, form {
 	text-align: center;
 }
 
+h2 {
+	margin: 1.25em 0 1em 0;
+}
+
 input, select, label {
 	margin: .25em auto;
 	vertical-align: middle;

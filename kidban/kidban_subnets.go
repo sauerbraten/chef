@@ -11,8 +11,21 @@ import (
 	"time"
 )
 
-var kidbannedNetworks []*net.IPNet
-var lock sync.RWMutex
+// runs after init() in config.co because of lexical order when files are passed to the compiler
+func init() {
+	go PeriodicallyUpdateKidbanRanges(conf.KidbanRangesURL)
+}
+
+var (
+	kidbannedNetworks []*net.IPNet
+	lock              sync.RWMutex
+
+	timeOfLastUpdate time.Time
+)
+
+func GetTimeOfLastUpdate() time.Time {
+	return timeOfLastUpdate
+}
 
 func IsInKidbannedNetwork(ip net.IP) bool {
 	lock.RLock()
@@ -27,13 +40,14 @@ func IsInKidbannedNetwork(ip net.IP) bool {
 }
 
 func PeriodicallyUpdateKidbanRanges(url string) {
-	ticker := time.Tick(1 * time.Hour)
+	ticker := time.Tick(conf.UpdateInterval * time.Minute)
+	timeOfLastUpdate = time.Now()
 
 	for {
 		networks, err := downloadKidbannedNetworks(url)
 		if err != nil {
 			log.Println("error fetching kidbanned networks:", err)
-			<-ticker
+			<-ticker // don't set time of last update since this request failed
 			continue
 		}
 
@@ -41,7 +55,7 @@ func PeriodicallyUpdateKidbanRanges(url string) {
 		kidbannedNetworks = networks
 		lock.Unlock()
 
-		<-ticker
+		timeOfLastUpdate = <-ticker
 	}
 }
 

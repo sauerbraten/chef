@@ -2,12 +2,14 @@ package kidban
 
 import (
 	"os"
+	"time"
 
 	"github.com/sauerbraten/jsonconf"
 )
 
 type config struct {
-	KidbanRangesURL string `json:"kidban_ranges_url"`
+	KidbanRangesURL string        `json:"kidban_ranges_url"`
+	UpdateInterval  time.Duration `json:"update_interval"`
 }
 
 var conf config
@@ -24,6 +26,4 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	go PeriodicallyUpdateKidbanRanges(conf.KidbanRangesURL)
 }

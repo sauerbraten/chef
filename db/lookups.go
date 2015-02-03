@@ -34,7 +34,7 @@ type FinishedLookup struct {
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
 func (db *DB) Lookup(nameOrIP string, sorting Sorting, directLookupForced bool) FinishedLookup {
-	if ips.IsRangeAsCIDR(nameOrIP) {
+	if ips.IsPartialOrFullCIDR(nameOrIP) {
 		lowest, highest := ips.GetIpRange(ips.GetSubnet(nameOrIP))
 		return FinishedLookup{
 			Query:                 nameOrIP,

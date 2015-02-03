@@ -27,10 +27,6 @@ header a, header a:visited {
 	text-decoration: none;
 }
 
-header a:hover {
-	text-decoration: underline;
-}
-
 main {
 	flex-grow: 1;
 }
@@ -85,6 +81,15 @@ td:last-child {
 
 td:first-child {
 	border-left: none;
+}
+
+a.subtle, a.subtle:visited {
+	color: inherit;
+	text-decoration: none;
+}
+
+a.subtle:hover {
+	text-decoration: underline;
 }
 
 .text {

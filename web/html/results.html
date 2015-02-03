@@ -55,10 +55,14 @@
 			<tbody>
 				{{range .Results}}
 				<tr>
-					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">{{.IP}}</td>
+					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">
+						<a class="subtle" target="_blank" href="http://bgp.he.net/ip/{{.IP}}">{{.IP}}</a>
+					</td>
 					<td>{{.Name}}</td>
 					<td class="align-center">{{timestring .Timestamp}}</td>
-					<td class="align-right">{{.ServerIP}}</td>
+					<td class="align-right">
+						<a class="subtle" target="_blank" href="http://bgp.he.net/ip/{{.ServerIP}}">{{.ServerIP}}</a>
+					</td>
 					<td class="align-right">{{.ServerPort}}</td>
 					<td>{{.ServerDescription}}</td>
 				</tr>

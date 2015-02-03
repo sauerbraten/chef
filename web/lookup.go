@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/sauerbraten/chef/db"
@@ -33,6 +34,22 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 	directLookupForced := false
 	if req.FormValue("direct") == "true" {
 		directLookupForced = true
+	}
+
+	// redirect partial IP queries
+	if ips.IsPartialOrFullRange(nameOrIP) {
+		var subnet *net.IPNet
+		subnet, err = ips.GetSubnet(nameOrIP)
+		if err != nil {
+			http.Error(resp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if nameOrIP != subnet.String() {
+			newURL := "/lookup?q=" + url.QueryEscape(subnet.String()) + "&sorting=" + req.FormValue("sorting")
+			http.Redirect(resp, req, newURL, http.StatusTemporaryRedirect)
+			return
+		}
 	}
 
 	finishedLookup := storage.Lookup(nameOrIP, sorting, directLookupForced)

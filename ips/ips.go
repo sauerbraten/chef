@@ -7,17 +7,27 @@ import (
 	"strings"
 )
 
-// checks for IP by requiring one to 4 octets. matches when there is at least the first octet. octets one to three need to end with a dot. also matches CIDR notations of ranges.
-// examples:
+// Matches when there is at least the first octet and the first dot. Octets one to three need to end with a dot. Also matches CIDR notations of ranges.
+// Examples:
 // 123.
 // 109.103.
 // 11.233.109.201
 // 154.93.0.0/16
-var ipRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])?(\/(3[0-1]|[12]?[0-9]))?$`)
+var partialIpRangeRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])?(\/(3[0-1]|[12]?[0-9]))?$`)
 
 // Returns true if s is an IP or a range in CIDR notation.
-func IsIP(s string) bool {
-	return ipRegex.MatchString(s)
+func IsPartialOrFullCIDR(s string) bool {
+	return partialIpRangeRegex.MatchString(s)
+}
+
+// Matches when a full and vaild CIDR notation of a range is given.
+// Example:
+// 154.93.0.0/16
+var ipRangeRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\/(3[0-1]|[12]?[0-9])$`)
+
+// Returns true if s is an IP or a range in CIDR notation.
+func IsRangeAsCIDR(s string) bool {
+	return ipRangeRegex.MatchString(s)
 }
 
 // Returns the int representation of the IP. Uses int64 to prevent negative values (easier range checks in DB). Assumes 4-byte IPv4. Inverse function of Int2IP.
@@ -64,7 +74,7 @@ func GetSubnet(cidr string) (ipNet *net.IPNet) {
 		}
 	}
 
-	// pad IP & choose a prefx size if not specified
+	// pad IP & choose a prefix size if not specified
 
 	if !strings.HasSuffix(ipString, ".") && strings.Count(ipString, ".") < 3 {
 		ipString += "."
@@ -95,7 +105,7 @@ func GetSubnet(cidr string) (ipNet *net.IPNet) {
 		}
 	}
 
-	// todo: maybe handle error?
+	// TODO: maybe handle error?
 	_, ipNet, _ = net.ParseCIDR(ipString + "/" + strconv.Itoa(prefixSize))
 
 	return

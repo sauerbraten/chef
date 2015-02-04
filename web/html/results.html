@@ -37,7 +37,7 @@
 
 		<header>
 			<h2>Results for {{.Query}}</h2>
-			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP (range){{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
+			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
 		</header>
 
 		{{if len .Results}}

@@ -13,7 +13,7 @@ import (
 
 // runs after init() in config.co because of lexical order when files are passed to the compiler
 func init() {
-	go PeriodicallyUpdateKidbanRanges(conf.KidbanRangesURL)
+	go PeriodicallyUpdateKidbanRanges()
 }
 
 var (
@@ -39,12 +39,12 @@ func IsInKidbannedNetwork(ip net.IP) bool {
 	return false
 }
 
-func PeriodicallyUpdateKidbanRanges(url string) {
+func PeriodicallyUpdateKidbanRanges() {
 	ticker := time.Tick(conf.UpdateInterval * time.Minute)
 	timeOfLastUpdate = time.Now()
 
 	for {
-		networks, err := downloadKidbannedNetworks(url)
+		networks, err := downloadKidbannedNetworks()
 		if err != nil {
 			log.Println("error fetching kidbanned networks:", err)
 			<-ticker // don't set time of last update since this request failed
@@ -59,9 +59,8 @@ func PeriodicallyUpdateKidbanRanges(url string) {
 	}
 }
 
-func downloadKidbannedNetworks(url string) (downloadedNetworks []*net.IPNet, err error) {
-	// hit URL
-	resp, err := http.Get(url)
+func downloadKidbannedNetworks() (downloadedNetworks []*net.IPNet, err error) {
+	resp, err := http.Get(conf.KidbanRangesURL)
 	if err != nil {
 		return
 	}

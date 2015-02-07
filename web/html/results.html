@@ -56,7 +56,11 @@
 				{{range .Results}}
 				<tr>
 					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">
-						<a class="subtle" target="_blank" href="http://bgp.he.net/ip/{{.IP}}">{{.IP}}</a>
+						{{if ne .IP "0.0.0.0"}}
+							<a class="subtle" target="_blank" href="http://bgp.he.net/ip/{{.IP}}">{{.IP}}</a>
+						{{else}}
+							{{.IP}}
+						{{end}}
 					</td>
 					<td>{{.Name}}</td>
 					<td class="align-center">{{timestring .Timestamp}}</td>

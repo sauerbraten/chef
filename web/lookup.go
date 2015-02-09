@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/sauerbraten/chef/db"
+	"github.com/sauerbraten/chef/ips"
 	"github.com/sauerbraten/chef/kidban"
 )
 
@@ -37,13 +38,9 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	// redirect partial IP queries
-	if ips.IsPartialOrFullRange(nameOrIP) {
+	if ips.IsPartialOrFullCIDR(nameOrIP) {
 		var subnet *net.IPNet
-		subnet, err = ips.GetSubnet(nameOrIP)
-		if err != nil {
-			http.Error(resp, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		subnet = ips.GetSubnet(nameOrIP)
 
 		if nameOrIP != subnet.String() {
 			newURL := "/lookup?q=" + url.QueryEscape(subnet.String()) + "&sorting=" + req.FormValue("sorting")

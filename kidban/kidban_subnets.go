@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// runs after init() in config.co because of lexical order when files are passed to the compiler
+// runs after init() in config.go because of lexical order when files are passed to the compiler
 func init() {
 	go PeriodicallyUpdateKidbanRanges()
 }
@@ -54,6 +54,8 @@ func PeriodicallyUpdateKidbanRanges() {
 		lock.Lock()
 		kidbannedNetworks = networks
 		lock.Unlock()
+
+		log.Println("updated kidban list")
 
 		timeOfLastUpdate = <-ticker
 	}

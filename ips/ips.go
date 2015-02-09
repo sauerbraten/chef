@@ -13,11 +13,11 @@ import (
 // 109.103.
 // 11.233.109.201
 // 154.93.0.0/16
-var partialIpRangeRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])?(\/(3[0-1]|[12]?[0-9]))?$`)
+var partialOrFullIpRangeRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])?(\/(3[0-1]|[12]?[0-9]))?$`)
 
 // Returns true if s is an IP or a range in CIDR notation.
 func IsPartialOrFullCIDR(s string) bool {
-	return partialIpRangeRegex.MatchString(s)
+	return partialOrFullIpRangeRegex.MatchString(s)
 }
 
 // Matches when a full and vaild CIDR notation of a range is given.

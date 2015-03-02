@@ -7,6 +7,7 @@ import (
 )
 
 type config struct {
+	ServerAddress       string   `json:"irc_server_address"`
 	Nick                string   `json:"irc_nick"`
 	AccountName         string   `json:"irc_account_name"`
 	AccountPassword     string   `json:"irc_account_password"`

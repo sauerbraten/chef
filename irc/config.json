@@ -2,6 +2,10 @@
 	// SQlite database file name
 	"db_file_path": "/home/axle/.chef/chef.sqlite",
 
+
+	// IRC server connection details
+	"irc_server_address": "195.68.206.250:6667",
+
 	// IRC nick
 	"irc_nick": "chef",
 
@@ -12,7 +16,7 @@
 	"irc_account_password": "QA5ZRkKnEOGx9Xjuvu0a",
 
 	// IRC channels to join on connect
-	"irc_channels": ["#novi-intern"],
+	"irc_channels": ["#novi-intern", "#sdos.intern"],
 
 	// IRC trusted user accounts (can use the bot in PM)
 	"irc_trusted_users": [
@@ -25,6 +29,7 @@
 		"ySoSrs.user.gamesurge",
 		"pisto.princess.gamesurge"
 	],
+
 
 	// web interface address (must be a publicly reachable address, since the IRC bot includes links to it in its replies)
 	"web_interface_address": "localhost:6060"

@@ -30,7 +30,7 @@ func main() {
 	ircConfig := irc.NewConfig(conf.Nick)
 	ircConfig.Me.Ident = "chef"
 	ircConfig.Me.Name = "pix' spy bot"
-	ircConfig.Server = "195.8.250.180:6667" // 195.8.250.180 = irc.gamesurge.net
+	ircConfig.Server = conf.ServerAddress
 	ircConfig.NewNick = func(n string) string { return n + "_" }
 
 	disconnected := make(chan bool)

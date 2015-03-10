@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/sauerbraten/chef/db"
@@ -36,9 +37,14 @@ func main() {
 
 		log.Println("running scan...")
 
+		var wg sync.WaitGroup
+
 		for _, serverAddress := range list {
-			scanServer(serverAddress)
+			wg.Add(1)
+			go scanServer(serverAddress, &wg)
 		}
+
+		wg.Wait()
 
 		log.Printf("scan finished (took %v)", time.Since(start))
 	}
@@ -72,14 +78,14 @@ func finishConfiguration() (err error) {
 	return
 }
 
-// get master server list and add manually specified extra servers
+// Returns the master server list, extended by manually specified extra servers
 func getServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	var err error
 
 	list, err = ms.getServerList()
 	if err != nil {
 		log.Println("error getting master server list:", err)
-		// still search extra servers
+		// still searching extra servers, so we need a valid map
 		list = map[string]*net.UDPAddr{}
 	}
 
@@ -90,7 +96,9 @@ func getServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	return
 }
 
-func scanServer(serverAddress *net.UDPAddr) {
+func scanServer(serverAddress *net.UDPAddr, waitGroup *sync.WaitGroup) {
+	defer waitGroup.Done()
+
 	s, err := extinfo.NewServer(serverAddress.IP.String(), serverAddress.Port, 2*time.Second)
 	if err != nil {
 		verbose(err)
@@ -119,12 +127,12 @@ func scanServer(serverAddress *net.UDPAddr) {
 
 	for _, playerInfo := range playerInfos {
 		// don't save bot sightings
-		if playerInfo.ClientNum > 127 {
+		if playerInfo.ClientNum > extinfo.MAX_PLAYER_CN {
 			continue
 		}
 
-		// check IP
-		if ips.IsInPrivateNetwork(playerInfo.IP) || conf.greylistedServers[serverAddress.IP.String()] {
+		// check for valid IP
+		if conf.greylistedServers[serverAddress.IP.String()] || ips.IsInPrivateNetwork(playerInfo.IP) {
 			playerInfo.IP = net.ParseIP("0.0.0.0")
 		}
 

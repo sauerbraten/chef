@@ -112,6 +112,9 @@ func (db *DB) GetServerId(ip string, port int, description string) (serverId int
 	err := db.QueryRow("select `rowid`, `description` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverId, &descriptionInDB)
 
 	if err == sql.ErrNoRows {
+		db.lock()
+		defer db.unlock()
+
 		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`) values (?, ?, ?)", ip, port, description)
 		if err != nil {
 			log.Fatal("error inserting new server into DB:", err)
@@ -124,6 +127,9 @@ func (db *DB) GetServerId(ip string, port int, description string) (serverId int
 	} else if err != nil {
 		log.Fatal("error getting ID of server:", err)
 	} else if description != descriptionInDB {
+		db.lock()
+		defer db.unlock()
+
 		_, err = db.Exec("update `servers` set `description` = ? where `rowid` = ?", description, serverId)
 		if err != nil {
 			log.Fatal("error updating server description:", err)
@@ -177,6 +183,9 @@ func (db *DB) getPlayerIpId(ip int64) (ipId int64) {
 
 // Adds an entry in the sightings table.
 func (db *DB) AddOrIgnoreSighting(name string, ip net.IP, serverId int64) {
+	db.lock()
+	defer db.unlock()
+
 	_, err := db.Exec("insert or ignore into `sightings` (`name`, `ip`, `server`) values (?, ?, ?)", db.getPlayerNameId(name), db.getPlayerIpId(ips.IP2Int(ip)), serverId)
 	if err != nil {
 		log.Fatal("error inserting new sighting:", err)

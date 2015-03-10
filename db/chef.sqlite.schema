@@ -28,3 +28,6 @@ create table `sightings` (
 	`timestamp` integer not null default (strftime('%s', 'now')),
 	unique (`ip`, `name`, `timestamp`)
 );
+
+create index idx_sight_name on `sightings`(`name`);
+create index idx_sight_ip on `sightings`(`ip`);

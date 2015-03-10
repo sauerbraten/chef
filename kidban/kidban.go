@@ -55,7 +55,7 @@ func PeriodicallyUpdateKidbanRanges() {
 		kidbannedNetworks = networks
 		lock.Unlock()
 
-		log.Println("updated kidban list")
+		log.Println("updated kidban subnets list")
 
 		timeOfLastUpdate = <-ticker
 	}

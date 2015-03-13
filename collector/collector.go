@@ -41,7 +41,10 @@ func main() {
 
 		for _, serverAddress := range list {
 			wg.Add(1)
-			go scanServer(serverAddress, &wg)
+			go func() {
+				scanServer(serverAddress)
+				wg.Done()
+			}()
 		}
 
 		wg.Wait()
@@ -85,7 +88,7 @@ func getServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	list, err = ms.getServerList()
 	if err != nil {
 		log.Println("error getting master server list:", err)
-		// still searching extra servers, so we need a valid map
+		// still going to search extra servers, so we need a valid map
 		list = map[string]*net.UDPAddr{}
 	}
 
@@ -96,9 +99,8 @@ func getServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	return
 }
 
-func scanServer(serverAddress *net.UDPAddr, waitGroup *sync.WaitGroup) {
-	defer waitGroup.Done()
-
+// scans a server and inserts sightings into the database
+func scanServer(serverAddress *net.UDPAddr) {
 	s, err := extinfo.NewServer(serverAddress.IP.String(), serverAddress.Port, 2*time.Second)
 	if err != nil {
 		verbose(err)

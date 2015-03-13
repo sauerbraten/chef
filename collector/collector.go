@@ -131,7 +131,7 @@ func scanServer(serverAddress *net.UDPAddr, waitGroup *sync.WaitGroup) {
 			continue
 		}
 
-		// check for valid IP
+		// check for valid client IP
 		if conf.greylistedServers[serverAddress.IP.String()] || ips.IsInPrivateNetwork(playerInfo.IP) {
 			playerInfo.IP = net.ParseIP("0.0.0.0")
 		}

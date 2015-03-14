@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/sauerbraten/jsonconf"
+	"github.com/sauerbraten/jsonfile"
 )
 
 type config struct {
@@ -31,7 +31,7 @@ func init() {
 		greylistedServers: map[string]bool{},
 	}
 
-	err := jsonconf.ParseFile(configFilePath, &conf)
+	err := jsonfile.ParseFile(configFilePath, &conf)
 	if err != nil {
 		panic(err)
 	}

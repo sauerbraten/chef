@@ -107,8 +107,6 @@ func scanServer(serverAddress *net.UDPAddr) {
 		return
 	}
 
-	log.Println("scanning", serverAddress.String())
-
 	basicInfo, err := s.GetBasicInfo()
 	if err != nil {
 		verbose("error getting basic info from", serverAddress, ":", err)

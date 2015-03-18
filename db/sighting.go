@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"net"
+
+	"github.com/sauerbraten/chef/ips"
 )
 
 type Sighting struct {

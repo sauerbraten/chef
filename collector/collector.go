@@ -41,10 +41,10 @@ func main() {
 
 		for _, serverAddress := range list {
 			wg.Add(1)
-			go func() {
+			go func(serverAddress *net.UDPAddr) {
 				scanServer(serverAddress)
 				wg.Done()
-			}()
+			}(serverAddress)
 		}
 
 		wg.Wait()
@@ -107,6 +107,8 @@ func scanServer(serverAddress *net.UDPAddr) {
 		return
 	}
 
+	log.Println("scanning", serverAddress.String())
+
 	basicInfo, err := s.GetBasicInfo()
 	if err != nil {
 		verbose("error getting basic info from", serverAddress, ":", err)
@@ -125,7 +127,7 @@ func scanServer(serverAddress *net.UDPAddr) {
 		return
 	}
 
-	log.Println("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
+	verbose("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
 	for _, playerInfo := range playerInfos {
 		// don't save bot sightings

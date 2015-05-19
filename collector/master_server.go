@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"log"
 	"net"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -52,14 +51,15 @@ func (ms *masterServer) getServerList() (servers map[string]*net.UDPAddr, err er
 			continue
 		}
 
-		msgParts := strings.Split(msg, " ")
+		// 12.23.34.45 28785 → 12.23.34.45:28785
+		msg = strings.Replace(strings.TrimSpace(msg), " ", ":", -1)
 
-		addr, err = net.ResolveUDPAddr("udp", msgParts[1]+":"+msgParts[2])
+		addr, err = net.ResolveUDPAddr("udp", msg)
 		if err != nil {
 			return
 		}
 
-		servers[addr.IP.String()+":"+strconv.Itoa(addr.Port)] = addr
+		servers[addr.String()] = addr
 	}
 
 	err = in.Err()

@@ -3,8 +3,13 @@
 	"db_file_path": "/home/axle/.chef/chef.sqlite",
 
 	// Web interface address
-	// This address should be a publicly reachable address, since the IRC bot includes links to it in its replies.
-	"web_interface_address": "localhost:6060",
+	// <hostname>:<port> should be a publicly reachable address, since the IRC bot includes links to it in its replies.
+	"web_interface_hostname": "localhost",
+
+	"web_interface_port": "80",
+
+	// set a custom listen port if you are behind a proxy like ngingx
+	"web_interface_internal_listenport": "6060",
 
 	// URL where to get kidbanned URLs (simple CIDR-notated IP ranges; one range per line)
 	"kidban_ranges_url": "https://raw.githubusercontent.com/pisto/ASkidban/master/compiled/ipv4",

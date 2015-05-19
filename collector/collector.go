@@ -12,7 +12,7 @@ import (
 	"github.com/sauerbraten/extinfo"
 )
 
-var storage *db.DB
+var storage *db.Database
 
 func main() {
 	var err error

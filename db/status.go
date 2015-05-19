@@ -10,7 +10,7 @@ type Status struct {
 	ServersCount      int
 }
 
-func (db *DB) Status() (status Status) {
+func (db *Database) Status() (status Status) {
 	err := db.QueryRow("select count(*) from `names`").Scan(&status.NamesCount)
 	if err != nil {
 		log.Fatal("error getting names count:", err)

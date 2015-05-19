@@ -31,6 +31,9 @@
 	],
 
 
-	// web interface address (must be a publicly reachable address, since the IRC bot includes links to it in its replies)
-	"web_interface_address": "localhost:6060"
+	// Web interface address
+	// <hostname>:<port> should be a publicly reachable address, since the IRC bot includes links to it in its replies.
+	"web_interface_hostname": "localhost",
+
+	"web_interface_port": "80"
 }

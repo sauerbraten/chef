@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	storage *db.DB
+	storage *db.Database
 	conn    *irc.Conn
 )
 

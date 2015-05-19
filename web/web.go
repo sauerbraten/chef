@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/sauerbraten/chef/kidban"
 )
 
-var storage *db.DB
+var storage *db.Database
 
 func main() {
 	var err error
@@ -30,9 +31,11 @@ func main() {
 	r.HandleFunc("/info", infoPage)
 	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
+	laddr := net.JoinHostPort(conf.WebInterfaceHostname, conf.WebInterfaceInternalListenport)
+
 	// start listening
-	log.Println("server listening on", conf.WebInterfaceAddress)
-	err = http.ListenAndServe(conf.WebInterfaceAddress, r)
+	log.Println("server listening on", laddr)
+	err = http.ListenAndServe(laddr, r)
 	if err != nil {
 		log.Println(err)
 	}

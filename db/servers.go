@@ -7,9 +7,9 @@ import (
 
 // Returns the SQLite rowid of the server specified by IP and port. In case no such server exists, it is inserted and the rowid of the new entry is returned.
 // If a server with that IP and port already exists but the descriptions differ, the description is updated in the database.
-func (db *DB) GetServerId(ip string, port int, description string) (serverId int64) {
-	var descriptionInDB string
-	err := db.QueryRow("select `rowid`, `description` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverId, &descriptionInDB)
+func (db *Database) GetServerId(ip string, port int, description string) (serverId int64) {
+	var descriptionInDatabase string
+	err := db.QueryRow("select `rowid`, `description` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverId, &descriptionInDatabase)
 
 	if err == sql.ErrNoRows {
 		db.lock()
@@ -17,7 +17,7 @@ func (db *DB) GetServerId(ip string, port int, description string) (serverId int
 
 		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`) values (?, ?, ?)", ip, port, description)
 		if err != nil {
-			log.Fatal("error inserting new server into DB:", err)
+			log.Fatal("error inserting new server into database:", err)
 		}
 
 		serverId, err = res.LastInsertId()
@@ -26,7 +26,7 @@ func (db *DB) GetServerId(ip string, port int, description string) (serverId int
 		}
 	} else if err != nil {
 		log.Fatal("error getting ID of server:", err)
-	} else if description != descriptionInDB {
+	} else if description != descriptionInDatabase {
 		db.lock()
 		defer db.unlock()
 

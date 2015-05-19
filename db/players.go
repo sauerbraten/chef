@@ -6,7 +6,7 @@ import (
 )
 
 // Returns the SQLite rowid of the name specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
-func (db *DB) getPlayerNameId(name string) (nameId int64) {
+func (db *Database) getPlayerNameId(name string) (nameId int64) {
 	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameId)
 
 	if err == sql.ErrNoRows {
@@ -27,7 +27,7 @@ func (db *DB) getPlayerNameId(name string) (nameId int64) {
 }
 
 // Returns the SQLite rowid of the IP specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
-func (db *DB) getPlayerIpId(ip int64) (ipId int64) {
+func (db *Database) getPlayerIpId(ip int64) (ipId int64) {
 	err := db.QueryRow("select `rowid` from `ips` where `ip` = ?", ip).Scan(&ipId)
 
 	if err == sql.ErrNoRows {

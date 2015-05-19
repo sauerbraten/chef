@@ -7,21 +7,21 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type DB struct {
-	mutex sync.Mutex // used to lock the DB for writing access
+type Database struct {
+	mutex sync.Mutex // used to lock the database for writing access
 	*sql.DB
 }
 
-func New() (*DB, error) {
+func New() (*Database, error) {
 	db, err := sql.Open("sqlite3", conf.FilePath)
 
-	return &DB{sync.Mutex{}, db}, err
+	return &Database{sync.Mutex{}, db}, err
 }
 
-func (db *DB) lock() {
+func (db *Database) lock() {
 	db.mutex.Lock()
 }
 
-func (db *DB) unlock() {
+func (db *Database) unlock() {
 	db.mutex.Unlock()
 }

@@ -17,8 +17,8 @@ type Sighting struct {
 	ServerDescription string
 }
 
-// Adds an entry in the sightings table or does nothing if adding fails due to DB constraints.
-func (db *DB) AddOrIgnoreSighting(name string, ip net.IP, serverId int64) {
+// Adds an entry in the sightings table or does nothing if adding fails due to database constraints.
+func (db *Database) AddOrIgnoreSighting(name string, ip net.IP, serverId int64) {
 	db.lock()
 	defer db.unlock()
 

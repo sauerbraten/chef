@@ -7,8 +7,7 @@ import (
 )
 
 type config struct {
-	WebInterfaceHostname           string `json:"web_interface_hostname"`
-	WebInterfaceInternalListenport string `json:"web_interface_internal_listenport"`
+	WebInterfaceAddress string `json:"web_interface_address"`
 }
 
 var conf config

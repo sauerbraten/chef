@@ -18,15 +18,18 @@
 	// IRC channels to join on connect
 	"irc_channels": ["#novi-intern", "#sdos.intern"],
 
-	// IRC trusted user accounts (can use the bot in PM)
+	// IRC trusted user accounts (can use the bot via PM)
 	"irc_trusted_users": [
-		"dss.asdf.gamesurge",
 		"pix.user.gamesurge",
+
+		"ConfusedCat.user.gamesurge",
+		"dss.asdf.gamesurge",
 		"Luffy.hacks-on.gamesurge",
 		"pure_ascii.is-always-idle-on.gamesurge",
 		"Tagger.idle-whore.gamesurge",
 		"Whoohoo.Gimme.Them.Coooki.es", // tagger's bouncer
 		"ySoSrs.user.gamesurge",
+
 		"pisto.princess.gamesurge"
 	],
 

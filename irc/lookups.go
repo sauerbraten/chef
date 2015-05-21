@@ -36,7 +36,7 @@ func nameLookup(nameOrIP string) string {
 		}
 	}
 
-	return fmt.Sprintf("%s – more at http://"+conf.webInterfaceAddress+"/lookup?q=%s&sorting=name_frequency", strings.Join(topFiveNames, ", "), url.QueryEscape(nameOrIP))
+	return fmt.Sprintf("%s – more at http://"+conf.WebInterfaceAddress+"/lookup?q=%s&sorting=name_frequency", strings.Join(topFiveNames, ", "), url.QueryEscape(nameOrIP))
 }
 
 func lastSeenLookup(nameOrIP string) string {
@@ -56,5 +56,5 @@ func lastSeenLookup(nameOrIP string) string {
 		serverString += ")"
 	}
 
-	return fmt.Sprintf("%s (%s) was last seen %s on %s – more at http://"+conf.webInterfaceAddress+"/lookup?q=%s&sorting=last_seen", lastSighting.Name, lastSighting.IP, time.Unix(lastSighting.Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), serverString, url.QueryEscape(nameOrIP))
+	return fmt.Sprintf("%s (%s) was last seen %s on %s – more at http://"+conf.WebInterfaceAddress+"/lookup?q=%s&sorting=last_seen", lastSighting.Name, lastSighting.IP, time.Unix(lastSighting.Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), serverString, url.QueryEscape(nameOrIP))
 }

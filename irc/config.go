@@ -12,8 +12,10 @@ type config struct {
 	AccountName         string   `json:"irc_account_name"`
 	AccountPassword     string   `json:"irc_account_password"`
 	Channels            []string `json:"irc_channels"`
-	TrustedUsers        []string `json:"irc_trusted_users"`
-	WebInterfaceAddress string   `json:"web_interface_address"`
+	TrustedUsers        []User   `json:"irc_trusted_users"`
+	hostnameByUsername  map[string]string
+	usernameByHostname  map[string]string
+	WebInterfaceAddress string `json:"web_interface_address"`
 }
 
 var conf config
@@ -30,4 +32,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	initializeUsers()
 }

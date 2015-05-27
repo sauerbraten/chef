@@ -1,0 +1,14 @@
+pragma journal_mode = wal;
+pragma foreign_keys = on;
+
+drop table if exists `messages`;
+
+create table `messages` (
+	`sender_hostname` text not null,
+	`recipient_hostname` text not null,
+	`contents` text not null,
+	`timestamp` integer not null default (strftime('%s', 'now')),
+	primary key (`sender_hostname`, `recipient_hostname`, `contents`)
+);
+
+create index idx_messages_recipient on `messages`(`recipient_hostname`);

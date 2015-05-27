@@ -1,4 +1,4 @@
-package db
+package messageboard
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 )
 
 type config struct {
-	DatabaseFilePath string `json:"db_file_path"`
+	MessageBoardDatabaseFilePath string `json:"mb_db_file_path"`
 }
 
 var conf config

@@ -18,25 +18,48 @@
 	// IRC channels to join on connect
 	"irc_channels": ["#novi-intern", "#sdos.intern"],
 
-	// IRC trusted user accounts (can use the bot via PM)
+	// IRC trusted user accounts (can use the bot via PM and leave messages for each other)
 	"irc_trusted_users": [
-		"pix.user.gamesurge",
+		{
+			"username": "pix",
+			"host": "pix.user.gamesurge"
+		},
+		{
+			"username": "ConfusedCat",
+			"host": "ConfusedCat.user.gamesurge"
+		},
+		{
+			"username": "greenadiss",
+			"host": "dss.asdf.gamesurge"
+		},
+		{
+			"username": "Luffy",
+			"host": "Luffy.hacks-on.gamesurge"
+		},
+		{
+			"username": "pure_ascii",
+			"host": "pure_ascii.is-always-idle-on.gamesurge"
+		},
+		//{
+		//	"username": "Tagger",
+		//	"host": "Tagger.idle-whore.gamesurge"
+		//},
+		{
+			"username": "Tagger",
+			"host": "Whoohoo.Gimme.Them.Coooki.es"
+		},
+		{
+			"username":"ySoSrs",
+			"host": "ySoSrs.user.gamesurge"
+		},
 
-		"ConfusedCat.user.gamesurge",
-		"dss.asdf.gamesurge",
-		"Luffy.hacks-on.gamesurge",
-		"pure_ascii.is-always-idle-on.gamesurge",
-		"Tagger.idle-whore.gamesurge",
-		"Whoohoo.Gimme.Them.Coooki.es", // tagger's bouncer
-		"ySoSrs.user.gamesurge",
-
-		"pisto.princess.gamesurge"
+		{
+			"username":"pisto",
+			"host": "pisto.princess.gamesurge"
+		}
 	],
 
 
-	// Web interface address
-	// <hostname>:<port> should be a publicly reachable address, since the IRC bot includes links to it in its replies.
-	"web_interface_hostname": "localhost",
-
-	"web_interface_port": "80"
+	// Address where the web interface is (publicly) listenting
+	"web_interface_address": "chef.sauerworld.org"
 }

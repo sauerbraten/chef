@@ -3,16 +3,19 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
 	irc "github.com/fluffle/goirc/client"
 	"github.com/sauerbraten/chef/db"
+	"github.com/sauerbraten/chef/messageboard"
 )
 
 var (
-	storage *db.Database
-	conn    *irc.Conn
+	storage      *db.Database
+	messageBoard *messageboard.MessageBoard
+	conn         *irc.Conn
 )
 
 const (
@@ -26,6 +29,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer storage.Close()
+
+	messageBoard, err = messageboard.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer messageBoard.Close()
 
 	ircConfig := irc.NewConfig(conf.Nick)
 	ircConfig.Me.Ident = "chef"
@@ -52,10 +61,14 @@ func main() {
 		disconnected <- true
 	})
 
+	// handle joins
+	conn.HandleFunc(irc.JOIN, handleJoin)
+
+	// handle messages in channels or PM
 	conn.HandleFunc(irc.PRIVMSG, handlePrivMsg)
 
 	for {
-		// Tell client to connect.
+		// tell client to connect.
 		if err := conn.Connect(); err != nil {
 			log.Fatal(err)
 		}
@@ -67,6 +80,15 @@ func main() {
 	}
 }
 
+func handleJoin(conn *irc.Conn, line *irc.Line) {
+	// only act when a trusted user joins
+	if _, ok := conf.usernameByHostname[line.Host]; !ok {
+		return
+	}
+
+	checkMessages(line, false)
+}
+
 func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
 	if !strings.HasPrefix(line.Text(), ".") {
 		return
@@ -76,7 +98,7 @@ func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
 		allowed := false
 
 		for _, user := range conf.TrustedUsers {
-			if line.Host == user {
+			if line.Host == user.Host {
 				allowed = true
 			}
 		}
@@ -89,47 +111,46 @@ func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
 
 	firstMessageToken := strings.Split(line.Text(), " ")[0]
 
-	if isHelpCommandAlias(firstMessageToken) {
-		reply(line, ".names <name|IP>    – returns the five most oftenly used names by IPs that used <name> / names used by <IP>")
-		reply(line, ".lastseen <name|IP> – returns date and time a player with that <name/IP> was last seen")
-	} else if isNameLookupCommandAlias(firstMessageToken) {
+	switch firstMessageToken {
+	case ".help", ".commands", ".about", ".usage", ".h":
+		reply(line, ".names <name|IP>      – returns the five most oftenly used names by IPs that used <name> / names used by <IP>")
+		reply(line, ".lastseen <name|IP>   – returns date and time a player with that <name/IP> was last seen")
+		reply(line, ".message <name> <msg> - stores msg so it can be retrieved by <name> later (using the .checkmessages command)")
+		reply(line, ".checkmessages         - checks if there are messages left for you and if so displays them")
+	case ".names", ".name", ".nicks", ".n":
 		nameOrIP := line.Text()[len(firstMessageToken)+1:]
 		reply(line, nameLookup(nameOrIP))
-	} else if isLastSeenLookupCommandAlias(firstMessageToken) {
+	case ".lastseen", ".seen", ".ls", ".s":
 		nameOrIP := line.Text()[len(firstMessageToken)+1:]
 		reply(line, lastSeenLookup(nameOrIP))
+	case ".leavemessage", ".message", ".lm", ".m":
+		lineParts := strings.Split(line.Text(), " ")
+		reply(line, leaveMessage(line.Host, lineParts[1], strings.Join(lineParts[2:], " ")))
+	case ".checkmessages", ".cm":
+		checkMessages(line, true)
 	}
 
 	// log query
 	log.Println(line.Src+":", line.Text())
 }
 
-func isIncluded(s string, slice []string) bool {
-	for _, element := range slice {
-		if element == s {
-			return true
+func checkMessages(line *irc.Line, explicitRequest bool) {
+	messages := getMessagesLeftForUser(line.Host)
+
+	if len(messages) == 0 {
+		if explicitRequest {
+			replyInPM(line.Nick, "there were no messages left for you!")
 		}
+		return
+	} else if len(messages) == 1 {
+		replyInPM(line.Nick, "there was one message left for you while you were gone:")
+	} else {
+		replyInPM(line.Nick, "there were "+strconv.Itoa(len(messages))+" messages left for you while you were gone:")
 	}
 
-	return false
-}
-
-func isHelpCommandAlias(s string) bool {
-	helpAliases := []string{".help", ".commands", ".about", ".usage", ".h"}
-
-	return isIncluded(s, helpAliases)
-}
-
-func isNameLookupCommandAlias(s string) bool {
-	nameLookupAliases := []string{".names", ".name", ".nicks", ".n"}
-
-	return isIncluded(s, nameLookupAliases)
-}
-
-func isLastSeenLookupCommandAlias(s string) bool {
-	lastSeenLookupAliases := []string{".lastseen", ".seen", ".ls", ".s"}
-
-	return isIncluded(s, lastSeenLookupAliases)
+	for _, m := range messages {
+		replyInPM(line.Nick, m)
+	}
 }
 
 func reply(line *irc.Line, msg string) {
@@ -138,4 +159,8 @@ func reply(line *irc.Line, msg string) {
 	}
 
 	conn.Privmsg(line.Target(), msg)
+}
+
+func replyInPM(target string, msg string) {
+	conn.Privmsg(target, msg)
 }

@@ -116,7 +116,7 @@ func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
 		reply(line, ".names <name|IP>      – returns the five most oftenly used names by IPs that used <name> / names used by <IP>")
 		reply(line, ".lastseen <name|IP>   – returns date and time a player with that <name/IP> was last seen")
 		reply(line, ".message <name> <msg> - stores msg so it can be retrieved by <name> later (using the .checkmessages command)")
-		reply(line, ".checkmessages         - checks if there are messages left for you and if so displays them")
+		reply(line, ".checkmessages        - checks if there are messages left for you and if so displays them")
 	case ".names", ".name", ".nicks", ".n":
 		nameOrIP := line.Text()[len(firstMessageToken)+1:]
 		reply(line, nameLookup(nameOrIP))

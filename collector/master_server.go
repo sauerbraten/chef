@@ -51,6 +51,8 @@ func (ms *masterServer) getServerList() (servers map[string]*net.UDPAddr, err er
 			continue
 		}
 
+		msg = strings.TrimPrefix(msg, "addserver ")
+
 		// 12.23.34.45 28785 → 12.23.34.45:28785
 		msg = strings.Replace(strings.TrimSpace(msg), " ", ":", -1)
 

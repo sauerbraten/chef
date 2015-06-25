@@ -82,7 +82,7 @@ func main() {
 
 func handleJoin(conn *irc.Conn, line *irc.Line) {
 	// only act when a trusted user joins
-	if _, ok := conf.usernameByHostname[line.Host]; !ok {
+	if _, ok := conf.usernameByHostname[getMaskFromHostname(line.Host)]; !ok {
 		return
 	}
 
@@ -98,7 +98,7 @@ func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
 		allowed := false
 
 		for _, user := range conf.TrustedUsers {
-			if line.Host == user.Host {
+			if getMaskFromHostname(line.Host) == user.Host {
 				allowed = true
 			}
 		}

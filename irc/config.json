@@ -22,40 +22,74 @@
 	"irc_trusted_users": [
 		{
 			"username": "pix",
-			"host": "pix.user.gamesurge"
+			"aliases": ["pix", "px"],
+			"host": "pix.*.gamesurge"
 		},
 		{
 			"username": "ConfusedCat",
-			"host": "ConfusedCat.user.gamesurge"
+			"aliases": ["confusedcat", "confused", "cat"],
+			"host": "ConfusedCat.*.gamesurge"
 		},
 		{
 			"username": "greenadiss",
-			"host": "dss.asdf.gamesurge"
+			"aliases": ["greenadiss", "greena", "green", "miu", "mylove"],
+			"host": "dss.*.gamesurge"
+		},
+		{
+			"username": "hircalen",
+			"aliases": ["hircalen", "hirca"],
+			"host": "hircalen.*.gamesurge"
 		},
 		{
 			"username": "Luffy",
-			"host": "Luffy.hacks-on.gamesurge"
+			"aliases": ["luffy", "luff"],
+			"host": "Luffy.*.gamesurge"
 		},
 		{
 			"username": "pure_ascii",
-			"host": "pure_ascii.is-always-idle-on.gamesurge"
+			"aliases": ["pure_ascii", "pureascii", "pure"],
+			"host": "pure_ascii.*.gamesurge"
 		},
-		//{
-		//	"username": "Tagger",
-		//	"host": "Tagger.idle-whore.gamesurge"
-		//},
 		{
 			"username": "Tagger",
-			"host": "Whoohoo.Gimme.Them.Coooki.es"
+			"aliases": ["tagger", "tag", "fagger", "gaylord"],
+			//"host": "Whoohoo.Gimme.Them.Coooki.es"
+			"host": "Tagger.*.gamesurge"
 		},
 		{
-			"username":"ySoSrs",
-			"host": "ySoSrs.user.gamesurge"
+			"username": "ySoSrs",
+			"aliases": ["ysosrs", "yso"],
+			"host": "ySoSrs.*.gamesurge"
 		},
-
 		{
-			"username":"pisto",
-			"host": "pisto.princess.gamesurge"
+			"username": "savanha",
+			"aliases": ["savanha", "sav", "svnh"],
+			"host": "svnh.*.gamesurge"
+		},
+		{
+			"username": "pisto",
+			"aliases": ["pisto"],
+			"host": "pisto.*.gamesurge"
+		},
+		{
+			"username": "mefisto",
+			"aliases": ["mefisto"],
+			"host": "mefisto.*.gamesurge"
+		},
+		{
+			"username": "Art",
+			"aliases": ["art", "raffael", "raffa"],
+			"host": "raffael.*.gamesurge"
+		},
+		{
+			"username": "bbk",
+			"aliases": ["bbk"],
+			"host": "bbk.*.gamesurge"
+		},
+		{
+			"username": "Star",
+			"aliases": ["star", "django"],
+			"host": "star.*.gamesurge"
 		}
 	],
 

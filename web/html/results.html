@@ -57,7 +57,7 @@
 				<tr>
 					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">
 						{{if ne .IP "0.0.0.0"}}
-							<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}#tabId=at-a-glance">{{.IP}}</a>
+							<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}}#tabId=at-a-glance">{{.IP}}</a>
 						{{else}}
 							{{.IP}}
 						{{end}}

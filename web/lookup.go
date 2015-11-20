@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"html/template"
 	"log"
 	"net"
@@ -15,7 +15,7 @@ import (
 )
 
 func TimestampToString(timestamp int64) string {
-	return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST")
+	return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05")
 }
 
 func IsInKidbannedNetwork(ipString string) bool {
@@ -51,16 +51,11 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 
 	finishedLookup := storage.Lookup(nameOrIP, sorting, directLookupForced)
 
-	if req.FormValue("plain") == "true" {
-		if len(finishedLookup.Results) == 0 {
-			fmt.Fprintln(resp, "nothing found!")
-			return
-		}
-
-		fmt.Fprintf(resp, "%15s   %-15s   %-23s   %15s   %5s   %s\n\n", "PLAYER IP", "PLAYER NAME", "LAST SEEN", "SERVER IP", "PORT", "SERVER DESCRIPTION")
-
-		for _, sighting := range finishedLookup.Results {
-			fmt.Fprintf(resp, "%15s   %-15s   %-23s   %15s   %5d   %s\n", sighting.IP, sighting.Name, time.Unix(sighting.Timestamp, 0).UTC().Format("2006-01-02 15:04:05 MST"), sighting.ServerIP, sighting.ServerPort, sighting.ServerDescription)
+	if req.FormValue("format") == "json" {
+		enc := json.NewEncoder(resp)
+		err := enc.Encode(finishedLookup.Results)
+		if err != nil {
+			log.Println(err)
 		}
 	} else {
 		resultsTempl := template.New("results.html")
@@ -72,3 +67,4 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 }
+

@@ -9,12 +9,12 @@ import (
 )
 
 type Sighting struct {
-	Name              string
-	IP                string
-	Timestamp         int64
-	ServerIP          string
-	ServerPort        int
-	ServerDescription string
+	Name              string `json:"name"`
+	IP                string `json:"ip"`
+	Timestamp         int64  `json:"time_utc"`
+	ServerIP          string `json:"server_ip"`
+	ServerPort        int    `json:"server_port"`
+	ServerDescription string `json:"server_description"`
 }
 
 // Adds an entry in the sightings table or does nothing if adding fails due to database constraints.
@@ -52,3 +52,4 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 
 	return sightings
 }
+

@@ -3,26 +3,16 @@
 	"db_file_path": "/home/axle/.chef/chef.sqlite",
 
 	// Master server address
-	"master_server_address": "sauerbraten.org",
-
-	// Master server port
-	"master_server_port": "28787",
+	"master_server_address": "sauerbraten.org:28787",
 
 	// Servers that should be scanned even when they are not on the master list (hidden) or when the master server is unreachable.
 	"extra_servers": [
-
-		// hidden
-		"sauerleague.org:20000",
-		"sauerleague.org:30000",
-		"sauerleague.org:40000",
-
 		// main public servers (mentioned here in case the master server goes down)
 		"noviteam.de:28785",
 		"sauerleague.org:10000",
 		"crowd.gg:28785",
 		"sauer.woop.us:28785",
 		"vaq-clan.de:28785",
-		"sparc.nicotinelounge.com:28785",
 		"darkkeepers.dk:28785",
 		"effic.me:10000",
 		"effic.me:20000",

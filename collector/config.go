@@ -10,7 +10,6 @@ import (
 
 type config struct {
 	MasterServerAddress string          `json:"master_server_address"`
-	MasterServerPort    string          `json:"master_server_port"`
 	ExtraServers        []string        `json:"extra_servers"`
 	extraServers        []*net.UDPAddr  // to hold addresses after resolving them at initialization
 	GreylistedServers   []string        `json:"greylisted_servers"`

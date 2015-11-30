@@ -12,8 +12,8 @@ type masterServer struct {
 	addr string
 }
 
-func newMasterServer(host string, port string) *masterServer {
-	return &masterServer{addr: host + ":" + port}
+func newMasterServer(addr string) *masterServer {
+	return &masterServer{addr: addr}
 }
 
 func (ms *masterServer) getServerList() (servers map[string]*net.UDPAddr, err error) {

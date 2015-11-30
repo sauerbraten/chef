@@ -67,4 +67,3 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 }
-

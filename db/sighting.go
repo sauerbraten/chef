@@ -52,4 +52,3 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 
 	return sightings
 }
-

@@ -22,18 +22,15 @@ func main() {
 	}
 	defer storage.Close()
 
-	// resolve addresses given in config
-	err = finishConfiguration()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ms := newMasterServer(conf.MasterServerAddress, conf.MasterServerPort)
+	ms := newMasterServer(conf.MasterServerAddress)
 
 	for start := range time.Tick(conf.ScanIntervalSeconds * time.Second) {
+		// resolve addresses given in config
+		resolveConfigServers()
+
 		log.Println("refreshing server list after tick at", start.String())
 
-		list := getServerList(ms)
+		list := getExtendedServerList(ms)
 
 		log.Println("running scan...")
 
@@ -53,14 +50,17 @@ func main() {
 	}
 }
 
-func finishConfiguration() (err error) {
+func resolveConfigServers() {
+	// clear old server lists
+	conf.extraServers = make([]*net.UDPAddr, 0, len(conf.ExtraServers))
+	conf.greylistedServers = map[string]bool{}
+
 	// resolve extra servers
 	for _, serverAddress := range conf.ExtraServers {
-		var addr *net.UDPAddr
-
-		addr, err = net.ResolveUDPAddr("udp", serverAddress)
+		addr, err := net.ResolveUDPAddr("udp", serverAddress)
 		if err != nil {
-			return
+			log.Println("error resolving "+serverAddress+":", err)
+			continue
 		}
 
 		conf.extraServers = append(conf.extraServers, addr)
@@ -68,21 +68,18 @@ func finishConfiguration() (err error) {
 
 	// resolve greylisted servers
 	for _, serverAddress := range conf.GreylistedServers {
-		var addr *net.IPAddr
-
-		addr, err = net.ResolveIPAddr("ip", serverAddress)
+		addr, err := net.ResolveIPAddr("ip", serverAddress)
 		if err != nil {
-			return
+			log.Println("error resolving "+serverAddress+":", err)
+			continue
 		}
 
 		conf.greylistedServers[addr.IP.String()] = true
 	}
-
-	return
 }
 
 // Returns the master server list, extended by manually specified extra servers
-func getServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
+func getExtendedServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	var err error
 
 	list, err = ms.getServerList()

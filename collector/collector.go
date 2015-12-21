@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net"
-	"strconv"
 	"sync"
 	"time"
 
@@ -25,11 +24,10 @@ func main() {
 	ms := newMasterServer(conf.MasterServerAddress)
 
 	for start := range time.Tick(conf.ScanIntervalSeconds * time.Second) {
-		// resolve addresses given in config
-		resolveConfigServers()
 
 		log.Println("refreshing server list after tick at", start.String())
 
+		resolveConfigServers()
 		list := getExtendedServerList(ms)
 
 		log.Println("running scan...")
@@ -81,16 +79,15 @@ func resolveConfigServers() {
 // Returns the master server list, extended by manually specified extra servers
 func getExtendedServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	var err error
+	list = map[string]*net.UDPAddr{}
 
 	list, err = ms.getServerList()
 	if err != nil {
 		log.Println("error getting master server list:", err)
-		// still going to search extra servers, so we need a valid map
-		list = map[string]*net.UDPAddr{}
 	}
 
 	for _, addr := range conf.extraServers {
-		list[addr.IP.String()+":"+strconv.Itoa(addr.Port)] = addr
+		list[addr.String()] = addr
 	}
 
 	return
@@ -110,8 +107,6 @@ func scanServer(serverAddress *net.UDPAddr) {
 		return
 	}
 
-	serverID := storage.GetServerId(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
-
 	playerInfos, err := s.GetAllClientInfo()
 	if err != nil {
 		verbose("error getting client info from", serverAddress, ":", err)
@@ -124,6 +119,8 @@ func scanServer(serverAddress *net.UDPAddr) {
 
 	verbose("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
+	serverID := storage.GetServerId(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
+	
 	for _, playerInfo := range playerInfos {
 		// don't save bot sightings
 		if playerInfo.ClientNum > extinfo.MAX_PLAYER_CN {

@@ -71,8 +71,16 @@ func resolveConfigServers() {
 			log.Println("error resolving "+serverAddress+":", err)
 			continue
 		}
-
-		conf.greylistedServers[addr.IP.String()] = true
+		
+		ips, err := net.LookupIP(addr.String())
+		if err != nil {
+			log.Println("error looking up all IPs of server "+serverAddress+":", err)
+			continue
+		}
+		
+		for _, ip := range ips {
+			conf.greylistedServers[ip.String()] = true
+		}
 	}
 }
 

@@ -9,8 +9,7 @@ body {
 }
 
 body, input, select {
-	font-family: monospace;
-	color: #333;
+	font-family: 'Source Code Pro', monospace;
 }
 
 header, main, footer {
@@ -67,20 +66,14 @@ thead {
 
 td {
 	padding: .25em .75em;
-	border-right: 1px solid #bbb;
-	border-left: 1px solid #bbb;
 	max-width: 20em;
 	overflow-x: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-td:last-child {
-	border-right: none;
-}
-
-td:first-child {
-	border-left: none;
+td + td {
+	border-left: 1px solid #bbb;
 }
 
 a.subtle, a.subtle:visited {

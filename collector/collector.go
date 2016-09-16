@@ -87,11 +87,15 @@ func resolveConfigServers() {
 // Returns the master server list, extended by manually specified extra servers
 func getExtendedServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	var err error
-	list = map[string]*net.UDPAddr{}
 
 	list, err = ms.getServerList()
 	if err != nil {
 		log.Println("error getting master server list:", err)
+	}
+	
+	// make sure to have a non-nil map (list can be nil if the master server could not be reached, for example)
+	if list == nil {
+		list = map[string]*net.UDPAddr{}
 	}
 
 	for _, addr := range conf.extraServers {

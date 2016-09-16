@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -19,7 +18,6 @@ func newMasterServer(addr string) *masterServer {
 func (ms *masterServer) getServerList() (servers map[string]*net.UDPAddr, err error) {
 	conn, err := net.DialTimeout("tcp", ms.addr, 15*time.Second)
 	if err != nil {
-		log.Println("failed to connect to master server:", err)
 		return
 	}
 	defer conn.Close()

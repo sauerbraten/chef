@@ -9,7 +9,8 @@ body {
 }
 
 body, input, select {
-	font-family: 'Source Code Pro', monospace;
+	font-family: 'Roboto Mono', monospace;
+	font-size: small;
 }
 
 header, main, footer {

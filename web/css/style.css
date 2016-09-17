@@ -2,7 +2,7 @@ body {
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: center;
-	width: 72em;
+	max-width: 72em;
 	min-height: 100vh;
 	margin: 0 auto;
 	padding: 0 .5em;
@@ -36,9 +36,12 @@ footer {
 }
 
 h1, form {
-	margin: 1.5em 0;
 	min-width: 100%;
 	text-align: center;
+}
+
+h1 {
+	margin: 1.5em 0;
 }
 
 h2 {

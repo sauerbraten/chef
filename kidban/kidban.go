@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/sauerbraten/chef/ips"
 )
 
 // runs after init() in config.go because of lexical order when files are passed to the compiler
@@ -75,13 +77,7 @@ func downloadKidbannedNetworks() (downloadedNetworks []*net.IPNet, err error) {
 	scanner := bufio.NewScanner(resp.Body)
 
 	for scanner.Scan() {
-		_, network, err := net.ParseCIDR(scanner.Text())
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		downloadedNetworks = append(downloadedNetworks, network)
+		downloadedNetworks = append(downloadedNetworks, ips.GetSubnet(scanner.Text()))
 	}
 
 	if err := scanner.Err(); err != nil {

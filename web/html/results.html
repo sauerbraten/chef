@@ -30,8 +30,9 @@
 				<option value="last_seen" {{if not .SortedByNameFrequency}}selected{{end}}>last seen</option>
 			</select>
 			<br />
-			<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}}checked{{end}} />
-			<label for="direct">force direct lookup</label>
+			<label>
+				<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}}checked{{end}} /> force direct lookup
+			</label>
 			<br />
 			<input type="submit" value="Search" />
 		</form>

@@ -1,4 +1,4 @@
-package messageboard // import "github.com/sauerbraten/chef/messageboard"
+package messageboard
 
 import (
 	"database/sql"

@@ -1,4 +1,4 @@
-package ips // import "github.com/sauerbraten/chef/ips"
+package ips
 
 import (
 	"net"

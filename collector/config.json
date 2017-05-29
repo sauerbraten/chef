@@ -9,26 +9,9 @@
 	"extra_servers": [
 		// main public servers (mentioned here in case the master server goes down)
 		"noviteam.de:28785",
-		"sauerleague.org:10000",
-		"crowd.gg:28785",
 		"sauer.woop.us:28785",
 		"vaq-clan.de:28785",
-		"darkkeepers.dk:28785",
-		"effic.me:10000",
-		"effic.me:20000",
-		"effic.me:30000",
-		"effic.me:40000",
-		"effic.me:50000",
-		"effic.me:60000"
-	],
-
-	// Servers from which not to save client IP addresses since they are fake.
-	// Obviously fake IPs like 0.0.0.0 and IPs from the server's local network (192.168.0.0/16)
-	// are never stored, even if the server where they are found is not in this list.
-	// If no port is specfied, all servers on that host are greylisted.
-	"greylisted_servers": [
-		"pisto.horse", // sends fake IPs matching the player's country, can't be filtered
-		"92.222.216.113" // DM servers, send fake IP (e.g. 2.21.0.0)
+		"darkkeepers.dk:28785"
 	],
 
 	// Scan interval in seconds

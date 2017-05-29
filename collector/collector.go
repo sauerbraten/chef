@@ -51,7 +51,6 @@ func main() {
 func resolveConfigServers() {
 	// clear old server lists
 	conf.extraServers = make([]*net.UDPAddr, 0, len(conf.ExtraServers))
-	conf.greylistedServers = map[string]bool{}
 
 	// resolve extra servers
 	for _, serverAddress := range conf.ExtraServers {
@@ -63,25 +62,6 @@ func resolveConfigServers() {
 
 		conf.extraServers = append(conf.extraServers, addr)
 	}
-
-	// resolve greylisted servers
-	for _, serverAddress := range conf.GreylistedServers {
-		addr, err := net.ResolveIPAddr("ip", serverAddress)
-		if err != nil {
-			log.Println("error resolving "+serverAddress+":", err)
-			continue
-		}
-		
-		ips, err := net.LookupIP(addr.String())
-		if err != nil {
-			log.Println("error looking up all IPs of server "+serverAddress+":", err)
-			continue
-		}
-		
-		for _, ip := range ips {
-			conf.greylistedServers[ip.String()] = true
-		}
-	}
 }
 
 // Returns the master server list, extended by manually specified extra servers
@@ -92,7 +72,7 @@ func getExtendedServerList(ms *masterServer) (list map[string]*net.UDPAddr) {
 	if err != nil {
 		log.Println("error getting master server list:", err)
 	}
-	
+
 	// make sure to have a non-nil map (list can be nil if the master server could not be reached, for example)
 	if list == nil {
 		list = map[string]*net.UDPAddr{}
@@ -119,6 +99,12 @@ func scanServer(serverAddress *net.UDPAddr) {
 		return
 	}
 
+	serverMod, err := s.GetServerMod()
+	if err != nil {
+		verbose("error detecting server mod of", serverAddress, ":", err)
+		return
+	}
+
 	playerInfos, err := s.GetAllClientInfo()
 	if err != nil {
 		verbose("error getting client info from", serverAddress, ":", err)
@@ -132,15 +118,15 @@ func scanServer(serverAddress *net.UDPAddr) {
 	verbose("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
 	serverID := storage.GetServerId(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
-	
+
 	for _, playerInfo := range playerInfos {
 		// don't save bot sightings
-		if playerInfo.ClientNum > extinfo.MAX_PLAYER_CN {
+		if playerInfo.ClientNum > extinfo.MaxPlayerCN {
 			continue
 		}
 
 		// check for valid client IP
-		if conf.greylistedServers[serverAddress.IP.String()] || ips.IsInPrivateNetwork(playerInfo.IP) {
+		if serverMod == "spaghettimod" || ips.IsInPrivateNetwork(playerInfo.IP) {
 			playerInfo.IP = net.ParseIP("0.0.0.0")
 		}
 

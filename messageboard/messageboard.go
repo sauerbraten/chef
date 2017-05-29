@@ -6,7 +6,7 @@ import (
 )
 
 type MessageBoard struct {
-	mutex sync.Mutex // not embedded sp access to Mutex.Lock() and Mutex.Unlock() is not exported
+	mutex sync.Mutex // not embedded so access to Mutex.Lock() and Mutex.Unlock() is not exported
 	*sql.DB
 }
 

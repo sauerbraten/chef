@@ -7,8 +7,10 @@ import (
 
 // Returns the SQLite rowid of the name specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
 func (db *Database) getPlayerNameId(name string) (nameId int64) {
-	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameId)
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
 
+	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameId)
 	if err == sql.ErrNoRows {
 		res, err := db.Exec("insert into `names` values (?)", name)
 		if err != nil {
@@ -28,8 +30,10 @@ func (db *Database) getPlayerNameId(name string) (nameId int64) {
 
 // Returns the SQLite rowid of the IP specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
 func (db *Database) getPlayerIpId(ip int64) (ipId int64) {
-	err := db.QueryRow("select `rowid` from `ips` where `ip` = ?", ip).Scan(&ipId)
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
 
+	err := db.QueryRow("select `rowid` from `ips` where `ip` = ?", ip).Scan(&ipId)
 	if err == sql.ErrNoRows {
 		res, err := db.Exec("insert into `ips` values (?)", ip)
 		if err != nil {

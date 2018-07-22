@@ -11,6 +11,9 @@ type Status struct {
 }
 
 func (db *Database) Status() (status Status) {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
 	err := db.QueryRow("select count(*) from `names`").Scan(&status.NamesCount)
 	if err != nil {
 		log.Fatal("error getting names count:", err)

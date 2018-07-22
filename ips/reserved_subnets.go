@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-var privateNetworks []*net.IPNet
-
 // excluded for de-duplication:
 //192.0.0.0/29
 //192.0.0.170/32
@@ -30,6 +28,8 @@ const privateNetworkRanges = `0.0.0.0/8
 203.0.113.0/24
 240.0.0.0/4
 255.255.255.255/32`
+
+var privateNetworks []*net.IPNet
 
 func init() {
 	scanner := bufio.NewScanner(strings.NewReader(privateNetworkRanges))

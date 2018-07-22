@@ -43,15 +43,13 @@ func frontPage(resp http.ResponseWriter, req *http.Request) {
 	http.ServeFile(resp, req, "html/front.html")
 }
 
-type status struct {
-	db.Status
-	TimeOfLastKidbanUpdate string
-}
-
 func statusPage(resp http.ResponseWriter, req *http.Request) {
 	logRequest(req)
 
-	status := &status{
+	status := struct {
+		db.Status
+		TimeOfLastKidbanUpdate string
+	}{
 		Status:                 storage.Status(),
 		TimeOfLastKidbanUpdate: kidban.GetTimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
 	}
@@ -70,5 +68,9 @@ func infoPage(resp http.ResponseWriter, req *http.Request) {
 }
 
 func logRequest(req *http.Request) {
-	log.Println(strings.Split(req.RemoteAddr, ":")[0], "requested", req.URL.String())
+	remoteAddr := req.Header.Get("X-Real-IP")
+	if remoteAddr == "" {
+		remoteAddr = req.RemoteAddr
+	}
+	log.Println(strings.Split(remoteAddr, ":")[0], "requested", req.URL.String())
 }

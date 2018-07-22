@@ -37,14 +37,17 @@ func lookup(resp http.ResponseWriter, req *http.Request) {
 		directLookupForced = true
 	}
 
-	// redirect partial IP queries
+	// (permanently) redirect partial IP queries
 	if ips.IsPartialOrFullCIDR(nameOrIP) {
 		var subnet *net.IPNet
 		subnet = ips.GetSubnet(nameOrIP)
 
 		if nameOrIP != subnet.String() {
-			newURL := "/lookup?q=" + url.QueryEscape(subnet.String()) + "&sorting=" + req.FormValue("sorting")
-			http.Redirect(resp, req, newURL, http.StatusTemporaryRedirect)
+			u, _ := url.ParseRequestURI(req.RequestURI) // safe to assume this will not fail
+			params := u.Query()
+			params.Set("q", subnet.String())
+			u.RawQuery = params.Encode()
+			http.Redirect(resp, req, u.String(), http.StatusPermanentRedirect)
 			return
 		}
 	}

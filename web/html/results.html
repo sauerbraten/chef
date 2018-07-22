@@ -1,6 +1,7 @@
 <!doctype html>
 
 <html>
+
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -22,7 +23,7 @@
 
 	<main>
 		<form class="searchform text-center" action="/lookup" method="get">
-			<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" autofocus />
+			<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" value="{{.Query}}" autofocus />
 			<br />
 			<label for="sorting">sort by</label>
 			<select name="sorting">
@@ -39,7 +40,8 @@
 
 		<header>
 			<h2>Results for {{.Query}}</h2>
-			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
+			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
+				lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
 		</header>
 
 		{{if len .Results}}
@@ -59,18 +61,16 @@
 				<tr>
 					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">
 						{{if ne .IP "0.0.0.0"}}
-							<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}}#tabId=at-a-glance">{{.IP}}</a>
-						{{else}}
-							{{.IP}}
-						{{end}}
+						<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}}#tabId=at-a-glance">{{.IP}}</a>
+						{{else}} {{.IP}} {{end}}
 					</td>
 					<td>{{.Name}}</td>
 					<td class="align-center">{{timestring .Timestamp}}</td>
 					<td class="align-right">
-						<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.ServerIP}}#tabId=at-a-glance">{{.ServerIP}}</a>
+						<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.Server.IP}}#tabId=at-a-glance">{{.Server.IP}}</a>
 					</td>
-					<td class="align-right">{{.ServerPort}}</td>
-					<td>{{.ServerDescription}}</td>
+					<td class="align-right">{{.Server.Port}}</td>
+					<td>{{.Server.Description}}</td>
 				</tr>
 				{{end}}
 			</tbody>
@@ -84,9 +84,12 @@
 
 	<footer>
 		<small>
-			Sauerbraten spy by pix – <a href="/status">Status</a> – <a href="/info">More Information</a>
+			Sauerbraten spy by pix –
+			<a href="/status">Status</a> –
+			<a href="/info">More Information</a>
 		</small>
 	</footer>
 
 </body>
+
 </html>

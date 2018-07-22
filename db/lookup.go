@@ -32,37 +32,45 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, directLookupForced 
 			SortedByNameFrequency: sorting == ByNameFrequency,
 			Results:               db.lookupIpRange(lowest, highest, sorting),
 		}
-	} else {
-		return FinishedLookup{
-			Query:                 nameOrIP,
-			InterpretedAsName:     true,
-			PerformedDirectLookup: directLookupForced,
-			SortedByNameFrequency: sorting == ByNameFrequency,
-			Results:               db.lookupName(nameOrIP, sorting, directLookupForced),
-		}
+	}
+
+	return FinishedLookup{
+		Query:                 nameOrIP,
+		InterpretedAsName:     true,
+		PerformedDirectLookup: directLookupForced,
+		SortedByNameFrequency: sorting == ByNameFrequency,
+		Results:               db.lookupName(nameOrIP, sorting, directLookupForced),
 	}
 }
 
 func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting) []Sighting {
-	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where `sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?) group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", lowestIpInRange, highestIpInRange)
-	if err != nil {
-		log.Fatal("error looking up sightings by IP:", err)
-	}
-	defer rows.Close()
-
-	return rowsToSightings(rows)
+	condition := "`sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?)"
+	return db.lookup(condition, sorting, lowestIpInRange, highestIpInRange)
 }
 
 func (db *Database) lookupName(name string, sorting Sorting, directLookupForced bool) []Sighting {
-	condition := "`sightings`.`ip` in (select `ip` from `sightings` where `name` in (select `rowid` from `names` where `name` like ?) and `ip` != (select `rowid` from `ips` where `ip` = 0))"
-
-	if directLookupForced {
-		condition = "`sightings`.`name` in (select `rowid` from `names` where `name` like ?)"
+	condition := "`sightings`.`name` in (select `rowid` from `names` where `name` like ?)"
+	if !directLookupForced {
+		condition = "`sightings`.`ip` in (select `ip` from `sightings` where " + condition + " and `ip` != (select `rowid` from `ips` where `ip` = 0))"
 	}
+	return db.lookup(condition, sorting, "%"+name+"%")
+}
 
-	rows, err := db.Query("select `names`.`name`, `ips`.`ip`, max(`timestamp`), `servers`.`ip`, `servers`.`port`, `servers`.`description` from `sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid` where ("+condition+") group by `names`.`name`, `ips`.`ip` order by "+string(sorting)+" desc limit 1000", "%"+name+"%")
+func (db *Database) lookup(condition string, sorting Sorting, args ...interface{}) []Sighting {
+	const (
+		columns      = "`names`.`name`, `ips`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`"
+		joinedTables = "`sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid`"
+		grouping     = "`names`.`name`, `ips`.`ip`"
+	)
+
+	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + string(sorting) + " desc limit 1000"
+
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	rows, err := db.Query(query, args...)
 	if err != nil {
-		log.Fatal("error looking up sightings by name:", err)
+		log.Fatalln("error performing look up:", err)
 	}
 	defer rows.Close()
 

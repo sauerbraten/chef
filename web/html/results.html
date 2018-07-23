@@ -27,8 +27,8 @@
 			<br />
 			<label for="sorting">sort by</label>
 			<select name="sorting">
-				<option value="name_frequency" {{if .SortedByNameFrequency}}selected{{end}}>name frequency</option>
-				<option value="last_seen" {{if not .SortedByNameFrequency}}selected{{end}}>last seen</option>
+				<option value="name_frequency" {{if (eq .Sorting.Identifier "name_frequency")}}selected{{end}}>name frequency</option>
+				<option value="last_seen" {{if (eq .Sorting.Identifier "last_seen")}}selected{{end}}>last seen</option>
 			</select>
 			<br />
 			<label>
@@ -41,7 +41,7 @@
 		<header>
 			<h2>Results for {{.Query}}</h2>
 			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
-				lookup{{end}} | sorted by {{if .SortedByNameFrequency}}name frequency{{else}}last seen{{end}}</small>
+				lookup{{end}} | sorted by {{.Sorting.DisplayName}}</small>
 		</header>
 
 		{{if len .Results}}

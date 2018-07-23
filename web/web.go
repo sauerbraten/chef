@@ -1,34 +1,31 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
-	"github.com/sauerbraten/chef/db"
-	"github.com/sauerbraten/chef/kidban"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
-var storage *db.Database
-
 func main() {
-	var err error
-	storage, err = db.New()
+	s, err := NewServer()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	defer storage.Close()
 
-	r := mux.NewRouter()
-	r.StrictSlash(true)
+	r := chi.NewRouter()
+	r.Use(
+		middleware.RedirectSlashes,
+		requestLogging,
+	)
 
-	r.HandleFunc("/", frontPage)
-	r.HandleFunc("/lookup", lookup)
-	r.HandleFunc("/status", statusPage)
-	r.HandleFunc("/info", infoPage)
-	r.Handle("/{fn:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
+	r.HandleFunc("/", s.frontPage)
+	r.HandleFunc("/info", s.infoPage)
+	r.HandleFunc("/status", s.statusPage())
+	r.HandleFunc("/lookup", s.lookup())
+	r.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
 	// start listening
 	log.Println("server listening on", conf.WebInterfaceAddress)
@@ -38,39 +35,14 @@ func main() {
 	}
 }
 
-func frontPage(resp http.ResponseWriter, req *http.Request) {
-	logRequest(req)
-	http.ServeFile(resp, req, "html/front.html")
-}
+func requestLogging(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		remoteAddr := req.Header.Get("X-Real-IP")
+		if remoteAddr == "" {
+			remoteAddr = req.RemoteAddr
+		}
+		log.Println(strings.Split(remoteAddr, ":")[0], "requested", req.URL.String())
 
-func statusPage(resp http.ResponseWriter, req *http.Request) {
-	logRequest(req)
-
-	status := struct {
-		db.Status
-		TimeOfLastKidbanUpdate string
-	}{
-		Status:                 storage.Status(),
-		TimeOfLastKidbanUpdate: kidban.GetTimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
-	}
-
-	statusTempl := template.Must(template.ParseFiles("html/status.html"))
-	err := statusTempl.Execute(resp, status)
-
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func infoPage(resp http.ResponseWriter, req *http.Request) {
-	logRequest(req)
-	http.ServeFile(resp, req, "html/info.html")
-}
-
-func logRequest(req *http.Request) {
-	remoteAddr := req.Header.Get("X-Real-IP")
-	if remoteAddr == "" {
-		remoteAddr = req.RemoteAddr
-	}
-	log.Println(strings.Split(remoteAddr, ":")[0], "requested", req.URL.String())
+		h.ServeHTTP(resp, req)
+	})
 }

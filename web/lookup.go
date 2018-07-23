@@ -22,51 +22,52 @@ func IsInKidbannedNetwork(ipString string) bool {
 	return kidban.IsInKidbannedNetwork(net.ParseIP(ipString))
 }
 
-func lookup(resp http.ResponseWriter, req *http.Request) {
-	logRequest(req)
-
-	nameOrIP := req.FormValue("q")
-
-	sorting := db.ByNameFrequency
-	if req.FormValue("sorting") == "last_seen" {
-		sorting = db.ByLastSeen
+func (s *server) lookup() http.HandlerFunc {
+	tmpl, err := template.
+		New("results.html").
+		Funcs(template.FuncMap{"timestring": TimestampToString, "ipIsInKidbannedNetwork": IsInKidbannedNetwork}).
+		ParseFiles("html/results.html")
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	directLookupForced := false
-	if req.FormValue("direct") == "true" {
-		directLookupForced = true
-	}
+	return func(resp http.ResponseWriter, req *http.Request) {
+		nameOrIP := req.FormValue("q")
 
-	// (permanently) redirect partial IP queries
-	if ips.IsPartialOrFullCIDR(nameOrIP) {
-		var subnet *net.IPNet
-		subnet = ips.GetSubnet(nameOrIP)
-
-		if nameOrIP != subnet.String() {
-			u, _ := url.ParseRequestURI(req.RequestURI) // safe to assume this will not fail
-			params := u.Query()
-			params.Set("q", subnet.String())
-			u.RawQuery = params.Encode()
-			http.Redirect(resp, req, u.String(), http.StatusPermanentRedirect)
-			return
+		sorting := db.ByNameFrequency
+		if req.FormValue("sorting") == db.ByLastSeen.Identifier {
+			sorting = db.ByLastSeen
 		}
-	}
 
-	finishedLookup := storage.Lookup(nameOrIP, sorting, directLookupForced)
+		directLookupForced := req.FormValue("direct") == "true"
 
-	if req.FormValue("format") == "json" {
-		enc := json.NewEncoder(resp)
-		err := enc.Encode(finishedLookup.Results)
-		if err != nil {
-			log.Println(err)
+		// (permanently) redirect partial IP queries
+		if ips.IsPartialOrFullCIDR(nameOrIP) {
+			var subnet *net.IPNet
+			subnet = ips.GetSubnet(nameOrIP)
+
+			if nameOrIP != subnet.String() {
+				u, _ := url.ParseRequestURI(req.RequestURI) // it's safe to assume this will not fail
+				params := u.Query()
+				params.Set("q", subnet.String())
+				u.RawQuery = params.Encode()
+				http.Redirect(resp, req, u.String(), http.StatusPermanentRedirect)
+				return
+			}
 		}
-	} else {
-		resultsTempl := template.New("results.html")
-		resultsTempl = resultsTempl.Funcs(template.FuncMap{"timestring": TimestampToString, "ipIsInKidbannedNetwork": IsInKidbannedNetwork})
-		resultsTempl = template.Must(resultsTempl.ParseFiles("html/results.html"))
-		err := resultsTempl.Execute(resp, finishedLookup)
-		if err != nil {
-			log.Println(err)
+
+		finishedLookup := s.db.Lookup(nameOrIP, sorting, directLookupForced)
+
+		if req.FormValue("format") == "json" {
+			err := json.NewEncoder(resp).Encode(finishedLookup)
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			err := tmpl.Execute(resp, finishedLookup)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 }

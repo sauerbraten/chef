@@ -1,24 +1,39 @@
 package db
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/sauerbraten/chef/ips"
 )
 
-type Sorting string
+type Sorting struct {
+	Identifier  string
+	DisplayName string
+	sql         string
+}
 
-const (
-	ByLastSeen      Sorting = "`timestamp`"               // sort most recent sighting first
-	ByNameFrequency Sorting = "count(`sightings`.`name`)" // put most oftenly used name first
+func (s Sorting) MarshalJSON() ([]byte, error) { return json.Marshal(s.Identifier) }
+
+var (
+	ByLastSeen = Sorting{
+		Identifier:  "last_seen",
+		DisplayName: "last seen",
+		sql:         "`timestamp`", // sort most recent sighting first
+	}
+	ByNameFrequency = Sorting{
+		Identifier:  "name_frequency",
+		DisplayName: "name frequency",
+		sql:         "count(`sightings`.`name`)", // put most oftenly used name first
+	}
 )
 
 type FinishedLookup struct {
-	Query                 string
-	InterpretedAsName     bool
-	PerformedDirectLookup bool
-	SortedByNameFrequency bool
-	Results               []Sighting
+	Query                 string     `json:"query"`
+	InterpretedAsName     bool       `json:"interpreted_as_name"`
+	PerformedDirectLookup bool       `json:"direct"`
+	Sorting               Sorting    `json:"sorting"`
+	Results               []Sighting `json:"results"`
 }
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
@@ -29,7 +44,7 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, directLookupForced 
 			Query:                 nameOrIP,
 			InterpretedAsName:     false,
 			PerformedDirectLookup: true,
-			SortedByNameFrequency: sorting == ByNameFrequency,
+			Sorting:               sorting,
 			Results:               db.lookupIpRange(lowest, highest, sorting),
 		}
 	}
@@ -38,7 +53,7 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, directLookupForced 
 		Query:                 nameOrIP,
 		InterpretedAsName:     true,
 		PerformedDirectLookup: directLookupForced,
-		SortedByNameFrequency: sorting == ByNameFrequency,
+		Sorting:               sorting,
 		Results:               db.lookupName(nameOrIP, sorting, directLookupForced),
 	}
 }
@@ -63,7 +78,7 @@ func (db *Database) lookup(condition string, sorting Sorting, args ...interface{
 		grouping     = "`names`.`name`, `ips`.`ip`"
 	)
 
-	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + string(sorting) + " desc limit 1000"
+	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " desc limit 1000"
 
 	db.mutex.Lock()
 	defer db.mutex.Unlock()

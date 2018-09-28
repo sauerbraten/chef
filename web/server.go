@@ -35,7 +35,7 @@ func staticPageFromTemplates(files ...string) http.HandlerFunc {
 		Option("missingkey=error").
 		Execute(buf, nil)
 	if err != nil {
-		log.Fatalf("failed to build static page from template files (%s)\n", strings.Join(files, ", "))
+		log.Fatalf("failed to build static page from template files (%s): %v\n", strings.Join(files, ", "), err)
 	}
 
 	buildTime, page := time.Now(), bytes.NewReader(buf.Bytes())

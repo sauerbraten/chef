@@ -6,9 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sauerbraten/chef/db"
-	"github.com/sauerbraten/chef/ips"
 	"github.com/sauerbraten/extinfo"
+
+	"github.com/sauerbraten/chef/internal/db"
+	"github.com/sauerbraten/chef/internal/ips"
 )
 
 var storage *db.Database
@@ -126,7 +127,7 @@ func scanServer(serverAddress *net.UDPAddr) {
 		}
 
 		// check for valid client IP
-		if serverMod == "spaghettimod" || ips.IsInPrivateNetwork(playerInfo.IP) {
+		if serverMod == "spaghettimod" || ips.IsInReservedBlock(playerInfo.IP) {
 			playerInfo.IP = net.ParseIP("0.0.0.0")
 		}
 

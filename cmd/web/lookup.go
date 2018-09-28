@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/sauerbraten/chef/db"
-	"github.com/sauerbraten/chef/ips"
-	"github.com/sauerbraten/chef/kidban"
+	"github.com/sauerbraten/chef/internal/db"
+	"github.com/sauerbraten/chef/internal/ips"
+	"github.com/sauerbraten/chef/internal/kidban"
 )
 
 func TimestampToString(timestamp int64) string {

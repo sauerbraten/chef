@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/sauerbraten/chef/ips"
+	"github.com/sauerbraten/chef/internal/ips"
 )
 
 type Server struct {

@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sauerbraten/chef/ips"
+	"github.com/sauerbraten/chef/internal/ips"
 )
 
 // runs after init() in config.go because of lexical order when files are passed to the compiler

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sauerbraten/chef/db"
-	"github.com/sauerbraten/chef/kidban"
+	"github.com/sauerbraten/chef/internal/db"
+	"github.com/sauerbraten/chef/internal/kidban"
 )
 
 type server struct {

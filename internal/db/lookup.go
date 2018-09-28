@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/sauerbraten/chef/ips"
+	"github.com/sauerbraten/chef/internal/ips"
 )
 
 type Sorting struct {
@@ -39,7 +39,7 @@ type FinishedLookup struct {
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
 func (db *Database) Lookup(nameOrIP string, sorting Sorting, directLookupForced bool) FinishedLookup {
 	if ips.IsPartialOrFullCIDR(nameOrIP) {
-		lowest, highest := ips.GetIpRange(ips.GetSubnet(nameOrIP))
+		lowest, highest := ips.GetDecimalBoundaries(ips.GetSubnet(nameOrIP))
 		return FinishedLookup{
 			Query:                 nameOrIP,
 			InterpretedAsName:     false,

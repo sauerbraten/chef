@@ -15,7 +15,7 @@ import (
 // 154.93.0.0/16
 var partialOrFullIpRangeRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.)?(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])?(\/(3[0-1]|[12]?[0-9]))?$`)
 
-// Returns true if s is an IP or a range in CIDR notation.
+// IsPartialOrFullCIDR returns true if s is an IP or a range in CIDR notation.
 func IsPartialOrFullCIDR(s string) bool {
 	return partialOrFullIpRangeRegex.MatchString(s)
 }
@@ -25,12 +25,12 @@ func IsPartialOrFullCIDR(s string) bool {
 // 154.93.0.0/16
 var ipRangeRegex *regexp.Regexp = regexp.MustCompile(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\/(3[0-1]|[12]?[0-9])$`)
 
-// Returns true if s is an IP or a range in CIDR notation.
+// IsRangeAsCIDR returns true if s is an IP or a range in CIDR notation.
 func IsRangeAsCIDR(s string) bool {
 	return ipRangeRegex.MatchString(s)
 }
 
-// Returns the int representation of the IP. Uses int64 to prevent negative values (easier range checks in DB). Assumes 4-byte IPv4. Inverse function of Int2IP.
+// IP2Int returns the int representation of the IP. Uses int64 to prevent negative values (easier range checks in DB). Assumes 4-byte IPv4. Inverse function of Int2IP.
 func IP2Int(ip net.IP) (intIp int64) {
 	for index, octet := range ip.To4() {
 		intIp += int64(octet) << uint((3-index)*8)
@@ -39,7 +39,7 @@ func IP2Int(ip net.IP) (intIp int64) {
 	return
 }
 
-// Returns the net.IP representation of the integer. Inverse function of IP2Int.
+// Int2IP returns the net.IP representation of the integer. Inverse function of IP2Int.
 func Int2IP(intIp int64) net.IP {
 	abcd := [4]byte{}
 
@@ -50,11 +50,11 @@ func Int2IP(intIp int64) net.IP {
 	return net.IPv4(abcd[0], abcd[1], abcd[2], abcd[3])
 }
 
-// Parses all of the following examples into valid IP ranges by padding the IP:
-// 	123.
-// 	184.29.39.193/16
-// 	12.304/8
-// 	29.43.223./13
+// GetSubnet parses all of the following examples into valid IP ranges by padding the IP:
+//     123.
+//     184.29.39.193/16
+//     12.304/8
+//     29.43.223./13
 // A CIDR notation prefix size is optional, a fitting prefix size will be chosen in the case it's omitted or the specified prefix size is > 24.
 func GetSubnet(cidr string) (ipNet *net.IPNet) {
 	parts := strings.Split(cidr, "/")
@@ -111,8 +111,8 @@ func GetSubnet(cidr string) (ipNet *net.IPNet) {
 	return
 }
 
-// Returns lowest and highest IP inside the IPNet as integers (for easy range checking).
-func GetIpRange(ipNet *net.IPNet) (lowest, highest int64) {
+// GetDecimalBoundaries returns the lowest and the highest IP inside the IPNet as integers (for easy range checking).
+func GetDecimalBoundaries(ipNet *net.IPNet) (lowest, highest int64) {
 	var notMask int64
 
 	for index, ipOctet := range ipNet.IP.To4() {

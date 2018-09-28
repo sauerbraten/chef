@@ -1,6 +1,6 @@
 {
 	// SQlite database file name
-	"db_file_path": "/home/axle/.chef/chef.sqlite",
+	"db_file_path": "~/.chef/chef.sqlite",
 
 	// Address for the web interface to listen on
 	"web_interface_address": "localhost:8080",

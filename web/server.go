@@ -25,16 +25,30 @@ func NewServer() (*server, error) {
 	}, nil
 }
 
-func (s *server) frontPage(resp http.ResponseWriter, req *http.Request) {
-	http.ServeFile(resp, req, "html/front.html")
+func (s *server) frontPage() http.HandlerFunc {
+	tmpl := template.Must(template.ParseFiles("html/base.html", "html/front.html"))
+
+	return func(resp http.ResponseWriter, req *http.Request) {
+		err := tmpl.Execute(resp, nil)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
 
-func (s *server) infoPage(resp http.ResponseWriter, req *http.Request) {
-	http.ServeFile(resp, req, "html/info.html")
+func (s *server) infoPage() http.HandlerFunc {
+	tmpl := template.Must(template.ParseFiles("html/base.html", "html/info.html"))
+
+	return func(resp http.ResponseWriter, req *http.Request) {
+		err := tmpl.Execute(resp, nil)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
 
 func (s *server) statusPage() http.HandlerFunc {
-	tmpl := template.Must(template.ParseFiles("html/status.html"))
+	tmpl := template.Must(template.ParseFiles("html/base.html", "html/status.html"))
 
 	return func(resp http.ResponseWriter, req *http.Request) {
 		status := struct {

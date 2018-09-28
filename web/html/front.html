@@ -1,101 +1,76 @@
-<!doctype html>
+{{define "header"}}
+	<h1>
+		CHEF
+	</h1>
+{{end}}
 
-<html>
-<head>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta charset="utf-8">
+{{define "content"}}
+	<form class="searchform text-center" action="/lookup" method="get">
+		<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" autofocus />
+		<br />
+		<label for="sorting">sort by</label>
+		<select name="sorting">
+			<option value="name_frequency" selected>name frequency</option>
+			<option value="last_seen">last seen</option>
+		</select>
+		<br />
+		<label>
+			<input type="checkbox" name="direct" value="true" /> force direct lookup
+		</label>
+		<br />
+		<input type="submit" value="Search" />
+	</form>
 
-	<title>CHEF</title>
+	<aside class="text">
+		<h2>What is this?</h2>
 
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=cyrillic,greek" rel="stylesheet">
-	<link href="/style.css" rel="stylesheet">
-</head>
+		<p>
+			CHEF is a Sauerbraten stalker. It lets you search for players and shows you what names they use, on what servers they play, and when they were last seen.
+		</p>
 
-<body>
+		<h2>Usage Information</h2>
 
-	<header>
-		<h1 class="text-center">
-			CHEF
-		</h1>
-	</header>
+		<p>
+			The web interface accepts a name, an IP, or an IP range and performs either a <strong>direct lookup</strong> or a <strong>2-step lookup</strong>. By default, the search performs a direct lookup if you give an IP or an IP range, and a 2-step lookup if you give a name.
+		</p>
 
-	<main>
-		<form class="searchform text-center" action="/lookup" method="get">
-			<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" autofocus />
-			<br />
-			<label for="sorting">sort by</label>
-			<select name="sorting">
-				<option value="name_frequency" selected>name frequency</option>
-				<option value="last_seen">last seen</option>
-			</select>
-			<br />
-			<label>
-				<input type="checkbox" name="direct" value="true" /> force direct lookup
-			</label>
-			<br />
-			<input type="submit" value="Search" />
-		</form>
+		<h3>Direct Lookup</h3>
 
-		<aside class="text">
-			<h2>What is this?</h2>
+		<p>
+			A direct lookup is a simple lookup with only one step. If you give a name, it returns all IPs that have used this name; if you give an IP or IP range, it returns all names that have been used by the given IP (range). Results are displayed as distinct name-IP combinations with the timestamp and server information of their last sighting attached.
+		</p>
 
-			<p>
-				CHEF is a Sauerbraten stalker. It lets you search for players and shows you what names they use, on what servers they play, and when they were last seen.
-			</p>
+		<h3>2-Step Lookup</h3>
 
-			<h2>Usage Information</h2>
+		<p>
+			A 2-step lookup only works on names: It first performs a direct lookup of the name to get all IPs that used the name, and then looks up all sightings by all those IPs. This means that a 2-step lookups will also give you sightings where the player used a different name. Like direct lookups, it returns distinct name-IP combinations with timestamp and server information of their last sighting.
+		</p>
 
-			<p>
-				The web interface accepts a name, an IP, or an IP range and performs either a <strong>direct lookup</strong> or a <strong>2-step lookup</strong>. By default, the search performs a direct lookup if you give an IP or an IP range, and a 2-step lookup if you give a name.
-			</p>
+		<h3>IPs and IP Ranges</h3>
 
-			<h3>Direct Lookup</h3>
+		<p>
+			IPs (also in ranges) can be given partially, e.g. 177.159/8 will be parsed as 177.159.0.0/8 which in turn will return results in the subnet 177.0.0.0 -177.255.255.255.
+		</p>
 
-			<p>
-				A direct lookup is a simple lookup with only one step. If you give a name, it returns all IPs that have used this name; if you give an IP or IP range, it returns all names that have been used by the given IP (range). Results are displayed as distinct name-IP combinations with the timestamp and server information of their last sighting attached.
-			</p>
+		<p>
+			Note that since extinfo only sends the 3 highest IP bytes (24 bits), prefix sizes greater than 24 or greater than the default mask of the IP you specified will be ignored:
+		</p>
 
-			<h3>2-Step Lookup</h3>
-
-			<p>
-				A 2-step lookup only works on names: It first performs a direct lookup of the name to get all IPs that used the name, and then looks up all sightings by all those IPs. This means that a 2-step lookups will also give you sightings where the player used a different name. Like direct lookups, it returns distinct name-IP combinations with timestamp and server information of their last sighting.
-			</p>
-
-			<h3>IPs and IP Ranges</h3>
-
-			<p>
-				IPs (also in ranges) can be given partially, e.g. 177.159/8 will be parsed as 177.159.0.0/8 which in turn will return results in the subnet 177.0.0.0 -177.255.255.255.
-			</p>
-
-			<p>
-				Note that since extinfo only sends the 3 highest IP bytes (24 bits), prefix sizes greater than 24 or greater than the default mask of the IP you specified will be ignored:
-			</p>
-
-			<ul>
-				<li>
-					79.69/24
-					<br />
-					→ 16 bits of IP specified
-					<br />
-					→ 24 prefix size will be ignored and replaced with 16 (the intuitive one)
-				</li>
-				<li>
-					17.203.21.45/26
-					<br />
-					→ 26 is greater than 24
-					<br />
-					→ the prefix size will be set to 24
-				</li>
-			</ul>
-		</aside>
-	</main>
-
-	<footer>
-		<small>
-			Sauerbraten spy by pix – <a href="/status">Status</a> – <a href="/info">More Information</a>
-		</small>
-	</footer>
-
-</body>
-</html>
+		<ul>
+			<li>
+				79.69/24
+				<br />
+				→ 16 bits of IP specified
+				<br />
+				→ 24 prefix size will be ignored and replaced with 16 (the intuitive one)
+			</li>
+			<li>
+				17.203.21.45/26
+				<br />
+				→ 26 is greater than 24
+				<br />
+				→ the prefix size will be set to 24
+			</li>
+		</ul>
+	</aside>
+{{end}}

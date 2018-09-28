@@ -24,9 +24,9 @@ func IsInKidbannedNetwork(ipString string) bool {
 
 func (s *server) lookup() http.HandlerFunc {
 	tmpl, err := template.
-		New("results.html").
+		New("base.html"). // must be the base template (entry point) so templates are associated correctly by ParseFiles()
 		Funcs(template.FuncMap{"timestring": TimestampToString, "ipIsInKidbannedNetwork": IsInKidbannedNetwork}).
-		ParseFiles("html/results.html")
+		ParseFiles("html/base.html", "html/results.html")
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -21,8 +21,8 @@ func main() {
 		requestLogging,
 	)
 
-	r.HandleFunc("/", s.frontPage)
-	r.HandleFunc("/info", s.infoPage)
+	r.HandleFunc("/", s.frontPage())
+	r.HandleFunc("/info", s.infoPage())
 	r.HandleFunc("/status", s.statusPage())
 	r.HandleFunc("/lookup", s.lookup())
 	r.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))

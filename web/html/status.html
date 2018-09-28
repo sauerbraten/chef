@@ -1,66 +1,37 @@
-<!doctype html>
+{{define "title"}}Status – CHEF{{end}}
 
-<html>
-<head>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta charset="utf-8">
+{{define "content"}}
+	<div class="text">
+		<h2>Status Information</h2>
 
-	<title>Status – CHEF</title>
+		<table>
+			<tr>
+				<td class="align-right">{{.NamesCount}}</td>
+				<td>names</td>
+			</tr>
+			<tr>
+				<td class="align-right">{{.IPsCount}}</td>
+				<td>IPs</td>
+			</tr>
+			<tr>
+				<td class="align-right">{{.CombinationsCount}}</td>
+				<td>combinations of name and IP</td>
+			</tr>
+			<tr>
+				<td class="align-right">{{.SightingsCount}}</td>
+				<td>sightings</td>
+			</tr>
+			<tr>
+				<td class="align-right">{{.ServersCount}}</td>
+				<td>servers</td>
+			</tr>
+		</table>
 
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=cyrillic,greek" rel="stylesheet">
-	<link href="/style.css" rel="stylesheet">
-</head>
+		<p>
+			All numbers are distinct (unique) counts.
+		</p>
 
-<body>
-
-	<header>
-		<h1 class="align-center">
-			<a class="subtle" href="/">CHEF</a>
-		</h1>
-	</header>
-
-	<main>
-		<div class="text">
-			<h2>Status Information</h2>
-
-			<table>
-				<tr>
-					<td class="align-right">{{.NamesCount}}</td>
-					<td>names</td>
-				</tr>
-				<tr>
-					<td class="align-right">{{.IPsCount}}</td>
-					<td>IPs</td>
-				</tr>
-				<tr>
-					<td class="align-right">{{.CombinationsCount}}</td>
-					<td>combinations of name and IP</td>
-				</tr>
-				<tr>
-					<td class="align-right">{{.SightingsCount}}</td>
-					<td>sightings</td>
-				</tr>
-				<tr>
-					<td class="align-right">{{.ServersCount}}</td>
-					<td>servers</td>
-				</tr>
-			</table>
-
-			<p>
-				All numbers are distinct (unique) counts.
-			</p>
-
-			<p>
-				The kidban ranges were last updated on {{.TimeOfLastKidbanUpdate}}.
-		</div>
-	</main>
-
-	<footer>
-		<small>
-			Sauerbraten spy by pix – <a href="/status">Status</a> – <a href="/info">More Information</a>
-		</small>
-	</footer>
-
-</body>
-</html>
+		<p>
+			The kidban ranges were last updated on {{.TimeOfLastKidbanUpdate}}.
+	</div>
+{{end}}

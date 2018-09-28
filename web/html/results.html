@@ -1,50 +1,29 @@
-<!doctype html>
+{{define "title"}}{{.Query}} – CHEF{{end}}
 
-<html>
-
-<head>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta charset="utf-8">
-
-	<title>{{.Query}} – CHEF</title>
-
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=cyrillic,greek" rel="stylesheet">
-	<link href="/style.css" rel="stylesheet">
-</head>
-
-<body>
+{{define "content"}}
+	<form class="searchform text-center" action="/lookup" method="get">
+		<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" value="{{.Query}}" autofocus />
+		<br />
+		<label for="sorting">sort by</label>
+		<select name="sorting">
+			<option value="name_frequency" {{if (eq .Sorting.Identifier "name_frequency")}} selected{{end}}>name frequency</option>
+			<option value="last_seen" {{if (eq .Sorting.Identifier "last_seen")}} selected{{end}}>last seen</option>
+		</select>
+		<br />
+		<label>
+			<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}} checked{{end}} /> force direct lookup
+		</label>
+		<br />
+		<input type="submit" value="Search" />
+	</form>
 
 	<header>
-		<h1 class="align-center">
-			<a class="subtle" href="/">CHEF</a>
-		</h1>
+		<h2>Results for {{.Query}}</h2>
+		<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
+			lookup{{end}} | sorted by {{.Sorting.DisplayName}}</small>
 	</header>
 
-	<main>
-		<form class="searchform text-center" action="/lookup" method="get">
-			<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" value="{{.Query}}" autofocus />
-			<br />
-			<label for="sorting">sort by</label>
-			<select name="sorting">
-				<option value="name_frequency" {{if (eq .Sorting.Identifier "name_frequency")}}selected{{end}}>name frequency</option>
-				<option value="last_seen" {{if (eq .Sorting.Identifier "last_seen")}}selected{{end}}>last seen</option>
-			</select>
-			<br />
-			<label>
-				<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}}checked{{end}} /> force direct lookup
-			</label>
-			<br />
-			<input type="submit" value="Search" />
-		</form>
-
-		<header>
-			<h2>Results for {{.Query}}</h2>
-			<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
-				lookup{{end}} | sorted by {{.Sorting.DisplayName}}</small>
-		</header>
-
-		{{if len .Results}}
+	{{if len .Results}}
 		<table>
 			<thead>
 				<tr>
@@ -58,38 +37,26 @@
 			</thead>
 			<tbody>
 				{{range .Results}}
-				<tr>
-					<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">
-						{{if ne .IP "0.0.0.0"}}
-						<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}}#tabId=at-a-glance">{{.IP}}</a>
-						{{else}} {{.IP}} {{end}}
-					</td>
-					<td>{{.Name}}</td>
-					<td class="align-center">{{timestring .Timestamp}}</td>
-					<td class="align-right">
-						<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.Server.IP}}#tabId=at-a-glance">{{.Server.IP}}</a>
-					</td>
-					<td class="align-right">{{.Server.Port}}</td>
-					<td>{{.Server.Description}}</td>
-				</tr>
+					<tr>
+						<td class="align-right{{if ipIsInKidbannedNetwork .IP}} orange{{end}}">
+							{{if ne .IP "0.0.0.0"}}
+								<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}}#tabId=at-a-glance">{{.IP}}</a>
+							{{else}} {{.IP}} {{end}}
+						</td>
+						<td>{{.Name}}</td>
+						<td class="align-center">{{timestring .Timestamp}}</td>
+						<td class="align-right">
+							<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.Server.IP}}#tabId=at-a-glance">{{.Server.IP}}</a>
+						</td>
+						<td class="align-right">{{.Server.Port}}</td>
+						<td>{{.Server.Description}}</td>
+					</tr>
 				{{end}}
 			</tbody>
 		</table>
-		{{else}}
+	{{else}}
 		<p>
 			Nothing found!
 		</p>
-		{{end}}
-	</main>
-
-	<footer>
-		<small>
-			Sauerbraten spy by pix –
-			<a href="/status">Status</a> –
-			<a href="/info">More Information</a>
-		</small>
-	</footer>
-
-</body>
-
-</html>
+	{{end}}
+{{end}}

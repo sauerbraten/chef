@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/sauerbraten/chef/db"
 	"github.com/sauerbraten/chef/kidban"
@@ -25,30 +28,33 @@ func NewServer() (*server, error) {
 	}, nil
 }
 
-func (s *server) frontPage() http.HandlerFunc {
-	tmpl := template.Must(template.ParseFiles("html/base.html", "html/front.html"))
+func staticPageFromTemplates(files ...string) http.HandlerFunc {
+	buf := new(bytes.Buffer)
+	err := template.
+		Must(template.ParseFiles(files...)).
+		Option("missingkey=error").
+		Execute(buf, nil)
+	if err != nil {
+		log.Fatalf("failed to build static page from template files (%s)\n", strings.Join(files, ", "))
+	}
+
+	buildTime, page := time.Now(), bytes.NewReader(buf.Bytes())
 
 	return func(resp http.ResponseWriter, req *http.Request) {
-		err := tmpl.Execute(resp, nil)
-		if err != nil {
-			log.Println(err)
-		}
+		http.ServeContent(resp, req, "", buildTime, page)
 	}
+}
+
+func (s *server) frontPage() http.HandlerFunc {
+	return staticPageFromTemplates("templates/base.tmpl", "templates/front.tmpl")
 }
 
 func (s *server) infoPage() http.HandlerFunc {
-	tmpl := template.Must(template.ParseFiles("html/base.html", "html/info.html"))
-
-	return func(resp http.ResponseWriter, req *http.Request) {
-		err := tmpl.Execute(resp, nil)
-		if err != nil {
-			log.Println(err)
-		}
-	}
+	return staticPageFromTemplates("templates/base.tmpl", "templates/info.tmpl")
 }
 
 func (s *server) statusPage() http.HandlerFunc {
-	tmpl := template.Must(template.ParseFiles("html/base.html", "html/status.html"))
+	tmpl := template.Must(template.ParseFiles("templates/base.tmpl", "templates/status.tmpl"))
 
 	return func(resp http.ResponseWriter, req *http.Request) {
 		status := struct {

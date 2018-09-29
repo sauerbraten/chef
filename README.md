@@ -23,7 +23,7 @@ To store these things, the database has four tables:
 - `servers`: stores server IP as string, server port as int, server description as string. An IP and a port together uniquely identify a server. If the description of a known server changes, the description is simply updated in this table.
 - `sightings`: stores entries consisting of the current time and SQLite rowids referencing a name, an IP and a server.
 
-For more information, see [`db/chef.sqlite.schema`](https://github.com/sauerbraten/chef/blob/master/db/chef.sqlite.schema).
+For more information, see [`chef.sqlite.schema`](https://github.com/sauerbraten/chef/blob/master/chef.sqlite.schema).
 
 
 ## Web Interface
@@ -44,14 +44,6 @@ The web interface periodically downloads a compiled list of „untrustworthy“ 
 
 The update URL and interval are specified in the configuration file; a sane interval is 60 minutes.
 
-## IRC Bot
-
-Lastly, there is an IRC bot. It has the following two commands:
-
-- `.names <name, IP, or IP range>` (aliases: `.name`, `.nicks`, `.n`)
-- `.lastseen <name, IP, or IP range>` (aliases: `.seen`, `.ls`, `.s`)
-
-It uses a *direct lookup* when you give an IP and a *2-step lookup* when you give a name as argument.
 
 ## „Name, IP or IP range“
 

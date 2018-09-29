@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"html/template"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -48,7 +49,6 @@ func staticPageFromTemplates(files ...string) http.HandlerFunc {
 	buf := new(bytes.Buffer)
 	err := template.
 		Must(template.ParseFiles(files...)).
-		Option("missingkey=error").
 		Execute(buf, nil)
 	if err != nil {
 		log.Fatalf("failed to build static page from template files (%s): %v\n", strings.Join(files, ", "), err)
@@ -58,6 +58,7 @@ func staticPageFromTemplates(files ...string) http.HandlerFunc {
 
 	return func(resp http.ResponseWriter, req *http.Request) {
 		http.ServeContent(resp, req, "", buildTime, page)
+		page.Seek(0, io.SeekStart)
 	}
 }
 

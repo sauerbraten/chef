@@ -6,46 +6,40 @@ import (
 )
 
 // Returns the SQLite rowid of the name specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
-func (db *Database) getPlayerNameId(name string) (nameId int64) {
-	db.mutex.Lock()
-	defer db.mutex.Unlock()
-
-	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameId)
+func (db *Database) getPlayerNameID(name string) (nameID int64) {
+	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameID)
 	if err == sql.ErrNoRows {
-		res, err := db.Exec("insert into `names` values (?)", name)
+		res, err := db.Exec("insert into `names` (`name`) values (?)", name)
 		if err != nil {
-			log.Fatal("error inserting new name:", err)
+			log.Fatalln("error inserting new name:", err)
 		}
 
-		nameId, err = res.LastInsertId()
+		nameID, err = res.LastInsertId()
 		if err != nil {
-			log.Fatal("error getting ID of newly inserted name:", err)
+			log.Fatalln("error getting ID of newly inserted name:", err)
 		}
 	} else if err != nil {
-		log.Fatal("error getting ID of name:", err)
+		log.Fatalln("error getting ID of name:", err)
 	}
 
 	return
 }
 
 // Returns the SQLite rowid of the IP specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
-func (db *Database) getPlayerIpId(ip int64) (ipId int64) {
-	db.mutex.Lock()
-	defer db.mutex.Unlock()
-
-	err := db.QueryRow("select `rowid` from `ips` where `ip` = ?", ip).Scan(&ipId)
+func (db *Database) getPlayerIpID(ip int64) (ipID int64) {
+	err := db.QueryRow("select `rowid` from `ips` where `ip` = ?", ip).Scan(&ipID)
 	if err == sql.ErrNoRows {
 		res, err := db.Exec("insert into `ips` values (?)", ip)
 		if err != nil {
-			log.Fatal("error inserting new IP:", err)
+			log.Fatalln("error inserting new IP:", err)
 		}
 
-		ipId, err = res.LastInsertId()
+		ipID, err = res.LastInsertId()
 		if err != nil {
-			log.Fatal("error getting ID of newly inserted IP:", err)
+			log.Fatalln("error getting ID of newly inserted IP:", err)
 		}
 	} else if err != nil {
-		log.Fatal("error getting ID of IP:", err)
+		log.Fatalln("error getting ID of IP:", err)
 	}
 
 	return

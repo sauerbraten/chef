@@ -1,21 +1,19 @@
 {
 	// SQlite database file name
-	"db_file_path": "~/.chef/chef.sqlite",
+	"db_file_path": "/home/alex/.chef/chef.sqlite",
 
 	// Master server address
 	"master_server_address": "sauerbraten.org:28787",
 
 	// Servers that should be scanned even when they are not on the master list (hidden) or when the master server is unreachable.
 	"extra_servers": [
-		// main public servers (mentioned here in case the master server goes down)
-		"noviteam.de:28785",
-		"sauer.woop.us:28785",
-		"vaq-clan.de:28785",
-		"darkkeepers.dk:28785"
+		// some public servers (mentioned here in case the master server goes down)
+		"45.63.41.136:28785", // Rigatoni Rugby
+		"62.75.213.175:1234" // CALM PARK
 	],
 
-	// Scan interval in seconds
-	"scan_interval_seconds": 60,
+	// Scan interval
+	"scan_interval": "60s",
 
 	// Verbosity of collector
 	"verbose": true

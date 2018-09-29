@@ -23,13 +23,13 @@ type Sighting struct {
 }
 
 // Adds an entry in the sightings table or does nothing if adding fails due to database constraints.
-func (db *Database) AddOrIgnoreSighting(name string, ip net.IP, serverId int64) {
+func (db *Database) AddOrIgnoreSighting(name string, ip net.IP, serverID int64) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	_, err := db.Exec("insert or ignore into `sightings` (`name`, `ip`, `server`) values (?, ?, ?)", db.getPlayerNameId(name), db.getPlayerIpId(ips.IP2Int(ip)), serverId)
+	_, err := db.Exec("insert or ignore into `sightings` (`name`, `ip`, `server`) values (?, ?, ?)", db.getPlayerNameID(name), db.getPlayerIpID(ips.IP2Int(ip)), serverID)
 	if err != nil {
-		log.Fatal("error inserting new sighting:", err)
+		log.Fatalln("error inserting new sighting:", err)
 	}
 }
 

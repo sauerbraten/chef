@@ -16,16 +16,20 @@ var storage *db.Database
 
 func main() {
 	var err error
-	storage, err = db.New()
+	storage, err = db.New(conf.DatabaseFilePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("could not initialize database:", err)
 	}
-	defer storage.Close()
+
+	scanInterval, err := time.ParseDuration(conf.ScanInterval)
+	if err != nil {
+		log.Fatalln("could not parse scan interval:", err)
+	}
 
 	ms := newMasterServer(conf.MasterServerAddress)
 
-	for start := range time.Tick(conf.ScanIntervalSeconds * time.Second) {
-
+	t := time.NewTicker(scanInterval)
+	for start := time.Now(); true; start = <-t.C {
 		log.Println("refreshing server list after tick at", start.String())
 
 		resolveConfigServers()
@@ -38,8 +42,8 @@ func main() {
 		for _, serverAddress := range list {
 			wg.Add(1)
 			go func(serverAddress *net.UDPAddr) {
+				defer wg.Done()
 				scanServer(serverAddress)
-				wg.Done()
 			}(serverAddress)
 		}
 
@@ -118,7 +122,7 @@ func scanServer(serverAddress *net.UDPAddr) {
 
 	verbose("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
-	serverID := storage.GetServerId(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
+	serverID := storage.GetServerID(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
 
 	for _, playerInfo := range playerInfos {
 		// don't save bot sightings

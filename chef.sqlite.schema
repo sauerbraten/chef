@@ -7,7 +7,8 @@ drop table if exists `ips`;
 drop table if exists `names`;
 
 create table `names` (
-	`name` text not null primary key
+	`id` integer primary key autoincrement,
+	`name` text not null unique
 );
 
 create table `ips` (
@@ -15,6 +16,7 @@ create table `ips` (
 );
 
 create table `servers` (
+	`id` integer primary key autoincrement,
 	`ip` integer not null,
 	`port` integer not null,
 	`description` text not null,
@@ -22,9 +24,9 @@ create table `servers` (
 );
 
 create table `sightings` (
-	`name` integer not null references `names`(`rowid`),
-	`ip` integer references `ips`(`rowid`),
-	`server` integer not null references `servers`(`rowid`),
+	`name` integer not null references `names`(`id`),
+	`ip` integer references `ips`(`ip`),
+	`server` integer not null references `servers`(`id`),
 	`timestamp` integer not null default (strftime('%s', 'now')),
 	unique (`ip`, `name`, `timestamp`)
 );

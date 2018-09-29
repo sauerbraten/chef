@@ -23,7 +23,7 @@ type server struct {
 }
 
 func NewServer() (*server, error) {
-	storage, err := db.New()
+	storage, err := db.New(conf.DatabaseFilePath)
 	if err != nil {
 		return nil, errors.New("could not create server: database initialization failed: " + err.Error())
 	}

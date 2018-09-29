@@ -7,6 +7,7 @@ import (
 )
 
 type config struct {
+	DatabaseFilePath     string `json:"db_file_path"`
 	WebInterfaceAddress  string `json:"web_interface_address"`
 	KidbanRangesURL      string `json:"kidban_ranges_url"`
 	KidbanUpdateInterval string `json:"kidban_update_interval"`

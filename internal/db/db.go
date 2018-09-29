@@ -12,10 +12,19 @@ type Database struct {
 	*sql.DB
 }
 
-func New() (*Database, error) {
-	db, err := sql.Open("sqlite3", conf.DatabaseFilePath)
+func New(path string) (*Database, error) {
+	db, err := sql.Open("sqlite3", path)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("pragma foreign_keys = on;")
+	if err != nil {
+		return nil, err
+	}
+
 	return &Database{
 		mutex: sync.Mutex{},
 		DB:    db,
-	}, err
+	}, nil
 }

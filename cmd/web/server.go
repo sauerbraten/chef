@@ -14,17 +14,29 @@ import (
 )
 
 type server struct {
-	db *db.Database
+	db     *db.Database
+	kidban *kidban.Checker
 }
 
 func NewServer() (*server, error) {
 	storage, err := db.New()
 	if err != nil {
-		return nil, errors.New("could not create server: " + err.Error())
+		return nil, errors.New("could not create server: database initialization failed: " + err.Error())
+	}
+
+	kidbanUpdateInterval, err := time.ParseDuration(conf.KidbanUpdateInterval)
+	if err != nil {
+		return nil, errors.New("could not create server: parsing kidban refresh interval failed: " + err.Error())
+	}
+
+	kidban, err := kidban.NewChecker(conf.KidbanRangesURL, kidbanUpdateInterval)
+	if err != nil {
+		return nil, errors.New("could not create server: kidban initialization failed: " + err.Error())
 	}
 
 	return &server{
-		db: storage,
+		db:     storage,
+		kidban: kidban,
 	}, nil
 }
 
@@ -62,7 +74,7 @@ func (s *server) statusPage() http.HandlerFunc {
 			TimeOfLastKidbanUpdate string
 		}{
 			Status:                 s.db.Status(),
-			TimeOfLastKidbanUpdate: kidban.GetTimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
+			TimeOfLastKidbanUpdate: s.kidban.TimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
 		}
 
 		err := tmpl.Execute(resp, status)

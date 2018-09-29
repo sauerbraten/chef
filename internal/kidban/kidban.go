@@ -13,26 +13,35 @@ import (
 	"github.com/sauerbraten/chef/internal/ips"
 )
 
-// runs after init() in config.go because of lexical order when files are passed to the compiler
-func init() {
-	go PeriodicallyUpdateKidbanRanges()
-}
+type Checker struct {
+	source          string
+	refreshInterval time.Duration
 
-var (
 	kidbannedNetworks []*net.IPNet
-	lock              sync.RWMutex
+	timeOfLastUpdate  time.Time
 
-	timeOfLastUpdate time.Time
-)
-
-func GetTimeOfLastUpdate() time.Time {
-	return timeOfLastUpdate
+	lock sync.RWMutex
 }
 
-func IsInKidbannedNetwork(ip net.IP) bool {
-	lock.RLock()
-	defer lock.RUnlock()
-	for _, net := range kidbannedNetworks {
+func NewChecker(source string, refreshInterval time.Duration) (*Checker, error) {
+	c := &Checker{
+		source:          source,
+		refreshInterval: refreshInterval,
+	}
+
+	go c.periodicallyUpdateKidbanRanges()
+
+	return c, nil
+}
+
+func (c *Checker) TimeOfLastUpdate() time.Time {
+	return c.timeOfLastUpdate
+}
+
+func (c *Checker) IsBanned(ip net.IP) bool {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	for _, net := range c.kidbannedNetworks {
 		if net.Contains(ip) {
 			return true
 		}
@@ -41,30 +50,30 @@ func IsInKidbannedNetwork(ip net.IP) bool {
 	return false
 }
 
-func PeriodicallyUpdateKidbanRanges() {
-	ticker := time.Tick(conf.UpdateInterval * time.Minute)
-	timeOfLastUpdate = time.Now()
+func (c *Checker) periodicallyUpdateKidbanRanges() {
+	ticker := time.Tick(c.refreshInterval)
+	c.timeOfLastUpdate = time.Now()
 
 	for {
-		networks, err := downloadKidbannedNetworks()
+		networks, err := c.downloadKidbannedNetworks()
 		if err != nil {
 			log.Println("error fetching kidbanned networks:", err)
 			<-ticker // don't set time of last update since this request failed
 			continue
 		}
 
-		lock.Lock()
-		kidbannedNetworks = networks
-		lock.Unlock()
+		c.lock.Lock()
+		c.kidbannedNetworks = networks
+		c.lock.Unlock()
 
 		log.Println("updated kidban subnets list")
 
-		timeOfLastUpdate = <-ticker
+		c.timeOfLastUpdate = <-ticker
 	}
 }
 
-func downloadKidbannedNetworks() (downloadedNetworks []*net.IPNet, err error) {
-	resp, err := http.Get(conf.KidbanRangesURL)
+func (c *Checker) downloadKidbannedNetworks() (downloadedNetworks []*net.IPNet, err error) {
+	resp, err := http.Get(c.source)
 	if err != nil {
 		return
 	}

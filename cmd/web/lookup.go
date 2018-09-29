@@ -11,21 +11,15 @@ import (
 
 	"github.com/sauerbraten/chef/internal/db"
 	"github.com/sauerbraten/chef/internal/ips"
-	"github.com/sauerbraten/chef/internal/kidban"
 )
-
-func TimestampToString(timestamp int64) string {
-	return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05")
-}
-
-func IsInKidbannedNetwork(ipString string) bool {
-	return kidban.IsInKidbannedNetwork(net.ParseIP(ipString))
-}
 
 func (s *server) lookup() http.HandlerFunc {
 	tmpl, err := template.
 		New("base.tmpl"). // must be the base template (entry point) so templates are associated correctly by ParseFiles()
-		Funcs(template.FuncMap{"timestring": TimestampToString, "ipIsInKidbannedNetwork": IsInKidbannedNetwork}).
+		Funcs(template.FuncMap{
+			"timestring": func(timestamp int64) string { return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05") },
+			"kidbanned":  func(ip string) bool { return s.kidban.IsBanned(net.ParseIP(ip)) },
+		}).
 		ParseFiles("templates/base.tmpl", "templates/results.tmpl")
 	if err != nil {
 		log.Fatalln(err)

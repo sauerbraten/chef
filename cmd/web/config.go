@@ -7,7 +7,9 @@ import (
 )
 
 type config struct {
-	WebInterfaceAddress string `json:"web_interface_address"`
+	WebInterfaceAddress  string `json:"web_interface_address"`
+	KidbanRangesURL      string `json:"kidban_ranges_url"`
+	KidbanUpdateInterval string `json:"kidban_update_interval"`
 }
 
 var conf config

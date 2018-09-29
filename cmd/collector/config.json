@@ -1,6 +1,6 @@
 {
 	// SQlite database file name
-	"db_file_path": "/home/alex/.chef/chef.sqlite",
+	"db_file_path": "./chef.sqlite",
 
 	// Master server address
 	"master_server_address": "sauerbraten.org:28787",

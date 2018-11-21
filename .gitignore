@@ -1,3 +1,2 @@
-cmd/collector/collector
-cmd/web/web
 chef.sqlite
+cmd/chef/chef

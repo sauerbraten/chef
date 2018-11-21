@@ -1,4 +1,4 @@
-package main
+package master
 
 import (
 	"bufio"
@@ -7,16 +7,20 @@ import (
 	"time"
 )
 
-type masterServer struct {
-	addr string
+type Server struct {
+	addr    string
+	timeout time.Duration
 }
 
-func newMasterServer(addr string) *masterServer {
-	return &masterServer{addr: addr}
+func New(addr string, timeout time.Duration) *Server {
+	return &Server{
+		addr:    addr,
+		timeout: timeout,
+	}
 }
 
-func (ms *masterServer) getServerList() (servers map[string]*net.UDPAddr, err error) {
-	conn, err := net.DialTimeout("tcp", ms.addr, 15*time.Second)
+func (ms *Server) ServerList() (servers map[string]*net.UDPAddr, err error) {
+	conn, err := net.DialTimeout("tcp", ms.addr, ms.timeout)
 	if err != nil {
 		return
 	}
@@ -50,9 +54,10 @@ func (ms *masterServer) getServerList() (servers map[string]*net.UDPAddr, err er
 		}
 
 		msg = strings.TrimPrefix(msg, "addserver ")
+		msg = strings.TrimSpace(msg)
 
 		// 12.23.34.45 28785 → 12.23.34.45:28785
-		msg = strings.Replace(strings.TrimSpace(msg), " ", ":", -1)
+		msg = strings.Replace(msg, " ", ":", -1)
 
 		addr, err = net.ResolveUDPAddr("udp", msg)
 		if err != nil {

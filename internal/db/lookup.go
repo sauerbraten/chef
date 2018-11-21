@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/sauerbraten/chef/internal/ips"
+	"github.com/sauerbraten/chef/pkg/ips"
 )
 
 type Sorting struct {

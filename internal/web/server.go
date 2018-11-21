@@ -1,9 +1,8 @@
-package main
+package web
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"html/template"
 	"io"
 	"log"
@@ -13,36 +12,55 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+
 	"github.com/sauerbraten/chef/internal/db"
-	"github.com/sauerbraten/chef/internal/ips"
-	"github.com/sauerbraten/chef/internal/kidban"
+	"github.com/sauerbraten/chef/pkg/ips"
+	"github.com/sauerbraten/chef/pkg/kidban"
 )
 
-type server struct {
-	db     *db.Database
+type Server struct {
+	db *db.Database
+
+	chi.Router
 	kidban *kidban.Checker
 }
 
-func NewServer() (*server, error) {
-	storage, err := db.New(conf.DatabaseFilePath)
-	if err != nil {
-		return nil, errors.New("could not create server: database initialization failed: " + err.Error())
-	}
+func New(db *db.Database, kidban *kidban.Checker) *Server {
+	r := chi.NewRouter()
+	r.Use(
+		middleware.RedirectSlashes,
+		requestLogging,
+	)
 
-	kidbanUpdateInterval, err := time.ParseDuration(conf.KidbanUpdateInterval)
-	if err != nil {
-		return nil, errors.New("could not create server: parsing kidban refresh interval failed: " + err.Error())
-	}
+	s := &Server{
+		db: db,
 
-	kidban, err := kidban.NewChecker(conf.KidbanRangesURL, kidbanUpdateInterval)
-	if err != nil {
-		return nil, errors.New("could not create server: kidban initialization failed: " + err.Error())
-	}
-
-	return &server{
-		db:     storage,
+		Router: r,
 		kidban: kidban,
-	}, nil
+	}
+
+	r.HandleFunc("/", s.frontPage())
+	r.HandleFunc("/info", s.infoPage())
+	r.HandleFunc("/status", s.statusPage())
+	r.HandleFunc("/lookup", s.lookup())
+	r.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
+
+	return s
+
+}
+
+func requestLogging(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		remoteAddr := req.Header.Get("X-Real-IP")
+		if remoteAddr == "" {
+			remoteAddr = req.RemoteAddr
+		}
+		log.Println(strings.Split(remoteAddr, ":")[0], "requested", req.URL.String())
+
+		h.ServeHTTP(resp, req)
+	})
 }
 
 func staticPageFromTemplates(files ...string) http.HandlerFunc {
@@ -62,15 +80,15 @@ func staticPageFromTemplates(files ...string) http.HandlerFunc {
 	}
 }
 
-func (s *server) frontPage() http.HandlerFunc {
+func (s *Server) frontPage() http.HandlerFunc {
 	return staticPageFromTemplates("templates/base.tmpl", "templates/front.tmpl")
 }
 
-func (s *server) infoPage() http.HandlerFunc {
+func (s *Server) infoPage() http.HandlerFunc {
 	return staticPageFromTemplates("templates/base.tmpl", "templates/info.tmpl")
 }
 
-func (s *server) statusPage() http.HandlerFunc {
+func (s *Server) statusPage() http.HandlerFunc {
 	tmpl := template.Must(template.ParseFiles("templates/base.tmpl", "templates/status.tmpl"))
 
 	return func(resp http.ResponseWriter, req *http.Request) {
@@ -89,7 +107,7 @@ func (s *server) statusPage() http.HandlerFunc {
 	}
 }
 
-func (s *server) lookup() http.HandlerFunc {
+func (s *Server) lookup() http.HandlerFunc {
 	tmpl, err := template.
 		New("base.tmpl"). // must be the base template (entry point) so templates are associated correctly by ParseFiles()
 		Funcs(template.FuncMap{

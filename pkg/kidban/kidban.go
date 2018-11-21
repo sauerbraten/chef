@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sauerbraten/chef/internal/ips"
+	"github.com/sauerbraten/chef/pkg/ips"
 )
 
 type Checker struct {

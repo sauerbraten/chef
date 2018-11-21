@@ -2,6 +2,9 @@
 	// SQlite database file name
 	"db_file_path": "./chef.sqlite",
 
+
+	// Collector
+
 	// Master server address
 	"master_server_address": "sauerbraten.org:28787",
 
@@ -16,5 +19,17 @@
 	"scan_interval": "60s",
 
 	// Verbosity of collector
-	"verbose": true
+	"verbose": true,
+
+
+	// Web interface
+
+	// Address for the web interface to listen on
+	"web_interface_address": "localhost:8080",
+
+	// URL where to get kidbanned URLs (simple CIDR-notated IP ranges; one range per line)
+	"kidban_ranges_url": "https://raw.githubusercontent.com/pisto/ASkidban/master/compiled/ipv4",
+
+	// Interval in which to update the kidbanned ranges
+	"kidban_update_interval": "24h"
 }

@@ -2,34 +2,37 @@
 	// SQlite database file name
 	"db_file_path": "./chef.sqlite",
 
+	// code version
+	"revision": "<filled in by CI service>",
+
 
 	// Collector
 
-	// Master server address
+	// master server address
 	"master_server_address": "sauerbraten.org:28787",
 
-	// Servers that should be scanned even when they are not on the master list (hidden) or when the master server is unreachable.
+	// servers that should be scanned even when they are not on the master list (hidden) or when the master server is unreachable.
 	"extra_servers": [
 		// some public servers (mentioned here in case the master server goes down)
 		"45.63.41.136:28785", // Rigatoni Rugby
 		"62.75.213.175:1234" // CALM PARK
 	],
 
-	// Scan interval
+	// scan interval
 	"scan_interval": "60s",
 
-	// Verbosity of collector
+	// verbosity of collector
 	"verbose": true,
 
 
 	// Web interface
 
-	// Address for the web interface to listen on
+	// address for the web interface to listen on
 	"web_interface_address": "localhost:8082",
 
 	// URL where to get kidbanned URLs (simple CIDR-notated IP ranges; one range per line)
 	"kidban_ranges_url": "https://raw.githubusercontent.com/pisto/ASkidban/master/compiled/ipv4",
 
-	// Interval in which to update the kidbanned ranges
+	// interval in which to update the kidbanned ranges
 	"kidban_update_interval": "24h"
 }

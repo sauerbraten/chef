@@ -22,6 +22,8 @@ type config struct {
 
 	webInterfaceAddress string
 	kidban              *kidban.Checker
+
+	revision string
 }
 
 var conf config
@@ -43,6 +45,8 @@ func init() {
 		WebInterfaceAddress  string `json:"web_interface_address"`
 		KidbanRangesURL      string `json:"kidban_ranges_url"`
 		KidbanUpdateInterval string `json:"kidban_update_interval"`
+
+		Revision string `json:"revision"`
 	}{}
 
 	err := jsonfile.ParseFile(configFilePath, &_conf)
@@ -82,5 +86,7 @@ func init() {
 
 		webInterfaceAddress: _conf.WebInterfaceAddress,
 		kidban:              kidban,
+
+		revision: _conf.Revision,
 	}
 }

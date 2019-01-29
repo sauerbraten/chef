@@ -95,9 +95,11 @@ func (w *WebInterface) statusPage() http.HandlerFunc {
 		status := struct {
 			db.Status
 			TimeOfLastKidbanUpdate string
+			Revision               string
 		}{
 			Status:                 w.db.Status(),
 			TimeOfLastKidbanUpdate: w.kidban.TimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
+			Revision:               conf.revision,
 		}
 
 		err := tmpl.Execute(resp, status)

@@ -1,6 +1,6 @@
 {
 	// SQlite database file name
-	"db_file_path": "~/.chef.sqlite",
+	"db_file_path": "./chef.sqlite",
 
 
 	// Collector

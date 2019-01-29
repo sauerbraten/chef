@@ -1,4 +1,3 @@
-pragma journal_mode = wal;
 pragma foreign_keys = on;
 
 drop table if exists `sightings`;

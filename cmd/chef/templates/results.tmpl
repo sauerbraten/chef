@@ -3,10 +3,10 @@
 {{define "content"}}
 	{{template "search_form" .}}
 
-	<header>
+	<header class="results-header">
 		<h2>Results for {{.Query}}</h2>
 		<small>{{if .InterpretedAsName}}name{{else}}IP range{{end}} | {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
-			lookup{{end}} | {{if .Last6MonthsOnly}}last 6 months{{else}}all time{{end}} | sorted by {{.Sorting.DisplayName}}</small>
+			lookup{{end}} | {{if .Last90DaysOnly}}last 90 days{{else}}all time{{end}} | sorted by {{.Sorting.DisplayName}}</small>
 	</header>
 
 	{{if len .Results}}

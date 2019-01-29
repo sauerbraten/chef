@@ -17,10 +17,6 @@ body, input, select {
 header, main, footer {
 	width: 100%;
 	display: flex;
-	flex-flow: row wrap;
-	justify-content: space-between;
-	align-items: baseline;
-	align-content: flex-start;
 }
 
 header a, header a:visited {
@@ -29,6 +25,7 @@ header a, header a:visited {
 }
 
 main {
+	flex-flow: column nowrap;
 	flex-grow: 1;
 }
 
@@ -97,6 +94,13 @@ a.subtle:hover {
 .text {
 	max-width: 48em;
 	margin: 0 auto;
+}
+
+.results-header {
+	flex-flow: row wrap;
+	justify-content: space-between;
+	align-items: baseline;
+	align-content: flex-start;
 }
 
 .align-right {

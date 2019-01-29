@@ -1,4 +1,4 @@
-package web
+package main
 
 import (
 	"bytes"
@@ -20,34 +20,34 @@ import (
 	"github.com/sauerbraten/chef/pkg/kidban"
 )
 
-type Server struct {
+type WebInterface struct {
 	db *db.Database
 
 	chi.Router
 	kidban *kidban.Checker
 }
 
-func New(db *db.Database, kidban *kidban.Checker) *Server {
+func NewWebInterface(db *db.Database, kidban *kidban.Checker) *WebInterface {
 	r := chi.NewRouter()
 	r.Use(
 		middleware.RedirectSlashes,
 		requestLogging,
 	)
 
-	s := &Server{
+	w := &WebInterface{
 		db: db,
 
 		Router: r,
 		kidban: kidban,
 	}
 
-	r.HandleFunc("/", s.frontPage())
-	r.HandleFunc("/info", s.infoPage())
-	r.HandleFunc("/status", s.statusPage())
-	r.HandleFunc("/lookup", s.lookup())
+	r.HandleFunc("/", w.frontPage())
+	r.HandleFunc("/info", w.infoPage())
+	r.HandleFunc("/status", w.statusPage())
+	r.HandleFunc("/lookup", w.lookup())
 	r.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
-	return s
+	return w
 
 }
 
@@ -80,15 +80,15 @@ func staticPageFromTemplates(files ...string) http.HandlerFunc {
 	}
 }
 
-func (s *Server) frontPage() http.HandlerFunc {
+func (w *WebInterface) frontPage() http.HandlerFunc {
 	return staticPageFromTemplates("templates/base.tmpl", "templates/search_form.tmpl", "templates/front.tmpl")
 }
 
-func (s *Server) infoPage() http.HandlerFunc {
+func (w *WebInterface) infoPage() http.HandlerFunc {
 	return staticPageFromTemplates("templates/base.tmpl", "templates/info.tmpl")
 }
 
-func (s *Server) statusPage() http.HandlerFunc {
+func (w *WebInterface) statusPage() http.HandlerFunc {
 	tmpl := template.Must(template.ParseFiles("templates/base.tmpl", "templates/status.tmpl"))
 
 	return func(resp http.ResponseWriter, req *http.Request) {
@@ -96,8 +96,8 @@ func (s *Server) statusPage() http.HandlerFunc {
 			db.Status
 			TimeOfLastKidbanUpdate string
 		}{
-			Status:                 s.db.Status(),
-			TimeOfLastKidbanUpdate: s.kidban.TimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
+			Status:                 w.db.Status(),
+			TimeOfLastKidbanUpdate: w.kidban.TimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
 		}
 
 		err := tmpl.Execute(resp, status)
@@ -107,12 +107,12 @@ func (s *Server) statusPage() http.HandlerFunc {
 	}
 }
 
-func (s *Server) lookup() http.HandlerFunc {
+func (w *WebInterface) lookup() http.HandlerFunc {
 	tmpl, err := template.
 		New("base.tmpl"). // must be the base template (entry point) so templates are associated correctly by ParseFiles()
 		Funcs(template.FuncMap{
 			"timestring": func(timestamp int64) string { return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05") },
-			"kidbanned":  func(ip string) bool { return s.kidban.IsBanned(net.ParseIP(ip)) },
+			"kidbanned":  func(ip string) bool { return w.kidban.IsBanned(net.ParseIP(ip)) },
 		}).
 		Option("missingkey=error").
 		ParseFiles("templates/base.tmpl", "templates/search_form.tmpl", "templates/results.tmpl")
@@ -147,7 +147,7 @@ func (s *Server) lookup() http.HandlerFunc {
 			}
 		}
 
-		finishedLookup := s.db.Lookup(nameOrIP, sorting, last6MonthsOnly, directLookupForced)
+		finishedLookup := w.db.Lookup(nameOrIP, sorting, last6MonthsOnly, directLookupForced)
 
 		if req.FormValue("format") == "json" {
 			err := json.NewEncoder(resp).Encode(finishedLookup)

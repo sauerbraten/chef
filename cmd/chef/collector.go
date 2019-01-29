@@ -1,4 +1,4 @@
-package collector
+package main
 
 import (
 	"log"
@@ -22,7 +22,7 @@ type Collector struct {
 	verbose      bool
 }
 
-func New(
+func NewCollector(
 	db *db.Database,
 	ms *master.Server,
 	scanInterval time.Duration,

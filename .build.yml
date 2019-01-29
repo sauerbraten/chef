@@ -6,18 +6,21 @@ sources:
   - https://git.sr.ht/~sauerbraten/chef
 environment:
   DEPLOY: chef.sauerworld.org
+  GOPATH: $HOME
 secrets:
   - 98c1b481-b37f-452f-872a-8f8fa1833249
 tasks:
-  - setup: |
-      ssh $DEPLOY 'if [ ! -f .z ] ; then echo "yes"; fi'
   - build: |
-      cd chef/cmd/chef
+      mkdir -p src/github.com/sauerbraten
+      mv chef src/github.com/sauerbraten/
+      cd src/github.com/sauerbraten/chef/cmd/chef
+      go get
       go build
   - deploy: |
-      cd chef
-      rsync chef.sqlite.schema $DEPLOY:~/chef/
-      ssh $DEPLOY 'if [ ! -f ~/.chef.sqlite ] ; then sqlite3 ~/.chef.sqlite < chef.sqlite.schema ; fi'
+      cd src/github.com/sauerbraten/chef
+      sshopts="ssh -o StrictHostKeyChecking=no"
+      rsync --rsh="$sshopts" -rP chef.sqlite.schema ci@$DEPLOY:~/chef/
+      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'if [ ! -f ~/.chef.sqlite ] ; then sqlite3 ~/.chef.sqlite < chef.sqlite.schema ; fi'
       cd cmd/chef
-      rsync css templates config.json chef $DEPLOY:~/chef/
-      ssh $DEPLOY 'killall chef && nohup ./chef &>> logs/chef.txt &'
+      rsync --rsh="$sshopts" -rP css templates config.json chef ci@$DEPLOY:~/chef/
+      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'killall chef && nohup ./chef &>> logs/chef.txt &'

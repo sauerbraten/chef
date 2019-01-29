@@ -1,6 +1,6 @@
 {
 	// SQlite database file name
-	"db_file_path": "./chef.sqlite",
+	"db_file_path": "~/.chef.sqlite",
 
 
 	// Collector
@@ -25,7 +25,7 @@
 	// Web interface
 
 	// Address for the web interface to listen on
-	"web_interface_address": "localhost:8080",
+	"web_interface_address": "localhost:8082",
 
 	// URL where to get kidbanned URLs (simple CIDR-notated IP ranges; one range per line)
 	"kidban_ranges_url": "https://raw.githubusercontent.com/pisto/ASkidban/master/compiled/ipv4",

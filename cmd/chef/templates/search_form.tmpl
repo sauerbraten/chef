@@ -16,7 +16,7 @@
 			<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}} checked{{end}} /><span>force direct lookup</span>
 		</label>
 		<label>
-			<input type="checkbox" name="search_old" value="true" {{if (not .Last6MonthsOnly)}} checked{{end}} /><span>include sightings older than 6 months</span>
+			<input type="checkbox" name="search_old" value="true" {{if (not .Last90DaysOnly)}} checked{{end}} /><span>include sightings older than 90 days</span>
 		</label>
 		<input type="submit" value="Search" />
 	</form>

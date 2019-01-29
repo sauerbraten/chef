@@ -130,7 +130,7 @@ func (w *WebInterface) lookup() http.HandlerFunc {
 			sorting = db.ByLastSeen
 		}
 
-		last6MonthsOnly := !(req.FormValue("search_old") == "true")
+		last90DaysOnly := !(req.FormValue("search_old") == "true")
 
 		directLookupForced := req.FormValue("direct") == "true"
 
@@ -149,7 +149,7 @@ func (w *WebInterface) lookup() http.HandlerFunc {
 			}
 		}
 
-		finishedLookup := w.db.Lookup(nameOrIP, sorting, last6MonthsOnly, directLookupForced)
+		finishedLookup := w.db.Lookup(nameOrIP, sorting, last90DaysOnly, directLookupForced)
 
 		if req.FormValue("format") == "json" {
 			err := json.NewEncoder(resp).Encode(finishedLookup)

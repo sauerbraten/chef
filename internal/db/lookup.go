@@ -32,22 +32,22 @@ type FinishedLookup struct {
 	Query                 string     `json:"query"`
 	InterpretedAsName     bool       `json:"interpreted_as_name"`
 	PerformedDirectLookup bool       `json:"direct"`
-	Last6MonthsOnly       bool       `json:"last_6_months_only"`
+	Last90DaysOnly        bool       `json:"last_6_months_only"`
 	Sorting               Sorting    `json:"sorting"`
 	Results               []Sighting `json:"results"`
 }
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
-func (db *Database) Lookup(nameOrIP string, sorting Sorting, last6MonthsOnly bool, directLookupForced bool) FinishedLookup {
+func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool, directLookupForced bool) FinishedLookup {
 	if ips.IsPartialOrFullCIDR(nameOrIP) {
 		lowest, highest := ips.GetDecimalBoundaries(ips.GetSubnet(nameOrIP))
 		return FinishedLookup{
 			Query:                 nameOrIP,
 			InterpretedAsName:     false,
 			PerformedDirectLookup: true,
-			Last6MonthsOnly:       last6MonthsOnly,
+			Last90DaysOnly:        last90DaysOnly,
 			Sorting:               sorting,
-			Results:               db.lookupIpRange(lowest, highest, sorting, last6MonthsOnly),
+			Results:               db.lookupIpRange(lowest, highest, sorting, last90DaysOnly),
 		}
 	}
 
@@ -55,23 +55,23 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, last6MonthsOnly boo
 		Query:                 nameOrIP,
 		InterpretedAsName:     true,
 		PerformedDirectLookup: directLookupForced,
-		Last6MonthsOnly:       last6MonthsOnly,
+		Last90DaysOnly:        last90DaysOnly,
 		Sorting:               sorting,
-		Results:               db.lookupName(nameOrIP, sorting, last6MonthsOnly, directLookupForced),
+		Results:               db.lookupName(nameOrIP, sorting, last90DaysOnly, directLookupForced),
 	}
 }
 
-func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting, last6MonthsOnly bool) []Sighting {
+func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting, last90DaysOnly bool) []Sighting {
 	condition := "`sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?)"
-	if last6MonthsOnly {
-		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-6 months')"
+	if last90DaysOnly {
+		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
 	}
 	return db.lookup(condition, sorting, lowestIpInRange, highestIpInRange)
 }
 
-func (db *Database) lookupName(name string, sorting Sorting, last6MonthsOnly bool, directLookupForced bool) []Sighting {
+func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool, directLookupForced bool) []Sighting {
 	condition := "`sightings`.`name` in (select `rowid` from `names` where `name` like ?)"
-	if last6MonthsOnly {
+	if last90DaysOnly {
 		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-6 months')"
 	}
 	if !directLookupForced {

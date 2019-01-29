@@ -81,7 +81,7 @@ func staticPageFromTemplates(files ...string) http.HandlerFunc {
 }
 
 func (s *Server) frontPage() http.HandlerFunc {
-	return staticPageFromTemplates("templates/base.tmpl", "templates/front.tmpl")
+	return staticPageFromTemplates("templates/base.tmpl", "templates/search_form.tmpl", "templates/front.tmpl")
 }
 
 func (s *Server) infoPage() http.HandlerFunc {
@@ -115,7 +115,7 @@ func (s *Server) lookup() http.HandlerFunc {
 			"kidbanned":  func(ip string) bool { return s.kidban.IsBanned(net.ParseIP(ip)) },
 		}).
 		Option("missingkey=error").
-		ParseFiles("templates/base.tmpl", "templates/results.tmpl")
+		ParseFiles("templates/base.tmpl", "templates/search_form.tmpl", "templates/results.tmpl")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -127,6 +127,8 @@ func (s *Server) lookup() http.HandlerFunc {
 		if req.FormValue("sorting") == db.ByLastSeen.Identifier {
 			sorting = db.ByLastSeen
 		}
+
+		last6MonthsOnly := !(req.FormValue("search_old") == "true")
 
 		directLookupForced := req.FormValue("direct") == "true"
 
@@ -145,7 +147,7 @@ func (s *Server) lookup() http.HandlerFunc {
 			}
 		}
 
-		finishedLookup := s.db.Lookup(nameOrIP, sorting, directLookupForced)
+		finishedLookup := s.db.Lookup(nameOrIP, sorting, last6MonthsOnly, directLookupForced)
 
 		if req.FormValue("format") == "json" {
 			err := json.NewEncoder(resp).Encode(finishedLookup)

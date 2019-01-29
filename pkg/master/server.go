@@ -7,20 +7,24 @@ import (
 	"time"
 )
 
+type ServerList map[string]*net.UDPAddr
+
 type Server struct {
 	addr    string
 	timeout time.Duration
+	cache   ServerList // to re-use resolved UDP addresses
 }
 
 func New(addr string, timeout time.Duration) *Server {
 	return &Server{
 		addr:    addr,
 		timeout: timeout,
+		cache:   ServerList{},
 	}
 }
 
-func (ms *Server) ServerList() (servers map[string]*net.UDPAddr, err error) {
-	conn, err := net.DialTimeout("tcp", ms.addr, ms.timeout)
+func (s *Server) ServerList() (servers ServerList, err error) {
+	conn, err := net.DialTimeout("tcp", s.addr, s.timeout)
 	if err != nil {
 		return
 	}
@@ -43,8 +47,7 @@ func (ms *Server) ServerList() (servers map[string]*net.UDPAddr, err error) {
 
 	// receive list
 
-	var addr *net.UDPAddr
-	servers = map[string]*net.UDPAddr{}
+	servers = ServerList{}
 
 	for in.Scan() {
 		msg := in.Text()
@@ -59,9 +62,13 @@ func (ms *Server) ServerList() (servers map[string]*net.UDPAddr, err error) {
 		// 12.23.34.45 28785 → 12.23.34.45:28785
 		msg = strings.Replace(msg, " ", ":", -1)
 
-		addr, err = net.ResolveUDPAddr("udp", msg)
-		if err != nil {
-			return
+		addr, ok := s.cache[msg]
+		if !ok {
+			addr, err = net.ResolveUDPAddr("udp", msg)
+			if err != nil {
+				return
+			}
+			s.cache[msg] = addr // cache resolved address
 		}
 
 		servers[addr.String()] = addr

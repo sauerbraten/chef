@@ -5,21 +5,7 @@
 {{end}}
 
 {{define "content"}}
-	<form class="searchform text-center" action="/lookup" method="get">
-		<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" autofocus />
-		<br />
-		<label for="sorting">sort by</label>
-		<select name="sorting">
-			<option value="name_frequency" selected>name frequency</option>
-			<option value="last_seen">last seen</option>
-		</select>
-		<br />
-		<label>
-			<input type="checkbox" name="direct" value="true" /> force direct lookup
-		</label>
-		<br />
-		<input type="submit" value="Search" />
-	</form>
+	{{template "search_form"}}
 
 	<aside class="text">
 		<h2>What is this?</h2>

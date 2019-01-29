@@ -1,26 +1,12 @@
 {{define "title"}}{{.Query}} – CHEF{{end}}
 
 {{define "content"}}
-	<form class="searchform text-center" action="/lookup" method="get">
-		<input type="search" name="q" class="searchbox" placeholder="name or IP (range)" value="{{.Query}}" autofocus />
-		<br />
-		<label for="sorting">sort by</label>
-		<select name="sorting">
-			<option value="name_frequency" {{if (eq .Sorting.Identifier "name_frequency")}} selected{{end}}>name frequency</option>
-			<option value="last_seen" {{if (eq .Sorting.Identifier "last_seen")}} selected{{end}}>last seen</option>
-		</select>
-		<br />
-		<label>
-			<input type="checkbox" name="direct" value="true" {{if .PerformedDirectLookup}} checked{{end}} /> force direct lookup
-		</label>
-		<br />
-		<input type="submit" value="Search" />
-	</form>
+	{{template "search_form" .}}
 
 	<header>
 		<h2>Results for {{.Query}}</h2>
-		<small>interpreted as {{if .InterpretedAsName}}name{{else}}IP range{{end}} | performed {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
-			lookup{{end}} | sorted by {{.Sorting.DisplayName}}</small>
+		<small>{{if .InterpretedAsName}}name{{else}}IP range{{end}} | {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
+			lookup{{end}} | {{if .Last6MonthsOnly}}last 6 months{{else}}all time{{end}} | sorted by {{.Sorting.DisplayName}}</small>
 	</header>
 
 	{{if len .Results}}

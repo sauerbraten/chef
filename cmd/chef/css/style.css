@@ -37,25 +37,29 @@ footer {
 	justify-content: center;
 }
 
-h1, form {
-	min-width: 100%;
-	text-align: center;
-}
-
 h1 {
 	margin: 1.5em 0;
+	min-width: 100%;
+	text-align: center;
 }
 
 h2 {
 	margin: 1.25em 0 1em 0;
 }
 
-input, select, label {
-	margin: .25em auto;
-	vertical-align: middle;
+form {
+	max-width: 30em;
+	margin: 0 auto;
+	text-align: center;
+}
+
+input[type=search], label {
+	margin: 0 auto .5em auto;
+	display: block;
 }
 
 input[type="search"] {
+	width: 100%;
 	font-size: 1.25em;
 }
 

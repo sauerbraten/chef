@@ -2,7 +2,6 @@ image: alpine/latest
 packages:
   - go
   - rsync
-  - ssh
 sources:
   - https://git.sr.ht/~sauerbraten/chef
 environment:

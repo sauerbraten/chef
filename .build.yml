@@ -22,4 +22,5 @@ tasks:
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; if [ ! -f chef.sqlite ] ; then sqlite3 chef.sqlite < chef.sqlite.schema ; fi'
       cd cmd/chef
       rsync --rsh="ssh -o StrictHostKeyChecking=no" -rP css templates config.json chef ci@$DEPLOY:~/chef/
-      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'killall chef || cd chef; nohup ./chef &>> log.txt &'
+      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'killall chef'
+      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; nohup ./chef &>> log.txt &'

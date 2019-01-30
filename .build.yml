@@ -22,9 +22,9 @@ tasks:
       go build
   - deploy: |
       cd src/github.com/sauerbraten/chef
-      rsync --rsh="ssh -o StrictHostKeyChecking=no" -rP chef.sqlite.schema ci@$DEPLOY:~/chef/
+      rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq chef.sqlite.schema ci@$DEPLOY:~/chef/
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; if [ ! -f chef.sqlite ] ; then sqlite3 chef.sqlite < chef.sqlite.schema ; fi'
       cd cmd/chef
-      rsync --rsh="ssh -o StrictHostKeyChecking=no" -rP css templates config.json chef ci@$DEPLOY:~/chef/
+      rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq css templates config.json chef ci@$DEPLOY:~/chef/
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'killall chef'
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; nohup ./chef &>> log.txt &'

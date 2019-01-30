@@ -44,7 +44,7 @@ func (slp *ServerListPublisher) loop() {
 					return
 				}
 			} else {
-				slp.updateServerList(newList)
+				slp.publishChanges(newList)
 				errorCount = 0
 			}
 		case <-slp.p.Stop:
@@ -53,7 +53,7 @@ func (slp *ServerListPublisher) loop() {
 	}
 }
 
-func (slp *ServerListPublisher) updateServerList(newList ServerList) {
+func (slp *ServerListPublisher) publishChanges(newList ServerList) {
 	for addr := range newList {
 		if _, ok := slp.servers[addr]; !ok {
 			slp.p.Publish([]byte("add " + addr))

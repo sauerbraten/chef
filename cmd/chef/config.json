@@ -2,9 +2,6 @@
 	// SQlite database file name
 	"db_file_path": "./chef.sqlite",
 
-	// code version
-	"revision": "<filled in by CI service>",
-
 
 	// Collector
 

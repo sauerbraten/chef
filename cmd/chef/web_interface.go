@@ -99,7 +99,7 @@ func (w *WebInterface) statusPage() http.HandlerFunc {
 		}{
 			Status:                 w.db.Status(),
 			TimeOfLastKidbanUpdate: w.kidban.TimeOfLastUpdate().UTC().Format("2006-01-02 15:04:05 MST"),
-			Revision:               conf.revision,
+			Revision:               gitRevision,
 		}
 
 		err := tmpl.Execute(resp, status)

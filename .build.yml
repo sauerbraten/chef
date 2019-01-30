@@ -10,15 +10,16 @@ environment:
 secrets:
   - 98c1b481-b37f-452f-872a-8f8fa1833249
 tasks:
-  - build: |
+  - prepare_gopath: |
       mkdir -p src/github.com/sauerbraten
       mv chef src/github.com/sauerbraten/
+  - version: |
+      cd src/github.com/sauerbraten/chef/cmd/chef
+      sed -i "s/<filled in by CI service>/$(git rev-parse --short HEAD)/" main.go
+  - build: |
       cd src/github.com/sauerbraten/chef/cmd/chef
       go get
       go build
-  - version: |
-      cd src/github.com/sauerbraten/chef/cmd/chef
-      sed -i "s/<filled in by CI service>/$(git rev-parse --short HEAD)/" config.json
   - deploy: |
       cd src/github.com/sauerbraten/chef
       rsync --rsh="ssh -o StrictHostKeyChecking=no" -rP chef.sqlite.schema ci@$DEPLOY:~/chef/

@@ -2,65 +2,34 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"html/template"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-
 	"github.com/sauerbraten/chef/internal/db"
-	"github.com/sauerbraten/chef/pkg/ips"
 	"github.com/sauerbraten/chef/pkg/kidban"
 )
 
 type WebInterface struct {
-	db *db.Database
-
-	chi.Router
-	kidban *kidban.Checker
+	Frontend
 }
 
 func NewWebInterface(db *db.Database, kidban *kidban.Checker) *WebInterface {
-	r := chi.NewRouter()
-	r.Use(
-		middleware.RedirectSlashes,
-		requestLogging,
-	)
-
 	w := &WebInterface{
-		db: db,
-
-		Router: r,
-		kidban: kidban,
+		Frontend: NewFrontend(db, kidban),
 	}
 
-	r.HandleFunc("/", w.frontPage())
-	r.HandleFunc("/info", w.infoPage())
-	r.HandleFunc("/status", w.statusPage())
-	r.HandleFunc("/lookup", w.lookup())
-	r.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
+	w.HandleFunc("/", w.frontPage())
+	w.HandleFunc("/info", w.infoPage())
+	w.HandleFunc("/status", w.statusPage())
+	w.HandleFunc("/lookup", w.lookup())
+	w.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
 
 	return w
-
-}
-
-func requestLogging(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-		remoteAddr := req.Header.Get("X-Real-IP")
-		if remoteAddr == "" {
-			remoteAddr = req.RemoteAddr
-		}
-		log.Println(strings.Split(remoteAddr, ":")[0], "requested", req.URL.String())
-
-		h.ServeHTTP(resp, req)
-	})
 }
 
 func staticPageFromTemplates(files ...string) http.HandlerFunc {
@@ -123,44 +92,11 @@ func (w *WebInterface) lookup() http.HandlerFunc {
 	}
 
 	return func(resp http.ResponseWriter, req *http.Request) {
-		nameOrIP := req.FormValue("q")
-
-		sorting := db.ByNameFrequency
-		if req.FormValue("sorting") == db.ByLastSeen.Identifier {
-			sorting = db.ByLastSeen
-		}
-
-		last90DaysOnly := !(req.FormValue("search_old") == "true")
-
-		directLookupForced := req.FormValue("direct") == "true"
-
-		// (permanently) redirect partial IP queries
-		if ips.IsPartialOrFullCIDR(nameOrIP) {
-			var subnet *net.IPNet
-			subnet = ips.GetSubnet(nameOrIP)
-
-			if nameOrIP != subnet.String() {
-				u, _ := url.ParseRequestURI(req.RequestURI) // it's safe to assume this will not fail
-				params := u.Query()
-				params.Set("q", subnet.String())
-				u.RawQuery = params.Encode()
-				http.Redirect(resp, req, u.String(), http.StatusPermanentRedirect)
-				return
-			}
-		}
-
-		finishedLookup := w.db.Lookup(nameOrIP, sorting, last90DaysOnly, directLookupForced)
-
-		if req.FormValue("format") == "json" {
-			err := json.NewEncoder(resp).Encode(finishedLookup)
+		w.Frontend.lookup(resp, req, func(resp http.ResponseWriter, results db.FinishedLookup) {
+			err := tmpl.Execute(resp, results)
 			if err != nil {
 				log.Println(err)
 			}
-		} else {
-			err := tmpl.Execute(resp, finishedLookup)
-			if err != nil {
-				log.Println(err)
-			}
-		}
+		})
 	}
 }

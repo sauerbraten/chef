@@ -1,5 +1,3 @@
-pragma foreign_keys = on;
-
 drop table if exists `sightings`;
 drop table if exists `servers`;
 drop table if exists `ips`;
@@ -19,8 +17,11 @@ create table `servers` (
 	`ip` integer not null,
 	`port` integer not null,
 	`description` text not null,
+	`last_seen` integer not null default (strftime('%s', 'now')),
 	unique (`ip`, `port`)
 );
+
+create index idx_srv_descr on `servers`(`description`);
 
 create table `sightings` (
 	`name` integer not null references `names`(`id`),

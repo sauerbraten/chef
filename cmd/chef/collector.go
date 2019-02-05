@@ -14,8 +14,7 @@ import (
 )
 
 type Collector struct {
-	db *db.Database
-
+	db           *db.Database
 	ms           *master.Server
 	scanInterval time.Duration
 	extraServers []string
@@ -30,8 +29,7 @@ func NewCollector(
 	verbose bool,
 ) *Collector {
 	return &Collector{
-		db: db,
-
+		db:           db,
 		ms:           ms,
 		scanInterval: scanInterval,
 		extraServers: extraServers,
@@ -129,6 +127,7 @@ func (c *Collector) scanServer(serverAddress *net.UDPAddr) {
 	c.log("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
 	serverID := c.db.GetServerID(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
+	c.db.UpdateServerLastSeen(serverID)
 
 	for _, playerInfo := range playerInfos {
 		// don't save bot sightings

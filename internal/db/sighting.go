@@ -8,13 +8,6 @@ import (
 	"github.com/sauerbraten/chef/pkg/ips"
 )
 
-type Server struct {
-	ID          int64  `json"id"`
-	IP          string `json:"ip"`
-	Port        int    `json:"port"`
-	Description string `json:"description"`
-}
-
 type Sighting struct {
 	Name      string `json:"name"`
 	IP        string `json:"ip"`

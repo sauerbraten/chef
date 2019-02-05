@@ -63,20 +63,25 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool
 
 func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting, last90DaysOnly bool) []Sighting {
 	condition := "`sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?)"
+
 	if last90DaysOnly {
 		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
 	}
+
 	return db.lookup(condition, sorting, lowestIpInRange, highestIpInRange)
 }
 
 func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool, directLookupForced bool) []Sighting {
 	condition := "`sightings`.`name` in (select `rowid` from `names` where `name` like ?)"
+
 	if last90DaysOnly {
 		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
 	}
+
 	if !directLookupForced {
 		condition = "`sightings`.`ip` in (select `ip` from `sightings` where " + condition + " and `ip` != (select `rowid` from `ips` where `ip` = 0))"
 	}
+
 	return db.lookup(condition, sorting, "%"+name+"%")
 }
 

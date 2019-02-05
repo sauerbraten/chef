@@ -56,7 +56,7 @@ type Server struct {
 	LastSeen    int64  `json:"last_seen,omitempty"`
 }
 
-func (db *Database) FindServerByDescription(desc string) (results []Server) {
+func (db *Database) FindServerByDescription(desc string) []Server {
 	desc = strings.Replace(desc, " ", "", -1)         // remove spaces
 	desc = strings.Join(strings.Split(desc, ""), "%") // place '%' SQLite wildcard between characters
 	desc = "%" + desc + "%"                           // wrap in '%' wildcards
@@ -70,11 +70,13 @@ func (db *Database) FindServerByDescription(desc string) (results []Server) {
 	}
 	defer rows.Close()
 
+	results := []Server{}
+
 	for rows.Next() {
 		s := Server{}
 		rows.Scan(&s.ID, &s.IP, &s.Port, &s.Description, &s.LastSeen)
 		results = append(results, s)
 	}
 
-	return
+	return results
 }

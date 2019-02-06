@@ -32,7 +32,7 @@ type FinishedLookup struct {
 	Query                 string     `json:"query"`
 	InterpretedAsName     bool       `json:"interpreted_as_name"`
 	PerformedDirectLookup bool       `json:"direct"`
-	Last90DaysOnly        bool       `json:"last_6_months_only"`
+	Last90DaysOnly        bool       `json:"last_90_days_only"`
 	Sorting               Sorting    `json:"sorting"`
 	Results               []Sighting `json:"results"`
 }

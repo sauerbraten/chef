@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/middleware"
+
 	"github.com/sauerbraten/chef/internal/db"
 	"github.com/sauerbraten/chef/pkg/kidban"
 )
@@ -17,6 +19,8 @@ func NewAPI(db *db.Database, kidban *kidban.Checker) *API {
 	api := &API{
 		Frontend: NewFrontend(db, kidban),
 	}
+
+	api.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
 
 	api.HandleFunc("/lookup", api.lookup)
 	api.HandleFunc("/server", api.server)
@@ -37,6 +41,7 @@ func (api *API) server(resp http.ResponseWriter, req *http.Request) {
 	desc := req.FormValue("q")
 
 	results := api.db.FindServerByDescription(desc)
+
 	err := json.NewEncoder(resp).Encode(results)
 	if err != nil {
 		log.Println(err)

@@ -126,7 +126,7 @@ func (c *Collector) scanServer(serverAddress *net.UDPAddr) {
 
 	c.log("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
 
-	serverID := c.db.GetServerID(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description)
+	serverID := c.db.GetServerID(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description, serverMod)
 	c.db.UpdateServerLastSeen(serverID)
 
 	for _, playerInfo := range playerInfos {

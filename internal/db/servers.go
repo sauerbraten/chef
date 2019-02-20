@@ -7,16 +7,16 @@ import (
 )
 
 // Returns the ID of the server specified by IP and port. In case no such server exists, it is inserted and the rowid of the new entry is returned.
-// If a server with that IP and port already exists but the descriptions differ, the description is updated in the database.
-func (db *Database) GetServerID(ip string, port int, description string) (serverID int64) {
+// If a server with that IP and port already exists but the description or mod changed, the entry is updated in the database.
+func (db *Database) GetServerID(ip string, port int, description, mod string) (serverID int64) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	var descriptionInDatabase string
-	err := db.QueryRow("select `id`, `description` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverID, &descriptionInDatabase)
+	var oldDescription, oldMod string
+	err := db.QueryRow("select `id`, `description`, `mod` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverID, &oldDescription, &oldMod)
 
 	if err == sql.ErrNoRows {
-		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`) values (?, ?, ?)", ip, port, description)
+		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`, `mod`) values (?, ?, ?, ?)", ip, port, description, mod)
 		if err != nil {
 			log.Fatalln("error inserting new server into database:", err)
 		}
@@ -27,8 +27,8 @@ func (db *Database) GetServerID(ip string, port int, description string) (server
 		}
 	} else if err != nil {
 		log.Fatalln("error getting ID of server:", err)
-	} else if description != descriptionInDatabase {
-		_, err = db.Exec("update `servers` set `description` = ? where `id` = ?", description, serverID)
+	} else if description != oldDescription || mod != oldMod {
+		_, err = db.Exec("update `servers` set `description` = ?, `mod` = ? where `id` = ?", description, mod, serverID)
 		if err != nil {
 			log.Fatalln("error updating server description:", err)
 		}
@@ -53,6 +53,7 @@ type Server struct {
 	IP          string `json:"ip"`
 	Port        int    `json:"port"`
 	Description string `json:"description"`
+	Mod         string `json:"mod"`
 	LastSeen    int64  `json:"last_seen,omitempty"`
 }
 
@@ -64,7 +65,7 @@ func (db *Database) FindServerByDescription(desc string) []Server {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	rows, err := db.Query("select `id`, `ip`, `port`, `description`, `last_seen` from `servers` where `description` like ?", desc)
+	rows, err := db.Query("select `id`, `ip`, `port`, `description`, `mod`, `last_seen` from `servers` where `description` like ?", desc)
 	if err != nil {
 		log.Fatalln("error finding server by description:", err)
 	}
@@ -74,7 +75,7 @@ func (db *Database) FindServerByDescription(desc string) []Server {
 
 	for rows.Next() {
 		s := Server{}
-		rows.Scan(&s.ID, &s.IP, &s.Port, &s.Description, &s.LastSeen)
+		rows.Scan(&s.ID, &s.IP, &s.Port, &s.Description, &s.Mod, &s.LastSeen)
 		results = append(results, s)
 	}
 

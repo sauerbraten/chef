@@ -53,7 +53,7 @@ type Server struct {
 	IP          string `json:"ip"`
 	Port        int    `json:"port"`
 	Description string `json:"description"`
-	Mod         string `json:"mod"`
+	Mod         string `json:"mod,omitempty"`
 	LastSeen    int64  `json:"last_seen,omitempty"`
 }
 

@@ -87,7 +87,7 @@ func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool
 
 func (db *Database) lookup(condition string, sorting Sorting, args ...interface{}) []Sighting {
 	const (
-		columns      = "`names`.`name`, `ips`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`"
+		columns      = "`names`.`name`, `ips`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`, `servers`.`mod`"
 		joinedTables = "`sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid`"
 		grouping     = "`names`.`name`, `ips`.`ip`"
 	)

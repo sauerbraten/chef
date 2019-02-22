@@ -35,7 +35,7 @@
 							<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.Server.IP}}#tabId=at-a-glance">{{.Server.IP}}</a>
 						</td>
 						<td class="align-right">{{.Server.Port}}</td>
-						<td>{{.Server.Description}}</td>
+						<td{{if .Server.Mod}} title="{{.Server.Mod}}"{{end}}>{{.Server.Description}}</td>
 					</tr>
 				{{end}}
 			</tbody>

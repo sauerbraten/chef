@@ -30,25 +30,20 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 	sightings := []Sighting{}
 
 	for rows.Next() {
-		name, intIP, timestamp, serverID, serverIP, serverPort, serverDescription := "", int64(0), int64(0), int64(0), "", 0, ""
-		rows.Scan(&name, &intIP, &timestamp, &serverID, &serverIP, &serverPort, &serverDescription)
+		sighting, intIP := Sighting{}, int64(0)
+		srv := &sighting.Server
 
-		ip := ips.Int2IP(intIP).String()
-		if ip == "255.255.255.255" {
-			ip = ""
+		err := rows.Scan(&sighting.Name, &intIP, &sighting.Timestamp, &srv.ID, &srv.IP, &srv.Port, &srv.Description, &srv.Mod)
+		if err != nil {
+			log.Println("error scanning DB row into sighting:", err)
 		}
 
-		sightings = append(sightings, Sighting{
-			Name:      name,
-			IP:        ip,
-			Timestamp: timestamp,
-			Server: Server{
-				ID:          serverID,
-				IP:          serverIP,
-				Port:        serverPort,
-				Description: serverDescription,
-			},
-		})
+		sighting.IP = ips.Int2IP(intIP).String()
+		if sighting.IP == "255.255.255.255" {
+			sighting.IP = ""
+		}
+
+		sightings = append(sightings, sighting)
 	}
 
 	return sightings

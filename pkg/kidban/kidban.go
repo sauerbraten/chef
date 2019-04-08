@@ -86,7 +86,10 @@ func (c *Checker) downloadKidbannedNetworks() (downloadedNetworks []*net.IPNet, 
 	scanner := bufio.NewScanner(resp.Body)
 
 	for scanner.Scan() {
-		downloadedNetworks = append(downloadedNetworks, ips.GetSubnet(scanner.Text()))
+		subnet := ips.GetSubnet(scanner.Text())
+		if subnet != nil {
+			downloadedNetworks = append(downloadedNetworks, subnet)
+		}
 	}
 
 	if err := scanner.Err(); err != nil {

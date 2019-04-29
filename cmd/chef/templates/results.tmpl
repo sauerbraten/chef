@@ -26,13 +26,13 @@
 					<tr>
 						<td class="align-right{{if kidbanned .IP}} orange{{end}}">
 							{{if ne .IP "0.0.0.0"}}
-								<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.IP}}#tabId=at-a-glance">{{.IP}}</a>
+								<a class="subtle" target="_blank" href="https://ipinfo.io/{{.IP}}">{{.IP}}</a>
 							{{else}} {{.IP}} {{end}}
 						</td>
 						<td>{{.Name}}</td>
 						<td class="align-center">{{timestring .Timestamp}}</td>
 						<td class="align-right">
-							<a class="subtle" target="_blank" href="https://stat.ripe.net/{{.Server.IP}}#tabId=at-a-glance">{{.Server.IP}}</a>
+							<a class="subtle" target="_blank" href="https://ipinfo.io/{{.Server.IP}}">{{.Server.IP}}</a>
 						</td>
 						<td class="align-right">{{.Server.Port}}</td>
 						<td{{if .Server.Mod}} title="{{.Server.Mod}}"{{end}}>{{.Server.Description}}</td>

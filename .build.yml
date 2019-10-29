@@ -6,15 +6,14 @@ sources:
   - https://github.com/sauerbraten/chef
 environment:
   DEPLOY: chef.p1x.pw
-  GOPATH: $HOME
 secrets:
   - 41a695fb-4229-450d-9aa4-5499f6bcea81
 tasks:
   - prepare_go_modules: |
-      go env -w mod=vendor
+      go env -w GOFLAGS=-mod=vendor
   - version: |
-      cd chef/cmd/chef
-      sed -i "s/<filled in by CI service>/$(git rev-parse --short HEAD)/" main.go
+      cd chef
+      sed -i "s/<filled in by CI service>/$(git rev-parse --short HEAD)/" cmd/chef/main.go
   - build: |
       cd chef
       go build ./cmd/chef

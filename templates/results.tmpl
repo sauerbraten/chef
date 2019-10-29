@@ -1,0 +1,48 @@
+{{define "title"}}{{.Query}} – CHEF{{end}}
+
+{{define "content"}}
+	{{template "search_form" .}}
+
+	<header class="results-header">
+		<h2>Results for {{.Query}}</h2>
+		<small>{{if .InterpretedAsName}}name{{else}}IP range{{end}} | {{if .PerformedDirectLookup}}direct lookup{{else}}2-step
+			lookup{{end}} | {{if .Last90DaysOnly}}last 90 days{{else}}all time{{end}} | sorted by {{.Sorting.DisplayName}}</small>
+	</header>
+
+	{{if len .Results}}
+		<table>
+			<thead>
+				<tr>
+					<td class="align-center">Player IP</td>
+					<td class="align-center">Player Name</td>
+					<td class="align-center">Last Seen (UTC)</td>
+					<td class="align-center">Server IP</td>
+					<td class="align-center">Port</td>
+					<td>Server Description</td>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .Results}}
+					<tr>
+						<td class="align-right{{if kidbanned .IP}} orange{{end}}">
+							{{if ne .IP "0.0.0.0"}}
+								<a class="subtle" target="_blank" href="https://ipinfo.io/{{.IP}}">{{.IP}}</a>
+							{{else}} {{.IP}} {{end}}
+						</td>
+						<td>{{.Name}}</td>
+						<td class="align-center">{{timestring .Timestamp}}</td>
+						<td class="align-right">
+							<a class="subtle" target="_blank" href="https://ipinfo.io/{{.Server.IP}}">{{.Server.IP}}</a>
+						</td>
+						<td class="align-right">{{.Server.Port}}</td>
+						<td{{if .Server.Mod}} title="{{.Server.Mod}}"{{end}}>{{.Server.Description}}</td>
+					</tr>
+				{{end}}
+			</tbody>
+		</table>
+	{{else}}
+		<p>
+			Nothing found!
+		</p>
+	{{end}}
+{{end}}

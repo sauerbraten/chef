@@ -1,0 +1,12 @@
+github.com/go-chi/chi v4.0.2+incompatible h1:maB6vn6FqCxrpz4FqWdh4+lwpyZIQS7YEAUcHlgXVRs=
+github.com/go-chi/chi v4.0.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
+github.com/mattn/go-sqlite3 v1.11.0 h1:LDdKkqtYlom37fkvqs8rMPFKAMe8+SgjbwZ6ex1/A/Q=
+github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
+github.com/sauerbraten/cubecode v0.0.0-20170529180859-6be16020d14c h1:LFA8D3M9cBH5h1y1qXjU86D+H0kwg0vJ0tK3i6qd2Qs=
+github.com/sauerbraten/cubecode v0.0.0-20170529180859-6be16020d14c/go.mod h1:+ca4JN7nsdIzdbtZN+Y7mjt/2J97orSq+Wxkkdn4Fpg=
+github.com/sauerbraten/extinfo v0.0.0-20190220141329-a4ae380e7098 h1:7AY3cpcpyx6yZNikINpnPS6C9JHJVWFIhgDTpF2VT7E=
+github.com/sauerbraten/extinfo v0.0.0-20190220141329-a4ae380e7098/go.mod h1:XHlJGWp1c5K8QS++uVYpUZbW/rj12vjrqbAL5pEjyGU=
+github.com/sauerbraten/jsonfile v0.0.0-20190903091658-ab22968f346e h1:LRIbafT26NlwbCde3LowwTTJnqIsvFhh7QX+KQe7fNY=
+github.com/sauerbraten/jsonfile v0.0.0-20190903091658-ab22968f346e/go.mod h1:48V62ijLfg8cNLKjUPZWn0dBs8PMjLSqCmebOop4MAQ=
+github.com/sauerbraten/pubsub v0.0.0-20171021135711-897f02c5bb09 h1:GoW+FUM13TEL0fQYVuydKdc1mqUsz8kTRN8d+QZqprY=
+github.com/sauerbraten/pubsub v0.0.0-20171021135711-897f02c5bb09/go.mod h1:L3sU7HgoQXlzgOfcb/72kMwyNGOyiowGJQ23EjzzTYc=

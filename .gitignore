@@ -1,2 +1,3 @@
 chef.sqlite
 cmd/chef/chef
+.vscode/settings.json

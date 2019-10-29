@@ -10,8 +10,8 @@ body {
 }
 
 body, input, select {
-	font-family: 'Roboto Mono', monospace;
-	font-size: small;
+	font-family: monospace;
+	font-size: 1.1em;
 }
 
 header, main, footer {
@@ -52,12 +52,22 @@ form {
 
 input[type=search], label {
 	margin: 0 auto .5em auto;
-	display: block;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 input[type="search"] {
 	width: 100%;
 	font-size: 1.25em;
+}
+
+label > input:first-child, label > select:first-child {
+	margin-right: .5em;
+}
+
+label > input:last-child, label > select:last-child {
+	margin-left: .5em;
 }
 
 table {

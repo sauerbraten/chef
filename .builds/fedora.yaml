@@ -5,9 +5,9 @@ packages:
 sources:
   - https://github.com/sauerbraten/chef
 environment:
-  DEPLOY: ng.p1x.pw
+  DEPLOY: p1x.pw
 secrets:
-  - 956ddc04-c911-4147-bc90-30bb08276c3e # ci@ng.p1x.pw ssh key
+  - 956ddc04-c911-4147-bc90-30bb08276c3e # ci@p1x.pw ssh key
 tasks:
   - prepare_go_modules: |
       go env -w GOFLAGS=-mod=vendor
@@ -22,5 +22,4 @@ tasks:
       rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq chef.sqlite.schema ci@$DEPLOY:~/chef/
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; if [ ! -f chef.sqlite ] ; then sqlite3 chef.sqlite < chef.sqlite.schema ; fi'
       rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq css templates config.json chef ci@$DEPLOY:~/chef/
-      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'killall chef || true'
-      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; nohup ./chef >> log.txt 2>&1 &'
+      ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'sudo systemctl restart chef'

@@ -40,7 +40,7 @@ func NewCollector(
 func (c *Collector) Run() {
 	t := time.NewTicker(c.scanInterval)
 	for start := time.Now(); true; start = <-t.C {
-		log.Println("refreshing server list after tick at", start.String())
+		log.Printf("refreshing server list from %s", c.ms.Address())
 
 		list := c.fetchExtendedServerList()
 
@@ -84,7 +84,7 @@ func (c *Collector) fetchExtendedServerList() (list map[string]*net.UDPAddr) {
 
 		addr, err := net.ResolveUDPAddr("udp", _addr)
 		if err != nil {
-			log.Println("collector: error resolving "+_addr+":", err)
+			log.Printf("collector: error resolving %s: %v", _addr, err)
 			continue
 		}
 
@@ -104,19 +104,19 @@ func (c *Collector) scanServer(serverAddress *net.UDPAddr) {
 
 	basicInfo, err := s.GetBasicInfo()
 	if err != nil {
-		c.log("error getting basic info from", serverAddress, ":", err)
+		c.logf("error getting basic info from %s: %v", serverAddress, err)
 		return
 	}
 
 	serverMod, err := s.GetServerMod()
 	if err != nil {
-		c.log("error detecting server mod of", serverAddress, ":", err)
+		c.logf("error detecting server mod of %s: %v", serverAddress, err)
 		return
 	}
 
 	playerInfos, err := s.GetAllClientInfo()
 	if err != nil {
-		c.log("error getting client info from", serverAddress, ":", err)
+		c.logf("error getting client info from %s: %v", serverAddress, err)
 		return
 	}
 
@@ -124,7 +124,7 @@ func (c *Collector) scanServer(serverAddress *net.UDPAddr) {
 		return
 	}
 
-	c.log("found", len(playerInfos), "players on", basicInfo.Description, serverAddress.String())
+	c.logf("found %d players on %s (%s)", len(playerInfos), basicInfo.Description, serverAddress)
 
 	serverID := c.db.GetServerID(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description, serverMod)
 	c.db.UpdateServerLastSeen(serverID)
@@ -147,5 +147,11 @@ func (c *Collector) scanServer(serverAddress *net.UDPAddr) {
 func (c *Collector) log(args ...interface{}) {
 	if c.verbose {
 		log.Println(args...)
+	}
+}
+
+func (c *Collector) logf(format string, args ...interface{}) {
+	if c.verbose {
+		log.Printf(format, args...)
 	}
 }

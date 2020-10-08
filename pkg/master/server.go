@@ -78,3 +78,5 @@ func (s *Server) ServerList() (servers ServerList, err error) {
 
 	return
 }
+
+func (s *Server) Address() string { return s.addr }

@@ -1,3 +1,8 @@
+html {
+	background: white;
+	color: black;
+}
+
 body {
 	display: flex;
 	flex-flow: column nowrap;
@@ -9,7 +14,28 @@ body {
 	padding: 0 .5em;
 }
 
-body, input, select {
+a {
+	color: rgb(20, 79, 174);
+}
+
+a:visited {
+	color: rgb(12, 48, 105);
+}
+
+@media (prefers-color-scheme: dark) {
+	html {
+		background: black;
+		color: white;
+	}
+	a {
+		color: rgb(40, 113, 231);
+	}
+	a:visited {
+		color: rgb(155, 189, 244);
+	}
+}
+
+html, input, select {
 	font-family: monospace;
 	font-size: 1.1em;
 }

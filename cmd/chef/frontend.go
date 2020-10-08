@@ -8,20 +8,17 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/sauerbraten/chef/internal/db"
 	"github.com/sauerbraten/chef/pkg/ips"
-	"github.com/sauerbraten/chef/pkg/kidban"
 )
 
 type Frontend struct {
 	chi.Router
-	db     *db.Database
-	kidban *kidban.Checker
+	db *db.Database
 }
 
-func NewFrontend(db *db.Database, kidban *kidban.Checker) Frontend {
+func NewFrontend(db *db.Database) Frontend {
 	return Frontend{
 		Router: chi.NewRouter(),
 		db:     db,
-		kidban: kidban,
 	}
 }
 

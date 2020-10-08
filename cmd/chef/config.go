@@ -62,16 +62,6 @@ func init() {
 		panic(errors.New("parsing scan interval failed: " + err.Error()))
 	}
 
-	kidbanUpdateInterval, err := time.ParseDuration(_conf.KidbanUpdateInterval)
-	if err != nil {
-		panic(errors.New("parsing kidban refresh interval failed: " + err.Error()))
-	}
-
-	kidban, err := kidban.NewChecker(_conf.KidbanRangesURL, kidbanUpdateInterval)
-	if err != nil {
-		panic(errors.New("kidban checker initialization failed: " + err.Error()))
-	}
-
 	conf = config{
 		db: _db,
 
@@ -81,6 +71,19 @@ func init() {
 		verbose:      _conf.Verbose,
 
 		webInterfaceAddress: _conf.WebInterfaceAddress,
-		kidban:              kidban,
+	}
+
+	if _conf.KidbanRangesURL != "" {
+		kidbanUpdateInterval, err := time.ParseDuration(_conf.KidbanUpdateInterval)
+		if err != nil {
+			panic(errors.New("parsing kidban refresh interval failed: " + err.Error()))
+		}
+
+		kidban, err := kidban.NewChecker(_conf.KidbanRangesURL, kidbanUpdateInterval)
+		if err != nil {
+			panic(errors.New("kidban checker initialization failed: " + err.Error()))
+		}
+
+		conf.kidban = kidban
 	}
 }

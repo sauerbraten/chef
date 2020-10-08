@@ -22,7 +22,7 @@ func main() {
 		middleware.RedirectSlashes,
 		requestLogging,
 	)
-	r.Mount("/api", NewAPI(conf.db, conf.kidban))
+	r.Mount("/api", NewAPI(conf.db))
 	r.Mount("/", NewWebInterface(conf.db, conf.kidban))
 	log.Println("server listening on", conf.webInterfaceAddress)
 	err := http.ListenAndServe(conf.webInterfaceAddress, r)

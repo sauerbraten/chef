@@ -33,11 +33,13 @@
 			All numbers are distinct (unique) counts.
 		</p>
 
-		<h3>Kidban</h3>
+		{{if .TimeOfLastKidbanUpdate}}
+			<h3>Kidban</h3>
 
-		<p>
-			The kidban ranges were last updated on {{.TimeOfLastKidbanUpdate}}.
-		</p>
+			<p>
+				The kidban ranges were last updated on {{.TimeOfLastKidbanUpdate}}.
+			</p>
+		{{end}}
 
 		<h3>Git Revision</h3>
 

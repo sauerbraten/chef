@@ -8,16 +8,15 @@ import (
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/sauerbraten/chef/internal/db"
-	"github.com/sauerbraten/chef/pkg/kidban"
 )
 
 type API struct {
 	Frontend
 }
 
-func NewAPI(db *db.Database, kidban *kidban.Checker) *API {
+func NewAPI(db *db.Database) *API {
 	api := &API{
-		Frontend: NewFrontend(db, kidban),
+		Frontend: NewFrontend(db),
 	}
 
 	api.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))

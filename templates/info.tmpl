@@ -14,11 +14,13 @@
 			Some servers do not give the correct IP but instead send an IP like 0.0.0.0 or other, harder to recognize fake IPs. These servers are put on a ‘greylist’, which means that they will be scanned, but all IPs they send will be changed to 0.0.0.0 before saving them, and sightings from those servers will not be shown in 2-step name lookups.
 		</p>
 
-		<h2>Why are some IPs colored orange-red?</h2>
+		{{if .KidbanConfigured}}
+			<h2>Why are some IPs colored orange-red?</h2>
 
-		<p>
-			IPs that are colored orange-red have been found to lie in a range which is most likely used for things like businesses, VPNs, server hosting, proxies, and so on. For more information, check out <a href="https://github.com/pisto/ASkidban">pisto’s ASkidban project</a>. This web interface periodically downloads a list of compiled ‘kid’ network ranges (typically once every hour).
-		</p>
+			<p>
+				IPs that are colored orange-red have been found to lie in a range which is most likely used for things like businesses, VPNs, server hosting, proxies, and so on. For more information, check out <a href="https://github.com/pisto/ASkidban">pisto’s ASkidban project</a>. This web interface periodically downloads a list of compiled ‘kid’ network ranges (typically once every hour).
+			</p>
+		{{end}}
 
 		<h2>API? JSON?</h2>
 

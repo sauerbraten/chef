@@ -24,7 +24,7 @@ func (db *Database) Status() (status Status) {
 		log.Fatalln("error getting IPs count:", err)
 	}
 
-	err = db.QueryRow("select count(*) from (select distinct `name`, `ip` from `sightings`)").Scan(&status.CombinationsCount)
+	err = db.QueryRow("select count(*) from `combinations` where `ip` != 0").Scan(&status.CombinationsCount)
 	if err != nil {
 		log.Fatalln("error getting combinations count:", err)
 	}

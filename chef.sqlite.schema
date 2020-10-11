@@ -1,10 +1,11 @@
 drop table if exists `sightings`;
 drop table if exists `servers`;
+drop table if exists `combinations`;
 drop table if exists `ips`;
 drop table if exists `names`;
 
 create table `names` (
-	`id` integer primary key autoincrement,
+	`id` integer primary key,
 	`name` text not null unique
 );
 
@@ -12,8 +13,18 @@ create table `ips` (
 	`ip` integer not null primary key
 );
 
+create table `combinations` (
+	`id` integer primary key,
+	`ip` integer references `ips`(`ip`),
+	`name` integer not null references `names`(`id`),
+	unique (`ip`, `name`)
+);
+
+create index idx_comb_name on `combinations`(`name`);
+create index idx_comb_ip on `combinations`(`ip`);
+
 create table `servers` (
-	`id` integer primary key autoincrement,
+	`id` integer primary key,
 	`ip` integer not null,
 	`port` integer not null,
 	`description` text not null,
@@ -25,12 +36,8 @@ create table `servers` (
 create index idx_srv_descr on `servers`(`description`);
 
 create table `sightings` (
-	`name` integer not null references `names`(`id`),
-	`ip` integer references `ips`(`ip`),
+	`combination` integer not null references `combinations`(`id`),
 	`server` integer not null references `servers`(`id`),
 	`timestamp` integer not null default (strftime('%s', 'now')),
-	unique (`ip`, `name`, `timestamp`)
+	unique (`combination`, `timestamp`)
 );
-
-create index idx_sight_name on `sightings`(`name`);
-create index idx_sight_ip on `sightings`(`ip`);

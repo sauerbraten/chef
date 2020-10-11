@@ -19,12 +19,12 @@ var (
 	ByLastSeen = Sorting{
 		Identifier:  "last_seen",
 		DisplayName: "last seen",
-		sql:         "`timestamp`", // sort most recent sighting first
+		sql:         "`timestamp` desc", // sort most recent sighting first
 	}
 	ByNameFrequency = Sorting{
 		Identifier:  "name_frequency",
 		DisplayName: "name frequency",
-		sql:         "count(`sightings`.`name`)", // put most oftenly used name first
+		sql:         "count(`combinations`.`name`) desc", // put most oftenly used name first
 	}
 )
 
@@ -62,7 +62,7 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool
 }
 
 func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting, last90DaysOnly bool) []Sighting {
-	condition := "`sightings`.`ip` in (select `rowid` from `ips` where `ip` >= ? and `ip` <= ?)"
+	condition := "`combinations`.`ip` >= ? and `combinations`.ip` <= ?)"
 
 	if last90DaysOnly {
 		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
@@ -72,14 +72,14 @@ func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorti
 }
 
 func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool, directLookupForced bool) []Sighting {
-	condition := "`sightings`.`name` in (select `rowid` from `names` where `name` like ?)"
+	condition := "`combinations`.`name` in (select `id` from `names` where `name` like ?)"
+
+	if !directLookupForced {
+		condition = "`combinations`.`ip` in (select `ip` from `combinations` where " + condition + " and `combinations`.`ip` != 0)"
+	}
 
 	if last90DaysOnly {
 		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
-	}
-
-	if !directLookupForced {
-		condition = "`sightings`.`ip` in (select `ip` from `sightings` where " + condition + " and `ip` != (select `rowid` from `ips` where `ip` = 0))"
 	}
 
 	return db.lookup(condition, sorting, "%"+name+"%")
@@ -87,12 +87,14 @@ func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool
 
 func (db *Database) lookup(condition string, sorting Sorting, args ...interface{}) []Sighting {
 	const (
-		columns      = "`names`.`name`, `ips`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`, `servers`.`mod`"
-		joinedTables = "`sightings`, `ips` on `sightings`.`ip` = `ips`.`rowid`, `names` on `sightings`.`name` = `names`.`rowid`, `servers` on `sightings`.`server` = `servers`.`rowid`"
-		grouping     = "`names`.`name`, `ips`.`ip`"
+		columns      = "`names`.`name`, `combinations`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`, `servers`.`mod`"
+		joinedTables = "`sightings`, `combinations` on `sightings`.`combination` = `combinations`.`id`, `names` on `combinations`.`name` = `names`.`id`, `servers` on `sightings`.`server` = `servers`.`id`"
+		grouping     = "`names`.`name`, `combinations`.`ip`"
 	)
 
-	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " desc limit 1000"
+	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " limit 1000"
+
+	log.Println(query)
 
 	db.mutex.Lock()
 	defer db.mutex.Unlock()

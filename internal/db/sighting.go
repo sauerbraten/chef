@@ -20,7 +20,7 @@ func (db *Database) AddOrIgnoreSighting(name string, ip net.IP, serverID int64) 
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	_, err := db.Exec("insert or ignore into `sightings` (`name`, `ip`, `server`) values (?, ?, ?)", db.getPlayerNameID(name), db.getPlayerIpID(ips.IP2Int(ip)), serverID)
+	_, err := db.Exec("insert or ignore into `sightings` (`combination`, `server`) values (?, ?)", db.getCombinationID(name, ip), serverID)
 	if err != nil {
 		log.Fatalln("error inserting new sighting:", err)
 	}

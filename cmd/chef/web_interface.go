@@ -66,7 +66,8 @@ func (w *WebInterface) infoPage() http.HandlerFunc {
 
 func (w *WebInterface) statusPage() http.HandlerFunc {
 	tmpl := template.
-		Must(template.ParseFiles("templates/base.tmpl", "templates/status.tmpl")).
+		New("base.tmpl"). // must be the base template (entry point) so templates are associated correctly by ParseFiles()
+		Option("missingkey=error").
 		Funcs(template.FuncMap{
 			"formatInt": func(i int) string {
 				s := strconv.Itoa(i)
@@ -81,6 +82,10 @@ func (w *WebInterface) statusPage() http.HandlerFunc {
 				return s + "," + f
 			},
 		})
+	tmpl, err := tmpl.ParseFiles("templates/base.tmpl", "templates/status.tmpl")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	return func(resp http.ResponseWriter, req *http.Request) {
 		status := struct {

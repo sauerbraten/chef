@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -64,13 +65,28 @@ func (w *WebInterface) infoPage() http.HandlerFunc {
 }
 
 func (w *WebInterface) statusPage() http.HandlerFunc {
-	tmpl := template.Must(template.ParseFiles("templates/base.tmpl", "templates/status.tmpl"))
+	tmpl := template.
+		Must(template.ParseFiles("templates/base.tmpl", "templates/status.tmpl")).
+		Funcs(template.FuncMap{
+			"formatInt": func(i int) string {
+				s := strconv.Itoa(i)
+				if i < 1000 {
+					return s
+				}
+				f, s := s[len(s)-3:], s[:len(s)-3]
+				for len(s) > 3 {
+					f = s[len(s)-3:] + "," + f
+					s = s[:len(s)-3]
+				}
+				return s + "," + f
+			},
+		})
 
 	return func(resp http.ResponseWriter, req *http.Request) {
 		status := struct {
 			db.Status
-			TimeOfLastKidbanUpdate string
 			Revision               string
+			TimeOfLastKidbanUpdate string
 		}{
 			Status:   w.db.Status(),
 			Revision: gitRevision,

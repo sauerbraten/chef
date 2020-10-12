@@ -94,8 +94,6 @@ func (db *Database) lookup(condition string, sorting Sorting, args ...interface{
 
 	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " limit 1000"
 
-	log.Println(query)
-
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 

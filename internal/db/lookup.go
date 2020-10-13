@@ -62,7 +62,7 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool
 }
 
 func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting, last90DaysOnly bool) []Sighting {
-	condition := "`combinations`.`ip` >= ? and `combinations`.ip` <= ?)"
+	condition := "`combinations`.`ip` >= ? and `combinations`.`ip` <= ?"
 
 	if last90DaysOnly {
 		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"

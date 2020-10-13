@@ -2,7 +2,7 @@
 
 A configurable Sauerbraten spy bot written in Go.
 
-Chef collects all name-IP combinations it finds on servers and stores them in an SQLite database. You can access this data via a web interface or an IRC bot.
+Chef collects all name-IP combinations it finds on servers and stores them in an SQLite database. You can access this data via a web interface and JSON API.
 
 > *With great power comes great responsibility.*
 
@@ -14,12 +14,13 @@ Chef retrieves the server list from the master server, adds manually specified s
 - information on the server
 - name
 - IP (only the first three octets since Sauerbraten doesn't give the full IP)
-- sighting (i.e. IP bla was seen on server foo using name bar at this specific time)
+- sighting (i.e. IP 12.23.34.45 was seen on server "foo" using name "bar" at this specific time)
 
-To store these things, the database has four tables:
+To store these things, the database has five tables:
 
 - `names`: stores the name as string
 - `ips`: stores the IP as integer (to facilitate IP range checks)
+- `combinations`: stores distinct name-IP combinations
 - `servers`: stores server IP as string, server port as int, server description as string. An IP and a port together uniquely identify a server. If the description of a known server changes, the description is simply updated in this table.
 - `sightings`: stores entries consisting of the current time and SQLite rowids referencing a name, an IP and a server.
 
@@ -40,7 +41,7 @@ A 2-step lookup only works on names: It first performs a direct lookup of the na
 
 ### ASkidban Integration
 
-The web interface periodically downloads a compiled list of „untrustworthy“ IP ranges, that is IP ranges that were identified by [pisto's ASkidban project](https://github.com/pisto/ASkidban) as ranges that belong to [Autonomous Systems](https://en.wikipedia.org/wiki/Autonomous_System) of hosting companies, businesses, etc., which is where most proxy and VPN servers will be located. Player IPs within one of the „kid“ ranges are colored orange-red on the results page.
+The web interface optionally periodically downloads a compiled list of „untrustworthy“ IP ranges, that is IP ranges that were identified by [pisto's ASkidban project](https://github.com/pisto/ASkidban) as ranges that belong to [Autonomous Systems](https://en.wikipedia.org/wiki/Autonomous_System) of hosting companies, businesses, etc., which is where most proxy and VPN servers will be located. Player IPs within one of the „kid“ ranges are colored orange-red on the results page.
 
 The update URL and interval are specified in the configuration file; a sane interval is 60 minutes.
 

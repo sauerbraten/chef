@@ -2,17 +2,48 @@
 
 {{define "content"}}
 	<article class="text">
-		<h2>What is collected?</h2>
+		<h2>What is stored?</h2>
 
 		<p>
-			This service stores information about what IP (using what name) was seen on which server. It stores IP, port, and description of every server on the master list plus some manually specified hidden servers. It stores all IPs it sees (first three octets), and all names it sees. It then stores an entry equivalent to “A player named XYZ was seen on server ABC at this date and time using the IP x.x.x.x”.
+			This service collects information about what IP (using what name) was seen on which server. It stores IP, port, and description of every server on the master list (which is refreshed before every scan). It stores all IPs it sees (first three octets), and all names it sees. It then stores an entry equivalent to “A player named XYZ was seen on server ABC at this date and time using the IP x.x.x.x”.
 		</p>
 
 		<h3>Exceptions</h3>
 
 		<p>
-			Some servers do not give the correct IP but instead send an IP like 0.0.0.0 or other, harder to recognize fake IPs. These servers are put on a ‘greylist’, which means that they will be scanned, but all IPs they send will be changed to 0.0.0.0 before saving them, and sightings from those servers will not be shown in 2-step name lookups.
+			Some server mods like spaghettimod can be configured to send (hard to detect) fake IPs. As a result, all IPs obtained from spaghettimod servers are discarded and replaced with 0.0.0.0. Servers (even vanilla) may also be configured to send 0.0.0.0 instead of players' real IPs. Sightings with an IP of 0.0.0.0 will be stored, but will only be shown in direct lookups, not 2-step name lookups.
 		</p>
+
+		<h2>Querying IPs</h2>
+
+		<p>
+			IPs (also in ranges) can be given partially, e.g. 177.159 will be parsed as 177.159.0.0/16, which in turn will return results in the subnet 177.159.0.0 - 177.159.255.255.
+		</p>
+
+		<p>
+			An explicit prefix size overrides an assumed prefix size, e.g. 177.159/8 will return results in the subnet 177.0.0.0 - 177.255.255.255, that is the second octet will be ignored.
+		</p>
+
+		<p>
+			Note that since extinfo only sends the 3 highest IP bytes (24 bits), prefix sizes greater than 24 or greater than the default mask of the IP you specified will be ignored:
+		</p>
+
+		<ul>
+			<li>
+				79.69/24
+				<br />
+				→ 16 bits of IP specified
+				<br />
+				→ 24 prefix size will be ignored and replaced with 16 (the intuitive one)
+			</li>
+			<li>
+				17.203.21.45/26
+				<br />
+				→ 26 is greater than 24
+				<br />
+				→ the prefix size will be set to 24
+			</li>
+		</ul>
 
 		{{if .KidbanConfigured}}
 			<h2>Why are some IPs colored orange-red?</h2>
@@ -31,7 +62,7 @@
 		<h2>Source Code</h2>
 
 		<p>
-			The source code for this project can be found on GitHub: <a href="https://github.com/sauerbraten/chef">https://github.com/sauerbraten/chef</a>
+			The source code for CHEF is on Github: <a href="https://github.com/sauerbraten/chef">https://github.com/sauerbraten/chef</a>
 		</p>
 	</article>
 {{end}}

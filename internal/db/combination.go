@@ -8,7 +8,7 @@ import (
 	"github.com/sauerbraten/chef/pkg/ips"
 )
 
-// Returns the SQLite rowid of the name-IP combination specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
+// Returns the ID of the name-IP combination specified. In case no such entry exists, it is inserted and the ID of the new entry is returned.
 func (db *Database) getCombinationID(name string, ip net.IP) (id int64) {
 	nameID, ipID := db.getNameID(name), db.getIpID(ips.IP2Int(ip))
 	err := db.QueryRow("select `id` from `combinations` where `name` = ? and `ip` = ?", nameID, ipID).Scan(&id)
@@ -29,7 +29,7 @@ func (db *Database) getCombinationID(name string, ip net.IP) (id int64) {
 	return
 }
 
-// Returns the SQLite rowid of the name specified. In case no such entry exists, it is inserted and the SQLite rowid of the new entry is returned.
+// Returns the ID of the name specified. In case no such entry exists, it is inserted and the ID of the new entry is returned.
 func (db *Database) getNameID(name string) (nameID int64) {
 	err := db.QueryRow("select `rowid` from `names` where `name` like ?", name).Scan(&nameID)
 	if err == sql.ErrNoRows {

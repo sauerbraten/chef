@@ -38,7 +38,7 @@ func NewWebInterface(db *db.Database, kidban *kidban.Checker) *WebInterface {
 func (w *WebInterface) staticPageFromTemplates(files ...string) http.HandlerFunc {
 	buf := new(bytes.Buffer)
 	err := template.
-		Must(template.ParseFiles(files...)).
+		Must(template.ParseFS(templates, files...)).
 		Execute(buf, struct {
 			KidbanConfigured bool
 		}{
@@ -57,11 +57,11 @@ func (w *WebInterface) staticPageFromTemplates(files ...string) http.HandlerFunc
 }
 
 func (w *WebInterface) frontPage() http.HandlerFunc {
-	return w.staticPageFromTemplates("templates/base.tmpl", "templates/search_form.tmpl", "templates/front.tmpl")
+	return w.staticPageFromTemplates("base.tmpl", "search_form.tmpl", "front.tmpl")
 }
 
 func (w *WebInterface) infoPage() http.HandlerFunc {
-	return w.staticPageFromTemplates("templates/base.tmpl", "templates/info.tmpl")
+	return w.staticPageFromTemplates("base.tmpl", "info.tmpl")
 }
 
 func (w *WebInterface) statusPage() http.HandlerFunc {
@@ -82,7 +82,7 @@ func (w *WebInterface) statusPage() http.HandlerFunc {
 				return s + "," + f
 			},
 		})
-	tmpl, err := tmpl.ParseFiles("templates/base.tmpl", "templates/status.tmpl")
+	tmpl, err := tmpl.ParseFS(templates, "base.tmpl", "status.tmpl")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -109,7 +109,7 @@ func (w *WebInterface) statusPage() http.HandlerFunc {
 
 func (w *WebInterface) lookup() http.HandlerFunc {
 	tmpl := template.
-		New("base.tmpl"). // must be the base template (entry point) so templates are associated correctly by ParseFiles()
+		New("base.tmpl"). // must be the base template (entry point) so templates are associated correctly by ParseFS()
 		Option("missingkey=error").
 		Funcs(template.FuncMap{
 			"timestring": func(timestamp int64) string { return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05") },
@@ -123,7 +123,7 @@ func (w *WebInterface) lookup() http.HandlerFunc {
 			"kidbanned": func(ip string) bool { return false },
 		})
 	}
-	tmpl, err := tmpl.ParseFiles("templates/base.tmpl", "templates/search_form.tmpl", "templates/results.tmpl")
+	tmpl, err := tmpl.ParseFS(templates, "base.tmpl", "search_form.tmpl", "results.tmpl")
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -1,6 +1,6 @@
 module github.com/sauerbraten/chef
 
-go 1.13
+go 1.16
 
 require (
 	github.com/go-chi/chi v4.1.2+incompatible

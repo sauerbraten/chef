@@ -1,4 +1,4 @@
-image: fedora/32
+image: fedora/latest
 packages:
   - go
   - rsync
@@ -21,5 +21,5 @@ tasks:
       cd chef
       rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq chef.sqlite.schema ci@$DEPLOY:~/chef/
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'cd chef; if [ ! -f chef.sqlite ] ; then sqlite3 chef.sqlite < chef.sqlite.schema ; fi'
-      rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq css templates config.json chef ci@$DEPLOY:~/chef/
+      rsync --rsh="ssh -o StrictHostKeyChecking=no" -rPq chef config.json ci@$DEPLOY:~/chef/
       ssh -o StrictHostKeyChecking=no ci@$DEPLOY 'sudo systemctl restart chef'

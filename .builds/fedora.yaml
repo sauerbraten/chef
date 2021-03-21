@@ -1,4 +1,4 @@
-image: fedora/latest
+image: fedora/34
 packages:
   - go
   - rsync

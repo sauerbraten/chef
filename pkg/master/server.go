@@ -51,8 +51,7 @@ func (s *Server) ServerList() (servers ServerList, err error) {
 
 	for in.Scan() {
 		msg := in.Text()
-		if msg == "\x00" {
-			// end of list
+		if !strings.HasPrefix(msg, "addserver ") || msg == "\x00" {
 			continue
 		}
 

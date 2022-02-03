@@ -1,0 +1,40 @@
+# fly.toml file generated for chef on 2022-02-15T22:32:58+01:00
+
+app = "chef"
+
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[mounts]
+  destination = "/data"
+  source = "chef_data"
+
+[[services]]
+  internal_port = 33333
+  protocol = "udp"
+
+  [services.concurrency]
+    hard_limit = 50
+    soft_limit = 45
+    type = "connections"
+
+  [[services.ports]]
+    port = 33333
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [services.concurrency]
+    hard_limit = 50
+    soft_limit = 45
+    type = "connections"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = "80"
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = "443"

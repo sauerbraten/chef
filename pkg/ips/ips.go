@@ -30,7 +30,8 @@ func IsRangeAsCIDR(s string) bool {
 	return ipRangeRegex.MatchString(s)
 }
 
-// IP2Int returns the int representation of the IP. Uses int64 to prevent negative values (easier range checks in DB). Assumes 4-byte IPv4. Inverse function of Int2IP.
+// IP2Int returns the int representation of the IP. Uses int64 to prevent negative
+// values (easier range checks in DB). Assumes 4-byte IPv4. Inverse function of Int2IP.
 func IP2Int(ip net.IP) (intIp int64) {
 	for index, octet := range ip.To4() {
 		intIp += int64(octet) << uint((3-index)*8)
@@ -43,7 +44,7 @@ func IP2Int(ip net.IP) (intIp int64) {
 func Int2IP(intIp int64) net.IP {
 	abcd := [4]byte{}
 
-	for index, _ := range abcd {
+	for index := range abcd {
 		abcd[index] = byte(intIp >> uint((3-index)*8))
 	}
 
@@ -55,7 +56,8 @@ func Int2IP(intIp int64) net.IP {
 //     184.29.39.193/16
 //     12.304/8
 //     29.43.223./13
-// A CIDR notation prefix size is optional, a fitting prefix size will be chosen in case it's omitted or the specified prefix size is > 24.
+// A CIDR notation prefix size is optional, a fitting prefix size will be chosen in case
+// it's omitted or the specified prefix size is > 24.
 func GetSubnet(cidr string) (ipNet *net.IPNet) {
 	parts := strings.Split(cidr, "/")
 
@@ -111,7 +113,8 @@ func GetSubnet(cidr string) (ipNet *net.IPNet) {
 	return
 }
 
-// GetDecimalBoundaries returns the lowest and the highest IP inside the IPNet as integers (for easy range checking).
+// GetDecimalBoundaries returns the lowest and the highest IP inside the IPNet
+// as integers (for easy range checking).
 func GetDecimalBoundaries(ipNet *net.IPNet) (lowest, highest int64) {
 	var notMask int64
 

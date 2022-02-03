@@ -8,11 +8,11 @@
 	// master server address
 	"master_server_address": "sauerbraten.org:28787",
 
-	// servers that should be scanned even when they are not on the master list (hidden) or when the master server is unreachable.
-	"extra_servers": [],
+	// refresh interval
+	"refresh_interval": "60s",
 
 	// scan interval
-	"scan_interval": "60s",
+	"scan_interval": "10s",
 
 	// verbosity of collector
 	"verbose": true,

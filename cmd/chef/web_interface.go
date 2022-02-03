@@ -30,7 +30,7 @@ func NewWebInterface(db *db.Database, kidban *kidban.Checker) *WebInterface {
 	w.HandleFunc("/info", w.infoPage())
 	w.HandleFunc("/status", w.statusPage())
 	w.HandleFunc("/lookup", w.lookup())
-	w.Handle("/{:[a-z]+\\.css}", http.FileServer(http.Dir("css")))
+	w.Handle("/{:[a-z]+\\.css}", http.FileServer(http.FS(css)))
 
 	return w
 }

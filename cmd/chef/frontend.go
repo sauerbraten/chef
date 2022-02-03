@@ -32,7 +32,7 @@ func (f *Frontend) lookup(resp http.ResponseWriter, req *http.Request, send func
 
 	last90DaysOnly := !(req.FormValue("search_old") == "true")
 
-	directLookupForced := req.FormValue("direct") == "true"
+	findAliases := req.FormValue("direct") != "true"
 
 	// (permanently) redirect partial IP queries
 	if ips.IsPartialOrFullCIDR(nameOrIP) {
@@ -49,5 +49,5 @@ func (f *Frontend) lookup(resp http.ResponseWriter, req *http.Request, send func
 		}
 	}
 
-	send(resp, f.db.Lookup(nameOrIP, sorting, last90DaysOnly, directLookupForced))
+	send(resp, f.db.Lookup(nameOrIP, sorting, last90DaysOnly, findAliases))
 }

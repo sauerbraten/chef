@@ -13,7 +13,7 @@ const gitRevision = "<filled in by CI service>"
 
 func main() {
 	// start collector
-	coll := NewCollector(conf.db, conf.ms, conf.scanInterval, conf.extraServers, conf.verbose)
+	coll := NewCollector(conf.db, conf.ms, conf.refreshInterval, conf.scanInterval, conf.verbose)
 	go coll.Run()
 
 	// start web frontends

@@ -15,10 +15,10 @@ import (
 type config struct {
 	db *db.Database
 
-	ms           *master.Server
-	extraServers []string
-	scanInterval time.Duration
-	verbose      bool
+	ms              *master.Server
+	refreshInterval time.Duration
+	scanInterval    time.Duration
+	verbose         bool
 
 	webInterfaceAddress string
 	kidban              *kidban.Checker
@@ -35,10 +35,10 @@ func init() {
 	_conf := struct {
 		DatabaseFilePath string `json:"db_file_path"`
 
-		MasterServerAddress string   `json:"master_server_address"`
-		ExtraServers        []string `json:"extra_servers"`
-		ScanInterval        string   `json:"scan_interval"`
-		Verbose             bool     `json:"verbose"`
+		MasterServerAddress string `json:"master_server_address"`
+		RefreshInterval     string `json:"refresh_interval"`
+		ScanInterval        string `json:"scan_interval"`
+		Verbose             bool   `json:"verbose"`
 
 		WebInterfaceAddress  string `json:"web_interface_address"`
 		KidbanRangesURL      string `json:"kidban_ranges_url"`
@@ -57,6 +57,11 @@ func init() {
 
 	ms := master.New(_conf.MasterServerAddress, 15*time.Second)
 
+	refreshInterval, err := time.ParseDuration(_conf.RefreshInterval)
+	if err != nil {
+		panic(errors.New("parsing refresh interval failed: " + err.Error()))
+	}
+
 	scanInterval, err := time.ParseDuration(_conf.ScanInterval)
 	if err != nil {
 		panic(errors.New("parsing scan interval failed: " + err.Error()))
@@ -65,10 +70,10 @@ func init() {
 	conf = config{
 		db: _db,
 
-		ms:           ms,
-		extraServers: _conf.ExtraServers,
-		scanInterval: scanInterval,
-		verbose:      _conf.Verbose,
+		ms:              ms,
+		refreshInterval: refreshInterval,
+		scanInterval:    scanInterval,
+		verbose:         _conf.Verbose,
 
 		webInterfaceAddress: _conf.WebInterfaceAddress,
 	}

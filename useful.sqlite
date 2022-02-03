@@ -1,0 +1,19 @@
+-- latest stats of each player in each game
+select
+    names.name, combination, frags, deaths, game_mode, map, game, description, max(recorded_at)
+from
+    stats,
+    combinations on stats.combination = combinations.id,
+    names on combinations.name = names.id,
+    games on stats.game = games.id,
+    servers on games.server = servers.id
+group by
+    combination, game;
+
+
+-- all games, and the server they were seen on
+select
+    *
+from
+    games,
+    servers on games.server = servers.id;

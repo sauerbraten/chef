@@ -6,17 +6,29 @@ import (
 	"strings"
 )
 
+type Server struct {
+	ID          int64  `json:"id"`
+	IP          string `json:"ip"`
+	Port        int    `json:"port"`
+	Description string `json:"description"`
+	Mod         string `json:"mod,omitempty"`
+	LastSeen    int64  `json:"last_seen,omitempty"`
+}
+
 // Returns the ID of the server specified by IP and port. In case no such server exists, it is inserted and the rowid of the new entry is returned.
 // If a server with that IP and port already exists but the description or mod changed, the entry is updated in the database.
-func (db *Database) GetServerID(ip string, port int, description, mod string) (serverID int64) {
+func (db *Database) GetServerID(ip string, port int, description string, mod int8, protocol int) (serverID int64) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	var oldDescription, oldMod string
-	err := db.QueryRow("select `id`, `description`, `mod` from `servers` where `ip` = ? and `port` = ?", ip, port).Scan(&serverID, &oldDescription, &oldMod)
+	var (
+		oldDescription string
+		oldMod         int8
+	)
+	err := db.QueryRow("select `id`, `description`, `mod` from `servers` where `ip` = ? and `port` = ? and `protocol` = ?", ip, port, protocol).Scan(&serverID, &oldDescription, &oldMod)
 
 	if err == sql.ErrNoRows {
-		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`, `mod`) values (?, ?, ?, ?)", ip, port, description, mod)
+		res, err := db.Exec("insert into `servers` (`ip`, `port`, `description`, `mod`, `protocol`) values (?, ?, ?, ?, ?)", ip, port, description, mod, protocol)
 		if err != nil {
 			log.Fatalln("error inserting new server into database:", err)
 		}
@@ -46,15 +58,6 @@ func (db *Database) UpdateServerLastSeen(serverID int64) {
 	if err != nil {
 		log.Fatalln("error updating server's 'last seen' timestamp:", err)
 	}
-}
-
-type Server struct {
-	ID          int64  `json:"id"`
-	IP          string `json:"ip"`
-	Port        int    `json:"port"`
-	Description string `json:"description"`
-	Mod         string `json:"mod,omitempty"`
-	LastSeen    int64  `json:"last_seen,omitempty"`
 }
 
 func (db *Database) FindServerByDescription(desc string) []Server {

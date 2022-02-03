@@ -1,17 +1,32 @@
+@import url('https://rsms.me/inter/inter.css');
+
+
+
 html {
 	background: white;
 	color: black;
+}
+
+html, input, select {
+	font-family: 'Inter', sans-serif;
+	font-size: 1rem;
+}
+
+@supports (font-variation-settings: normal) {
+	html, input, select {
+		font-family: 'Inter var', sans-serif;
+	}
 }
 
 body {
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: center;
-	max-width: 72em;
+	max-width: 72rem;
 	min-height: 100vh;
 	overflow-y: scroll;
 	margin: 0 auto;
-	padding: 0 .5em;
+	padding: 0 .5rem;
 }
 
 a {
@@ -35,14 +50,10 @@ a:visited {
 	}
 }
 
-html, input, select {
-	font-family: monospace;
-	font-size: 1.1em;
-}
-
 header, main, footer {
 	width: 100%;
 	display: flex;
+	align-items: center;
 }
 
 header a, header a:visited {
@@ -56,7 +67,7 @@ main {
 }
 
 footer {
-	margin: 2em 0;
+	margin: 2rem 0;
 	justify-content: center;
 }
 
@@ -70,35 +81,42 @@ h2 {
 	margin: 1.25em 0 1em 0;
 }
 
+#search-forms {
+	width: 100%;
+	display: grid;
+	justify-content: center;
+	grid-template-columns: repeat(auto-fit, 20rem);
+	gap: 4rem;
+}
+
 form {
-	max-width: 30em;
+	max-width: 30rem;
 	margin: 0 auto;
 	text-align: center;
 }
 
 input[type=search], label {
-	margin: 0 auto .5em auto;
+	margin: 0 auto .5rem auto;
 	display: flex;
-	justify-content: center;
 	align-items: center;
 }
 
 input[type="search"] {
 	width: 100%;
-	font-size: 1.25em;
 }
 
 label > input:first-child, label > select:first-child {
-	margin-right: .5em;
+	margin-right: .5rem;
 }
 
 label > input:last-child, label > select:last-child {
-	margin-left: .5em;
+	margin-left: .5rem;
 }
 
 table {
 	min-width: 100%;
 	border-collapse: collapse;
+	margin-bottom: 1rem;
 }
 
 thead {
@@ -106,9 +124,13 @@ thead {
 	border-bottom: 1px solid #bbb;
 }
 
+tr.border-bottom {
+	border-bottom: 1px solid #bbb;
+}
+
 td {
-	padding: .25em .75em;
-	max-width: 20em;
+	padding: .25rem .75rem;
+	max-width: 20rem;
 	overflow-x: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -116,6 +138,10 @@ td {
 
 td + td {
 	border-left: 1px solid #bbb;
+}
+
+td.align-center, td.align-right {
+	font-feature-settings: "tnum";
 }
 
 a.subtle, a.subtle:visited {
@@ -128,8 +154,7 @@ a.subtle:hover {
 }
 
 .text {
-	max-width: 48em;
-	margin: 0 auto;
+	max-width: 48rem;
 }
 
 .results-header {

@@ -1,0 +1,49 @@
+{{define "games_search_form"}}
+	<form class="searchform text-center" action="/games" method="get">
+		<input type="search" name="player" class="searchbox" placeholder="player name" value="{{.Query.PlayerName}}" autofocus />
+		<input type="search" name="map" class="searchbox" placeholder="map name" value="{{.Query.Map}}" />
+		<label for="mode"><span>game mode</span>
+			<select name="mode">
+				<option value="-1" {{if (eq .Query.GameMode -1)}}selected{{end}}>any</option>
+				<!-- <option value="1" {{if (eq .Query.GameMode 1)}}selected{{end}}>coop edit</option> -->
+				<optgroup label="deathmatch">
+					<option value="0" {{if (eq .Query.GameMode 0)}}selected{{end}}>ffa</option>
+					<option value="3" {{if (eq .Query.GameMode 3)}}selected{{end}}>insta</option>
+					<option value="5" {{if (eq .Query.GameMode 5)}}selected{{end}}>effic</option>
+					<option value="7" {{if (eq .Query.GameMode 7)}}selected{{end}}>tactics</option>
+				</optgroup>
+				<optgroup label="team deathmatch">
+					<option value="2" {{if (eq .Query.GameMode 2)}}selected{{end}}>teamplay</option>
+					<option value="4" {{if (eq .Query.GameMode 4)}}selected{{end}}>insta team</option>
+					<option value="6" {{if (eq .Query.GameMode 6)}}selected{{end}}>effic team</option>
+					<option value="8" {{if (eq .Query.GameMode 8)}}selected{{end}}>tactics team</option>
+				</optgroup>
+				<optgroup label="ctf">
+					<option value="11" {{if (eq .Query.GameMode 11)}}selected{{end}}>ctf</option>
+					<option value="12" {{if (eq .Query.GameMode 12)}}selected{{end}}>insta ctf</option>
+					<option value="17" {{if (eq .Query.GameMode 17)}}selected{{end}}>effic ctf</option>
+				</optgroup>
+				<optgroup label="capture">
+					<option value="9" {{if (eq .Query.GameMode 9)}}selected{{end}}>capture</option>
+					<option value="10" {{if (eq .Query.GameMode 10)}}selected{{end}}>regen capture</option>
+				</optgroup>
+				<optgroup label="hold">
+					<option value="15" {{if (eq .Query.GameMode 15)}}selected{{end}}>hold</option>
+					<option value="16" {{if (eq .Query.GameMode 16)}}selected{{end}}>insta hold</option>
+					<option value="19" {{if (eq .Query.GameMode 19)}}selected{{end}}>effic hold</option>
+				</optgroup>
+				<optgroup label="protect">
+					<option value="13" {{if (eq .Query.GameMode 13)}}selected{{end}}>protect</option>
+					<option value="14" {{if (eq .Query.GameMode 14)}}selected{{end}}>insta protect</option>
+					<option value="18" {{if (eq .Query.GameMode 18)}}selected{{end}}>effic protect</option>
+				</optgroup>
+				<optgroup label="collect">
+					<option value="20" {{if (eq .Query.GameMode 20)}}selected{{end}}>collect</option>
+					<option value="21" {{if (eq .Query.GameMode 21)}}selected{{end}}>insta collect</option>
+					<option value="22" {{if (eq .Query.GameMode 22)}}selected{{end}}>effic collect</option>
+				</optgroup>
+			</select>
+		</label>
+		<input type="submit" value="Search" />
+	</form>
+{{end}}

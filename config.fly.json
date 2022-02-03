@@ -1,6 +1,6 @@
 {
 	// SQlite database file name
-	"db_file_path": "./chef.sqlite",
+	"db_file_path": "/data/chef.sqlite",
 
 
 	// Collector
@@ -21,5 +21,5 @@
 	// Web interface
 
 	// address for the web interface to listen on
-	"web_interface_address": "localhost:8082"
+	"web_interface_address": ":8080"
 }

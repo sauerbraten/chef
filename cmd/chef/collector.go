@@ -1,146 +1,188 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 
-	"github.com/sauerbraten/extinfo"
-
 	"github.com/sauerbraten/chef/internal/db"
+	"github.com/sauerbraten/chef/pkg/extinfo"
 	"github.com/sauerbraten/chef/pkg/ips"
 	"github.com/sauerbraten/chef/pkg/master"
 )
 
 type Collector struct {
-	db           *db.Database
-	ms           *master.Server
-	scanInterval time.Duration
-	extraServers []string
-	verbose      bool
+	db              *db.Database
+	ms              *master.Server
+	p               *extinfo.Pinger
+	refreshInterval time.Duration
+	scanInterval    time.Duration
+	serverList      []string
+	servers         map[string]*extinfo.Server
+	verbose         bool
 }
 
 func NewCollector(
 	db *db.Database,
 	ms *master.Server,
-	scanInterval time.Duration,
-	extraServers []string,
+	refreshInterval, scanInterval time.Duration,
 	verbose bool,
 ) *Collector {
+	p, err := extinfo.NewPinger("")
+	if err != nil {
+		panic(err)
+	}
 	return &Collector{
-		db:           db,
-		ms:           ms,
-		scanInterval: scanInterval,
-		extraServers: extraServers,
-		verbose:      verbose,
+		db:              db,
+		ms:              ms,
+		p:               p,
+		refreshInterval: refreshInterval,
+		scanInterval:    scanInterval,
+		serverList:      []string{},
+		servers:         map[string]*extinfo.Server{},
+		verbose:         verbose,
 	}
 }
 
 func (c *Collector) Run() {
-	t := time.NewTicker(c.scanInterval)
-	for start := time.Now(); true; start = <-t.C {
-		log.Printf("refreshing server list from %s", c.ms.Address())
+	c.refreshServerList()
+	c.scanServers()
 
-		list := c.fetchExtendedServerList()
+	shouldScan := time.NewTicker(c.scanInterval)
+	shouldRefresh := time.NewTicker(c.refreshInterval)
 
-		log.Println("running scan...")
-
-		var wg sync.WaitGroup
-
-		for _, serverAddress := range list {
-			wg.Add(1)
-			go func(serverAddress *net.UDPAddr) {
-				defer wg.Done()
-				c.scanServer(serverAddress)
-			}(serverAddress)
+	for {
+		select {
+		case <-shouldRefresh.C:
+			c.refreshServerList()
+		case <-shouldScan.C:
+			c.scanServers()
 		}
-
-		wg.Wait()
-
-		log.Printf("scan finished (took %v)", time.Since(start))
 	}
 }
 
 // Returns the master server list, extended by manually specified extra servers
-func (c *Collector) fetchExtendedServerList() (list map[string]*net.UDPAddr) {
-	var err error
+func (c *Collector) refreshServerList() {
+	log.Printf("refreshing server list from %s", c.ms.Address())
 
-	list, err = c.ms.ServerList()
+	var err error
+	c.serverList, err = c.ms.ServerList()
 	if err != nil {
 		log.Println("collector: error getting master server list:", err)
 	}
+}
 
-	// make sure to have a non-nil map (list can be nil if the master server could not be reached, for example)
-	if list == nil {
-		list = map[string]*net.UDPAddr{}
-	}
+func (c *Collector) scanServers() {
+	start := time.Now()
 
-	for _, _addr := range c.extraServers {
-		if _, ok := list[_addr]; ok {
-			// server from config was already on the master list
-			continue
+	log.Println("running scan...")
+
+	var wg sync.WaitGroup
+
+	for _, addr := range c.serverList {
+		s, ok := c.servers[addr]
+		if !ok {
+			host, port, err := hostAndPort(addr)
+			if err != nil {
+				c.logf("parsing %s: %v", addr, err)
+				return
+			}
+			s, _ = extinfo.NewServer(c.p, host, port, 5*time.Second) // c.p is never nil
+			c.servers[addr] = s
 		}
 
-		addr, err := net.ResolveUDPAddr("udp", _addr)
-		if err != nil {
-			log.Printf("collector: error resolving %s: %v", _addr, err)
-			continue
-		}
-
-		list[_addr] = addr
+		wg.Add(1)
+		go func(s *extinfo.Server) {
+			defer wg.Done()
+			// c.logf("scanning %s", addr)
+			c.scanServer(s)
+			// c.logf("scanning %s completed", addr)
+		}(s)
 	}
 
-	return
+	wg.Wait()
+
+	log.Printf("scan finished (took %v)", time.Since(start))
 }
 
 // scans a server and inserts sightings into the database
-func (c *Collector) scanServer(serverAddress *net.UDPAddr) {
-	s, err := extinfo.NewServer(*serverAddress, 2*time.Second)
-	if err != nil {
-		c.log(err)
-		return
-	}
-
+func (c *Collector) scanServer(s *extinfo.Server) {
 	basicInfo, err := s.GetBasicInfo()
 	if err != nil {
-		c.logf("error getting basic info from %s: %v", serverAddress, err)
+		c.logf("error getting basic info from %s: %v", s.Addr(), err)
 		return
 	}
 
 	serverMod, err := s.GetServerMod()
 	if err != nil {
-		c.logf("error detecting server mod of %s: %v", serverAddress, err)
+		c.logf("error detecting server mod of %s: %v", s.Addr(), err)
 		return
 	}
 
-	playerInfos, err := s.GetAllClientInfo()
+	clientInfos, err := s.GetClientInfo(-1)
 	if err != nil {
-		c.logf("error getting client info from %s: %v", serverAddress, err)
+		c.logf("error getting client info from %s: %v", s.Addr(), err)
 		return
 	}
 
-	if len(playerInfos) == 0 {
+	hasPlayers := false
+	for _, i := range clientInfos {
+		if i.State != extinfo.StateSpectator {
+			hasPlayers = true
+			break
+		}
+	}
+
+	if !hasPlayers {
 		return
 	}
 
-	c.logf("found %d players on %s (%s)", len(playerInfos), basicInfo.Description, serverAddress)
+	c.logf("found %d clients on %s (%s)", len(clientInfos), basicInfo.Description, s.Addr())
 
-	serverID := c.db.GetServerID(serverAddress.IP.String(), serverAddress.Port, basicInfo.Description, serverMod)
+	serverID := c.db.GetServerID(s.Host(), s.Port(), basicInfo.Description, int8(serverMod), basicInfo.ProtocolVersion)
 	c.db.UpdateServerLastSeen(serverID)
 
-	for _, playerInfo := range playerInfos {
-		// don't save bot sightings
-		if playerInfo.ClientNum > extinfo.MaxPlayerCN {
+	var gameID int64
+	if basicInfo.GameMode != extinfo.GameModeCoopEdit {
+		gameID = c.db.GetGameID(int8(basicInfo.MasterMode), int8(basicInfo.GameMode), basicInfo.Map, serverID, basicInfo.SecsLeft, int(conf.scanInterval/time.Second))
+		c.db.UpdateGameLastRecordedAt(gameID)
+		if basicInfo.SecsLeft == 0 {
+			c.db.SetGameEnded(gameID)
+		}
+
+		if basicInfo.GameMode.HasTeams() {
+			if t, err := s.GetTeamScores(); err == nil {
+				for _, s := range t.Scores {
+					c.db.UpdateScore(gameID, s.Name, s.Score)
+				}
+			} else {
+				c.logf("fetching team scores from %s: %v", s.Addr(), err)
+			}
+		}
+	}
+
+	for _, ci := range clientInfos {
+		// ignore bots
+		if ci.ClientNum >= 128 {
 			continue
 		}
 
-		// check for valid client IP
-		if serverMod == "spaghettimod" || ips.IsInReservedBlock(playerInfo.IP) {
-			playerInfo.IP = net.ParseIP("0.0.0.0")
+		combinationID := c.db.GetCombinationID(ci.Name, ci.IP)
+
+		if basicInfo.GameMode != extinfo.GameModeCoopEdit && ci.State != extinfo.StateSpectator {
+			// save game stats
+			c.db.AddOrUpdateStats(combinationID, gameID, ci.Team, ci.Frags, ci.Deaths, ci.Accuracy, ci.Teamkills, ci.Flags)
 		}
 
-		c.db.AddOrIgnoreSighting(playerInfo.Name, playerInfo.IP, serverID)
+		// check for valid client IP
+		if serverMod == extinfo.ServerModSpaghetti || ips.IsInReservedBlock(ci.IP) {
+			ci.IP = net.ParseIP("0.0.0.0")
+		}
+
+		c.db.AddOrIgnoreSighting(combinationID, serverID)
 	}
 }
 
@@ -154,4 +196,18 @@ func (c *Collector) logf(format string, args ...interface{}) {
 	if c.verbose {
 		log.Printf(format, args...)
 	}
+}
+
+func hostAndPort(addr string) (string, int, error) {
+	host, _port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return "", -1, fmt.Errorf("parsing '%s' as host:port tuple: %v", addr, err)
+	}
+
+	port, err := strconv.Atoi(_port)
+	if err != nil {
+		return "", -1, fmt.Errorf("error converting port '%s' to int: %v", _port, err)
+	}
+
+	return host, port, nil
 }

@@ -1,0 +1,48 @@
+{{define "title"}}Games – CHEF{{end}}
+
+{{define "content"}}
+	{{template "games_search_form" .}}
+
+	{{if .Query}}
+		<header class="results-header">
+			<h2>Results</h2>
+		</header>
+
+		{{if len .Results}}
+			<table>
+				<thead>
+					<tr>
+						<td class="align-center">ID</td>
+						<td class="align-center">Mode</td>
+						<td class="align-center">Map</td>
+						<td class="align-center">Started At (UTC)</td>
+						<td class="align-center">Ended At (UTC)</td>
+						<td class="align-center">Server IP</td>
+						<td class="align-center">Port</td>
+						<td>Server Description</td>
+					</tr>
+				</thead>
+				<tbody>
+					{{range .Results}}
+						<tr>
+							<td class="align-right"><a href="/games/{{.ID}}">{{.ID}}</a></td>
+							<td>{{.GameMode}}</td>
+							<td>{{.Map}}</td>
+							<td class="align-center">{{timestring .StartedAt}}</td>
+							<td class="align-center">{{if .EndedAt}}{{timestring .EndedAt}}{{end}}</td>
+							<td class="align-right">
+								<a class="subtle" target="_blank" href="https://ipinfo.io/{{.Server.IP}}">{{.Server.IP}}</a>
+							</td>
+							<td class="align-right">{{.Server.Port}}</td>
+							<td{{if .Server.Mod}} title="{{.Server.Mod}}"{{end}}>{{.Server.Description}}</td>
+						</tr>
+					{{end}}
+				</tbody>
+			</table>
+		{{else}}
+			<p>
+				Nothing found!
+			</p>
+		{{end}}
+	{{end}}
+{{end}}

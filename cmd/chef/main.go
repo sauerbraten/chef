@@ -13,7 +13,7 @@ const gitRevision = "<filled in by CI service>"
 
 func main() {
 	// start collector
-	coll := NewCollector(conf.db, conf.ms, conf.scanInterval, conf.extraServers, conf.verbose)
+	coll := NewCollector(conf.db, conf.ms, conf.refreshInterval, conf.scanInterval, conf.verbose)
 	go coll.Run()
 
 	// start web frontends
@@ -23,7 +23,7 @@ func main() {
 		requestLogging,
 	)
 	r.Mount("/api", NewAPI(conf.db))
-	r.Mount("/", NewWebInterface(conf.db, conf.kidban))
+	r.Mount("/", NewWebInterface(conf.db))
 	log.Println("server listening on", conf.webInterfaceAddress)
 	err := http.ListenAndServe(conf.webInterfaceAddress, r)
 	if err != nil {

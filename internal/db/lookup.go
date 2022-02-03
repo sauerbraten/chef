@@ -19,12 +19,12 @@ var (
 	ByLastSeen = Sorting{
 		Identifier:  "last_seen",
 		DisplayName: "last seen",
-		sql:         "`timestamp` desc", // sort most recent sighting first
+		sql:         "timestamp desc", // sort most recent sighting first
 	}
 	ByNameFrequency = Sorting{
 		Identifier:  "name_frequency",
 		DisplayName: "name frequency",
-		sql:         "count(`combinations`.`name`) desc", // put most oftenly used name first
+		sql:         "count(combinations.name) desc", // put most oftenly used name first
 	}
 )
 
@@ -38,7 +38,7 @@ type FinishedLookup struct {
 }
 
 // Looks up a name or an IP or IP range (IPs are assumed to be short forms of ranges).
-func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool, directLookupForced bool) FinishedLookup {
+func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool, findAliases bool) FinishedLookup {
 	if ips.IsPartialOrFullCIDR(nameOrIP) {
 		lowest, highest := ips.GetDecimalBoundaries(ips.GetSubnet(nameOrIP))
 		return FinishedLookup{
@@ -47,52 +47,56 @@ func (db *Database) Lookup(nameOrIP string, sorting Sorting, last90DaysOnly bool
 			PerformedDirectLookup: true,
 			Last90DaysOnly:        last90DaysOnly,
 			Sorting:               sorting,
-			Results:               db.lookupIpRange(lowest, highest, sorting, last90DaysOnly),
+			Results:               db.lookupIpRange(lowest, highest, sorting.sql, last90DaysOnly),
 		}
 	}
 
 	return FinishedLookup{
 		Query:                 nameOrIP,
 		InterpretedAsName:     true,
-		PerformedDirectLookup: directLookupForced,
+		PerformedDirectLookup: !findAliases,
 		Last90DaysOnly:        last90DaysOnly,
 		Sorting:               sorting,
-		Results:               db.lookupName(nameOrIP, sorting, last90DaysOnly, directLookupForced),
+		Results:               db.lookupName(nameOrIP, sorting.sql, last90DaysOnly, findAliases),
 	}
 }
 
-func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting Sorting, last90DaysOnly bool) []Sighting {
-	condition := "`combinations`.`ip` >= ? and `combinations`.`ip` <= ?"
+func (db *Database) lookupIpRange(lowestIpInRange, highestIpInRange int64, sorting string, last90DaysOnly bool) []Sighting {
+	condition := "combinations.ip >= ? and combinations.ip <= ?"
 
 	if last90DaysOnly {
-		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
+		condition += " and sightings.timestamp > strftime('%s', 'now', '-90 days')"
 	}
 
-	return db.lookup(condition, sorting, lowestIpInRange, highestIpInRange)
+	return db.lookup("", condition, sorting, lowestIpInRange, highestIpInRange)
 }
 
-func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool, directLookupForced bool) []Sighting {
-	condition := "`combinations`.`name` in (select `id` from `names` where `name` like ?)"
+func (db *Database) lookupName(name, sorting string, last90DaysOnly bool, findAliases bool) []Sighting {
+	with := "matching_names as (select id from names where name like ?)"
 
-	if !directLookupForced {
-		condition = "`combinations`.`ip` in (select `ip` from `combinations` where " + condition + " and `combinations`.`ip` != 0)"
+	condition := "combinations.name in matching_names"
+	if findAliases {
+		condition += " or combinations.ip in (select ip from combinations where " + condition + " and combinations.ip != 0)"
 	}
 
 	if last90DaysOnly {
-		condition += " and `sightings`.`timestamp` > strftime('%s', 'now', '-90 days')"
+		condition += " and sightings.timestamp > strftime('%s', 'now', '-90 days')"
 	}
 
-	return db.lookup(condition, sorting, "%"+name+"%")
+	return db.lookup(with, condition, sorting, "%"+name+"%")
 }
 
-func (db *Database) lookup(condition string, sorting Sorting, args ...interface{}) []Sighting {
+func (db *Database) lookup(with, condition, sorting string, args ...interface{}) []Sighting {
 	const (
-		columns      = "`names`.`name`, `combinations`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`, `servers`.`mod`"
-		joinedTables = "`sightings`, `combinations` on `sightings`.`combination` = `combinations`.`id`, `names` on `combinations`.`name` = `names`.`id`, `servers` on `sightings`.`server` = `servers`.`id`"
-		grouping     = "`combinations`.`id`, `servers`.`id`"
+		columns      = "names.name, combinations.ip, max(timestamp), sightings.server, servers.ip, servers.port, servers.description, servers.mod"
+		joinedTables = "sightings, combinations on sightings.combination = combinations.id, names on combinations.name = names.id, servers on sightings.server = servers.id"
+		grouping     = "combinations.id, servers.id"
 	)
 
-	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " limit 1000"
+	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting + " limit 1000"
+	if with != "" {
+		query = "with " + with + " " + query
+	}
 
 	db.mutex.Lock()
 	defer db.mutex.Unlock()

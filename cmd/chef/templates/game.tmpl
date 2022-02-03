@@ -1,0 +1,110 @@
+{{define "title"}}Game {{.ID}} – CHEF{{end}}
+
+{{define "content"}}
+
+	{{if (eq .MasterMode 2)}}
+		{{if .GameMode.HasTeams}}
+			<h2>Mix / Clanwar</h2>
+		{{else}}
+			{{if eq (len .Stats) 2}}
+				<h2>Duel</h2>
+			{{else}}
+				<h2>All vs all</h2>
+			{{end}}
+		{{end}}
+	{{end}}
+
+	<table>
+		<tr>
+			<td class="align-right">Game Mode</td>
+			<td>{{.GameMode}}</td>
+		</tr>
+		<tr>
+			<td class="align-right">Map</td>
+			<td>{{.Map}}</td>
+		</tr>
+		<tr>
+			<td class="align-right">Server</td>
+			<td title="{{.Server.IP}}:{{.Server.Port}}">{{.Server.Description}}</td>
+		</tr>
+		<tr>
+			<td class="align-right">Master Mode</td>
+			<td>{{.MasterMode}}</td>
+		</tr>
+		<tr>
+			<td class="align-right">Started At (UTC)</td>
+			<td>{{timestring .StartedAt}}</td>
+		</tr>
+		<tr>
+			<td class="align-right">Ended At (UTC)</td>
+			<td>{{if .EndedAt}}{{timestring .EndedAt}}{{end}}</td>
+		</tr>
+		<tr>
+			<td class="align-right">Players</td>
+			<td>{{len .Stats}}</td>
+		</tr>
+	</table>
+
+
+	{{if .Scores}}
+		<table>
+			<thead>
+				<tr>
+					<td class="align-center">Team</td>
+					<td class="align-center">Name</td>
+					<td class="align-center">Frags</td>
+					<td class="align-center">Deaths</td>
+					<td class="align-center">Accuracy</td>
+					<td class="align-center">Teamkills</td>
+					{{if .GameMode.HasFlags}}
+						<td class="align-center">Flags</td>
+					{{end}}
+				</tr>
+			</thead>
+			<tbody>
+				{{range .Scores}}
+					{{$team := .Team}}
+					<tr class="border-bottom">
+						<td class="align-center">{{.Team}}: {{.Points}}</td>
+						<td class="align-center" colspan={{if $.GameMode.HasFlags}}5{{else}}4{{end}}>{{/* omit stats columns */}}</td>
+					</tr>
+					{{range $.Stats}} {{if eq .Team $team}}
+						<tr>
+							<td class="align-center">{{/* omit team column */}}</td>
+							<td {{if ne .IP "0.0.0.0"}}title="{{.IP}}"{{end}}>{{.Name}}</td>
+							<td class="align-right">{{.Frags}}</td>
+							<td class="align-right">{{.Deaths}}</td>
+							<td class="align-right">{{.Accuracy}}%</td>
+							<td class="align-right">{{.Teamkills}}</td>
+							{{if $.GameMode.HasFlags}}
+								<td class="align-right">{{.Flags }}</td>
+							{{end}}
+						</tr>
+					{{end}} {{end}}
+				{{end}}
+			</tbody>
+		</table>
+	{{else}}
+		<table>
+			<thead>
+				<tr>
+					<td class="align-center">Name</td>
+					<td class="align-center">Frags</td>
+					<td class="align-center">Deaths</td>
+					<td class="align-center">Accuracy</td>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .Stats}}
+					<tr>
+						<td {{if ne .IP "0.0.0.0"}}title="{{.IP}}"{{end}}>{{.Name}}</td>
+						<td class="align-right">{{.Frags}}</td>
+						<td class="align-right">{{.Deaths}}</td>
+						<td class="align-right">{{.Accuracy}}%</td>
+					</tr>
+				{{end}}
+			</tbody>
+		</table>
+ 	{{end}}
+
+{{end}}

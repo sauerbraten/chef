@@ -5,7 +5,16 @@
 {{end}}
 
 {{define "content"}}
-	{{template "search_form"}}
+	<section id="search-forms">
+		<div>
+			<h2>Sightings</h2>
+			{{template "sightings_search_form"}}
+		</div>
+		<div>
+			<h2>Games</h2>
+			{{template "games_search_form"}}
+		</div>
+	</section>
 
 	<aside class="text">
 		<h2>What is this?</h2>
@@ -33,4 +42,5 @@
 		</p>
 
 	</aside>
+
 {{end}}

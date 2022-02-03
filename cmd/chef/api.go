@@ -21,28 +21,48 @@ func NewAPI(db *db.Database) *API {
 
 	api.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
 
-	api.HandleFunc("/lookup", api.lookup)
-	api.HandleFunc("/server", api.server)
+	api.HandleFunc("/sightings", api.sightings)
+	api.HandleFunc("/servers", api.servers)
+	api.HandleFunc("/games", api.games)
+	api.HandleFunc("/games/{id}", api.game)
 
 	return api
 }
 
-func (api *API) lookup(resp http.ResponseWriter, req *http.Request) {
-	api.Frontend.lookup(resp, req, func(resp http.ResponseWriter, results db.FinishedLookup) {
-		err := json.NewEncoder(resp).Encode(results)
+func (api *API) sightings(resp http.ResponseWriter, req *http.Request) {
+	api.Frontend.lookupSightings(resp, req, func(resp http.ResponseWriter, result db.FinishedLookup) {
+		err := json.NewEncoder(resp).Encode(result)
 		if err != nil {
 			log.Println(err)
 		}
 	})
 }
 
-func (api *API) server(resp http.ResponseWriter, req *http.Request) {
-	desc := req.FormValue("q")
+func (api *API) servers(resp http.ResponseWriter, req *http.Request) {
+	desc := req.FormValue("desc")
 
-	results := api.db.FindServerByDescription(desc)
+	result := api.db.FindServerByDescription(desc)
 
-	err := json.NewEncoder(resp).Encode(results)
+	err := json.NewEncoder(resp).Encode(result)
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (api *API) games(resp http.ResponseWriter, req *http.Request) {
+	api.Frontend.lookupGames(resp, req, func(resp http.ResponseWriter, result db.FinishedGamesLookup) {
+		err := json.NewEncoder(resp).Encode(result)
+		if err != nil {
+			log.Println(err)
+		}
+	})
+}
+
+func (api *API) game(resp http.ResponseWriter, req *http.Request) {
+	api.Frontend.fetchGame(resp, req, func(resp http.ResponseWriter, result GameWithStats) {
+		err := json.NewEncoder(resp).Encode(result)
+		if err != nil {
+			log.Println(err)
+		}
+	})
 }

@@ -13,15 +13,19 @@
 			</tr>
 			<tr>
 				<td class="align-right">{{formatInt .IPsCount}}</td>
-				<td>IPs</td>
+				<td>non-zero IPs</td>
 			</tr>
 			<tr>
 				<td class="align-right">{{formatInt .CombinationsCount}}</td>
-				<td>combinations of name and (non-zero) IP</td>
+				<td>combinations of name and non-zero IP</td>
 			</tr>
 			<tr>
 				<td class="align-right">{{formatInt .SightingsCount}}</td>
 				<td>sightings</td>
+			</tr>
+			<tr>
+				<td class="align-right">{{formatInt .GamesCount}}</td>
+				<td>games</td>
 			</tr>
 			<tr>
 				<td class="align-right">{{formatInt .ServersCount}}</td>
@@ -32,14 +36,6 @@
 		<p>
 			All numbers are distinct (unique) counts.
 		</p>
-
-		{{if .TimeOfLastKidbanUpdate}}
-			<h3>Kidban</h3>
-
-			<p>
-				The kidban ranges were last updated on {{.TimeOfLastKidbanUpdate}}.
-			</p>
-		{{end}}
 
 		<h3>Git Revision</h3>
 

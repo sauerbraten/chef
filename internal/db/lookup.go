@@ -89,7 +89,7 @@ func (db *Database) lookup(condition string, sorting Sorting, args ...interface{
 	const (
 		columns      = "`names`.`name`, `combinations`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`, `servers`.`mod`"
 		joinedTables = "`sightings`, `combinations` on `sightings`.`combination` = `combinations`.`id`, `names` on `combinations`.`name` = `names`.`id`, `servers` on `sightings`.`server` = `servers`.`id`"
-		grouping     = "`names`.`name`, `combinations`.`ip`"
+		grouping     = "`combinations`.`id`, `servers`.`id`"
 	)
 
 	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " limit 1000"

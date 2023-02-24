@@ -9,5 +9,5 @@ require (
 	github.com/sauerbraten/extinfo v0.0.0-20191118162349-0387c695e739
 	github.com/sauerbraten/jsonfile v0.0.0-20190903091658-ab22968f346e
 	github.com/sauerbraten/pubsub v0.0.0-20171021135711-897f02c5bb09
-	golang.org/x/net v0.0.0-20191028085509-fe3aa8a45271 // indirect
+	golang.org/x/net v0.7.0 // indirect
 )

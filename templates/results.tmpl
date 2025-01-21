@@ -24,7 +24,7 @@
 			<tbody>
 				{{range .Results}}
 					<tr>
-						<td class="align-right{{if kidbanned .IP}} orange{{end}}">
+						<td class="align-right">
 							{{if ne .IP "0.0.0.0"}}
 								<a class="subtle" target="_blank" href="https://ipinfo.io/{{.IP}}">{{.IP}}</a>
 							{{else}} {{.IP}} {{end}}

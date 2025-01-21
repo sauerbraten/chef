@@ -1,3 +1,5 @@
 /chef
 /chef.sqlite
-.vscode/settings.json
+/chef.sqlite-wal
+/chef.sqlite-shm
+.vscode/*

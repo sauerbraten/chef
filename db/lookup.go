@@ -2,9 +2,8 @@ package db
 
 import (
 	"encoding/json"
-	"log"
 
-	"github.com/sauerbraten/chef/pkg/ips"
+	"github.com/sauerbraten/chef/ips"
 )
 
 type Sorting struct {
@@ -16,15 +15,18 @@ type Sorting struct {
 func (s Sorting) MarshalJSON() ([]byte, error) { return json.Marshal(s.Identifier) }
 
 var (
+	// ByLastSeen sorts most recent sighting first
 	ByLastSeen = Sorting{
 		Identifier:  "last_seen",
 		DisplayName: "last seen",
-		sql:         "`timestamp` desc", // sort most recent sighting first
+		sql:         "`timestamp` desc",
 	}
+
+	// ByNameFrequency sorts the most oftenly used name first
 	ByNameFrequency = Sorting{
 		Identifier:  "name_frequency",
 		DisplayName: "name frequency",
-		sql:         "count(`combinations`.`name`) desc", // put most oftenly used name first
+		sql:         "count(`combinations`.`name`) desc",
 	}
 )
 
@@ -94,12 +96,9 @@ func (db *Database) lookup(condition string, sorting Sorting, args ...interface{
 
 	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " limit 1000"
 
-	db.mutex.Lock()
-	defer db.mutex.Unlock()
-
 	rows, err := db.Query(query, args...)
 	if err != nil {
-		log.Fatalln("error performing look up:", err)
+		db.fatal("perform look up", err)
 	}
 	defer rows.Close()
 

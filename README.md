@@ -39,13 +39,6 @@ A direct lookup is a simple lookup with only one step. If you give a name, it re
 
 A 2-step lookup only works on names: It first performs a direct lookup of the name to get all IPs that used the name, and then looks up all sightings by all those IPs. Like direct lookups, it returns distinct name-IP combinations with timestamp and server information of their last sighting.
 
-### ASkidban Integration
-
-The web interface optionally periodically downloads a compiled list of „untrustworthy“ IP ranges, that is IP ranges that were identified by [pisto's ASkidban project](https://github.com/pisto/ASkidban) as ranges that belong to [Autonomous Systems](https://en.wikipedia.org/wiki/Autonomous_System) of hosting companies, businesses, etc., which is where most proxy and VPN servers will be located. Player IPs within one of the „kid“ ranges are colored orange-red on the results page.
-
-The update URL and interval are specified in the configuration file; a sane interval is 60 minutes.
-
-
 ## „Name, IP or IP range“
 
 Chef does some smart regex matching and IP padding to improve the user experience. If the query text of a lookup is at least the first octet of an IP and the first dot, it is interpreted as an IP range. The prefix can be ommitted, in which case it will be deduced from the IP. The IP is padded with zeroes if neccessary, i.e. `123.` becomes `123.0.0.0`, `92.1` becomes `92.1.0.0`. The prefix size, if not specified, will be guessed from how many octets were given.

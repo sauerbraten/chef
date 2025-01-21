@@ -2,10 +2,10 @@ package db
 
 import (
 	"database/sql"
-	"log"
+	"log/slog"
 	"net"
 
-	"github.com/sauerbraten/chef/pkg/ips"
+	"github.com/sauerbraten/chef/ips"
 )
 
 type Sighting struct {
@@ -22,7 +22,7 @@ func (db *Database) AddOrIgnoreSighting(name string, ip net.IP, serverID int64) 
 
 	_, err := db.Exec("insert or ignore into `sightings` (`combination`, `server`) values (?, ?)", db.getCombinationID(name, ip), serverID)
 	if err != nil {
-		log.Fatalln("error inserting new sighting:", err)
+		db.fatal("insert new sighting", err, "name", name, "server_id", serverID)
 	}
 }
 
@@ -35,7 +35,7 @@ func rowsToSightings(rows *sql.Rows) []Sighting {
 
 		err := rows.Scan(&sighting.Name, &intIP, &sighting.Timestamp, &srv.ID, &srv.IP, &srv.Port, &srv.Description, &srv.Mod)
 		if err != nil {
-			log.Println("error scanning DB row into sighting:", err)
+			slog.Error("db: scan DB row into sighting", "error", err)
 		}
 
 		sighting.IP = ips.Int2IP(intIP).String()

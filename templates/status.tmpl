@@ -17,7 +17,7 @@
 			</tr>
 			<tr>
 				<td class="align-right">{{formatInt .CombinationsCount}}</td>
-				<td>combinations of name and (non-zero) IP</td>
+				<td>combinations of name and IP</td>
 			</tr>
 			<tr>
 				<td class="align-right">{{formatInt .SightingsCount}}</td>
@@ -30,21 +30,23 @@
 		</table>
 
 		<p>
-			All numbers are distinct (unique) counts.
+			All numbers are distinct (unique) counts. Combinations with a 0.0.0.0 IP are not counted.
 		</p>
-
-		{{if .TimeOfLastKidbanUpdate}}
-			<h3>Kidban</h3>
-
-			<p>
-				The kidban ranges were last updated on {{.TimeOfLastKidbanUpdate}}.
-			</p>
-		{{end}}
-
-		<h3>Git Revision</h3>
 
 		<p>
-			This instance is running revision <a href="https://github.com/sauerbraten/chef/commit/{{.Revision}}" target="_blank">{{.Revision}}</a>.
+			A sighting consists of a name, an IP (potentially 0.0.0.0), a server and a timestamp.
 		</p>
+
+		<p>
+			Servers are uniquely identified only by their IP and port.
+		</p>
+
+		{{if ne .Revision "unknown"}}
+			<h3>Git Revision</h3>
+
+			<p>
+				This instance is running revision <a href="https://github.com/sauerbraten/chef/commit/{{.Revision}}" target="_blank">{{.Revision}}</a>.
+			</p>
+		{{end}}
 	</div>
 {{end}}

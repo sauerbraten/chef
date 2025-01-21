@@ -45,18 +45,16 @@
 			</li>
 		</ul>
 
-		{{if .KidbanConfigured}}
-			<h2>Why are some IPs colored orange-red?</h2>
-
-			<p>
-				IPs that are colored orange-red have been found to lie in a range which is most likely used for things like businesses, VPNs, server hosting, proxies, and so on. For more information, check out <a href="https://github.com/pisto/ASkidban">pisto’s ASkidban project</a>. This web interface periodically downloads a list of compiled ‘kid’ network ranges (typically once every hour).
-			</p>
-		{{end}}
-
 		<h2>API? JSON?</h2>
 
 		<p>
-			You can get JSON output by using the <code>/api</code> URL path. Example: <a href="/api/lookup?q=Obstriegel">http://chef.sauerworld.org/api/lookup?q=Obstriegel</a>
+			You can get JSON output by inserting <code>/api</code> into the URL of a normal lookup. <br />
+			Example: <a href="/api/lookup?q=Obstriegel">/api/lookup?q=Obstriegel</a>
+		</p>
+
+		<p>
+			There is also an <code>/api/server?q=[query]</code> endpoint that lets you search for servers by their description field. Results are sorted by when the server was last scanned (= seen on the master server list), with the most recently scanned server in first position. <br />
+			Example: <a href="/api/server?q=dojo">/api/server?q=dojo</a>
 		</p>
 
 		<h2>Source Code</h2>

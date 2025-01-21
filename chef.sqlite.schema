@@ -1,9 +1,3 @@
-drop table if exists `sightings`;
-drop table if exists `servers`;
-drop table if exists `combinations`;
-drop table if exists `ips`;
-drop table if exists `names`;
-
 create table `names` (
 	`id` integer primary key,
 	`name` text not null unique

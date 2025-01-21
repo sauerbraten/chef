@@ -58,7 +58,7 @@ func (s *Server) ServerList() (servers ServerList, err error) {
 		msg = strings.TrimPrefix(msg, "addserver ")
 		msg = strings.TrimSpace(msg)
 
-		// 12.23.34.45 28785 → 12.23.34.45:28785
+		// 12.23.34.45 28785 -> 12.23.34.45:28785
 		msg = strings.Replace(msg, " ", ":", -1)
 
 		addr, ok := s.cache[msg]

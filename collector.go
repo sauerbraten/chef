@@ -32,8 +32,7 @@ func NewCollector(
 }
 
 func (c *Collector) Run() {
-	t := time.NewTicker(c.scanInterval)
-	for start := time.Now(); true; start = <-t.C {
+	for start := time.Now(); true; start = <-time.Tick(c.scanInterval) {
 		slog.Info("refreshing server list from master", "master_addr", c.ms.Address())
 
 		list, err := c.ms.ServerList()

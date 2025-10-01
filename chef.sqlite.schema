@@ -1,18 +1,14 @@
 create table `names` (
 	`id` integer primary key,
 	`name` text not null unique
-);
-
-create table `ips` (
-	`ip` integer not null primary key
-);
+) strict;
 
 create table `combinations` (
 	`id` integer primary key,
-	`ip` integer references `ips`(`ip`),
+	`ip` integer not null,
 	`name` integer not null references `names`(`id`),
 	unique (`ip`, `name`)
-);
+) strict;
 
 create index idx_comb_name on `combinations`(`name`);
 create index idx_comb_ip on `combinations`(`ip`);
@@ -25,7 +21,7 @@ create table `servers` (
 	`mod` text,
 	`last_seen` integer not null default (strftime('%s', 'now')),
 	unique (`ip`, `port`)
-);
+) strict;
 
 create index idx_srv_descr on `servers`(`description`);
 
@@ -34,4 +30,4 @@ create table `sightings` (
 	`server` integer not null references `servers`(`id`),
 	`timestamp` integer not null default (strftime('%s', 'now')),
 	unique (`combination`, `timestamp`)
-);
+) strict;

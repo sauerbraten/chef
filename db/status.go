@@ -1,5 +1,10 @@
 package db
 
+import (
+	"database/sql"
+	"fmt"
+)
+
 type Status struct {
 	NamesCount        int
 	IPsCount          int
@@ -9,29 +14,36 @@ type Status struct {
 }
 
 func (db *Database) Status() (status Status) {
-	err := db.QueryRow("select count(*) from names").Scan(&status.NamesCount)
-	if err != nil {
-		db.fatal("get names count for status", err)
-	}
+	err := db.inTx(func(tx *sql.Tx) error {
+		err := tx.QueryRow("select count(*) from names").Scan(&status.NamesCount)
+		if err != nil {
+			return fmt.Errorf("get names count for status: %w", err)
+		}
 
-	err = db.QueryRow("select count(distinct ip) from combinations where ip != 0").Scan(&status.IPsCount)
-	if err != nil {
-		db.fatal("get IPs count for status", err)
-	}
+		err = tx.QueryRow("select count(distinct ip) from combinations where ip != 0").Scan(&status.IPsCount)
+		if err != nil {
+			return fmt.Errorf("get IPs count for status: %w", err)
+		}
 
-	err = db.QueryRow("select count(*) from combinations where ip != 0").Scan(&status.CombinationsCount)
-	if err != nil {
-		db.fatal("get combinations count for status", err)
-	}
+		err = tx.QueryRow("select count(*) from combinations where ip != 0").Scan(&status.CombinationsCount)
+		if err != nil {
+			return fmt.Errorf("get combinations count for status: %w", err)
+		}
 
-	err = db.QueryRow("select count(*) from sightings").Scan(&status.SightingsCount)
-	if err != nil {
-		db.fatal("get sightings count for status", err)
-	}
+		err = tx.QueryRow("select count(*) from sightings").Scan(&status.SightingsCount)
+		if err != nil {
+			return fmt.Errorf("get sightings count for status: %w", err)
+		}
 
-	err = db.QueryRow("select count(*) from servers").Scan(&status.ServersCount)
+		err = tx.QueryRow("select count(*) from servers").Scan(&status.ServersCount)
+		if err != nil {
+			return fmt.Errorf("get servers count for status: %w", err)
+		}
+
+		return nil
+	})
 	if err != nil {
-		db.fatal("get servers count for status", err)
+		db.fatal(err)
 	}
 
 	return

@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/sauerbraten/chef/ips"
 )
@@ -87,7 +88,7 @@ func (db *Database) lookupName(name string, sorting Sorting, last90DaysOnly bool
 	return db.lookup(condition, sorting, "%"+name+"%")
 }
 
-func (db *Database) lookup(condition string, sorting Sorting, args ...interface{}) []Sighting {
+func (db *Database) lookup(condition string, sorting Sorting, args ...any) []Sighting {
 	const (
 		columns      = "`names`.`name`, `combinations`.`ip`, max(`timestamp`), `sightings`.`server`, `servers`.`ip`, `servers`.`port`, `servers`.`description`, `servers`.`mod`"
 		joinedTables = "`sightings`, `combinations` on `sightings`.`combination` = `combinations`.`id`, `names` on `combinations`.`name` = `names`.`id`, `servers` on `sightings`.`server` = `servers`.`id`"
@@ -96,9 +97,9 @@ func (db *Database) lookup(condition string, sorting Sorting, args ...interface{
 
 	query := "select " + columns + " from " + joinedTables + " where " + condition + " group by " + grouping + " order by " + sorting.sql + " limit 1000"
 
-	rows, err := db.Query(query, args...)
+	rows, err := db.reader.Query(query, args...)
 	if err != nil {
-		db.fatal("perform look up", err)
+		db.fatal(fmt.Errorf("perform look up: %w", err))
 	}
 	defer rows.Close()
 

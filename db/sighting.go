@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"net"
 
@@ -17,13 +18,24 @@ type Sighting struct {
 
 // Adds an entry in the sightings table or does nothing if adding fails due to database constraints.
 func (db *Database) AddOrIgnoreSighting(name string, ip net.IP, serverID int64) {
-	db.mutex.Lock()
-	defer db.mutex.Unlock()
-
-	_, err := db.Exec("insert or ignore into `sightings` (`combination`, `server`) values (?, ?)", db.getCombinationID(name, ip), serverID)
+	err := db.inTx(func(tx *sql.Tx) (err error) {
+		return db.addOrIgnoreSighting(tx, name, ip, serverID)
+	})
 	if err != nil {
-		db.fatal("insert new sighting", err, "name", name, "server_id", serverID)
+		db.fatal(err, "name", name, "ip", ip, "server_id", serverID)
 	}
+}
+
+func (db *Database) addOrIgnoreSighting(tx *sql.Tx, name string, ip net.IP, serverID int64) error {
+	combinationID, err := db.getCombinationID(tx, name, ip)
+	if err != nil {
+		return fmt.Errorf("insert new sighting: %w", err)
+	}
+	_, err = tx.Exec("insert or ignore into `sightings` (`combination`, `server`) values (?, ?)", combinationID, serverID)
+	if err != nil {
+		return fmt.Errorf("insert new sighting: %w", err)
+	}
+	return nil
 }
 
 func rowsToSightings(rows *sql.Rows) []Sighting {

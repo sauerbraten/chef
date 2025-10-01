@@ -3,48 +3,62 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/sauerbraten/chef/ips"
 )
 
 // Returns the ID of the name-IP combination specified. In case no such entry exists, it is inserted and the ID of the new entry is returned.
-func (db *Database) getCombinationID(name string, ip net.IP) (id int64) {
-	nameID, ipID := db.getNameID(name), ips.IP2Int(ip)
-	err := db.QueryRow("select `id` from `combinations` where `name` = ? and `ip` = ?", nameID, ipID).Scan(&id)
-	if errors.Is(err, sql.ErrNoRows) {
-		res, err := db.Exec("insert or ignore into `combinations` (`name`, `ip`) values (?, ?)", nameID, ipID)
-		if err != nil {
-			db.fatal("insert new name-IP combination", err, "name", name, "ip", ip)
-		}
-
-		id, err = res.LastInsertId()
-		if err != nil {
-			db.fatal("get ID of newly inserted name-IP combination", err, "name", name, "ip", ip)
-		}
-	} else if err != nil {
-		db.fatal("get ID of name-IP combination", err, "name", name, "ip", ip)
+func (db *Database) getCombinationID(tx *sql.Tx, name string, ip net.IP) (id int64, err error) {
+	nameID, err := db.getNameID(tx, name)
+	if err != nil {
+		return -1, err
 	}
 
-	return
+	err = tx.QueryRow("select `id` from `combinations` where `name` = ? and `ip` = ?", nameID, ips.IP2Int(ip)).Scan(&id)
+
+	switch {
+	case err == nil: // combination already exists
+		return
+
+	case errors.Is(err, sql.ErrNoRows): // new combination found
+		res, err := tx.Exec("insert or ignore into `combinations` (`name`, `ip`) values (?, ?)", nameID, ips.IP2Int(ip))
+		if err != nil {
+			return -1, fmt.Errorf("insert new name-IP combination: %w", err)
+		}
+		id, err = res.LastInsertId()
+		if err != nil {
+			return -1, fmt.Errorf("get ID of newly inserted name-IP combination: %w", err)
+		}
+		return id, nil
+
+	default:
+		return -1, fmt.Errorf("get ID of name-IP combination: %w", err)
+	}
 }
 
 // Returns the ID of the name specified. In case no such entry exists, it is inserted and the ID of the new entry is returned.
-func (db *Database) getNameID(name string) (nameID int64) {
-	err := db.QueryRow("select `id` from `names` where `name` like ?", name).Scan(&nameID)
-	if errors.Is(err, sql.ErrNoRows) {
-		res, err := db.Exec("insert into `names` (`name`) values (?)", name)
-		if err != nil {
-			db.fatal("insert new name", err, "name", name)
-		}
+func (db *Database) getNameID(tx *sql.Tx, name string) (int64, error) {
+	var id int64
+	err := tx.QueryRow("select `id` from `names` where `name` like ?", name).Scan(&id)
 
-		nameID, err = res.LastInsertId()
+	switch {
+	case err == nil: // name already exists
+		return id, nil
+
+	case errors.Is(err, sql.ErrNoRows): // new name found
+		res, err := tx.Exec("insert into `names` (`name`) values (?)", name)
 		if err != nil {
-			db.fatal("get ID of newly inserted name", err, "name", name)
+			return -1, fmt.Errorf("insert new name: %w", err)
 		}
-	} else if err != nil {
-		db.fatal("get ID of name", err, "name", name)
+		id, err = res.LastInsertId()
+		if err != nil {
+			return -1, fmt.Errorf("get ID of newly inserted name: %w", err)
+		}
+		return id, nil
+
+	default:
+		return -1, fmt.Errorf("get ID of name: %w", err)
 	}
-
-	return
 }
